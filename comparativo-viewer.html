@@ -1,285 +1,235 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>AgroCota - Comparativo de Safra</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        :root {
-            --bg: #040404;
-            --surface: #0e0e0e;
-            --surface2: #161616;
-            --border: #1e1e1e;
-            --border2: #2a2a2a;
-            --primary: #22c55e;
-            --text: #f0f0f0;
-            --text-mid: #666;
-            --text-low: #333;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Agrocota - Comparativo de Decisão</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --bg: #040404;
+      --surface: #0e0e0e;
+      --surface2: #161616;
+      --border: #1e1e1e;
+      --border2: #2a2a2a;
+      --primary: #22c55e;
+      --text: #f0f0f0;
+      --text-mid: #666;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+    }
 
-        body {
-            background: var(--bg);
-            color: var(--text);
-            font-family: 'Inter', sans-serif;
-            margin: 0;
-            padding: 0;
-            -webkit-font-smoothing: antialiased;
-        }
+    /* TOP BAR IGUAL INDEX */
+    .top-bar {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(4,4,4,.88);
+      backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+      border-bottom: 1px solid var(--border);
+      padding: 13px 20px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .brand { font-size: .68rem; font-weight: 900; letter-spacing: .2em; color: var(--primary); text-transform: uppercase; }
+    .status-pill {
+      font-size: .58rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase;
+      padding: 4px 10px; border-radius: 100px;
+      border: 1px solid var(--border2); color: var(--text-mid);
+    }
 
-        /* TOP BAR IGUAL AO INDEX */
-        .top-bar {
-            position: sticky; top: 0; z-index: 100;
-            background: rgba(4,4,4,.88);
-            backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
-            border-bottom: 1px solid var(--border);
-            padding: 13px 20px;
-            display: flex; align-items: center; justify-content: space-between;
-        }
-        .brand { font-size: .68rem; font-weight: 900; letter-spacing: .2em; color: var(--primary); text-transform: uppercase; }
+    .page { max-width: 620px; margin: 0 auto; padding: 28px 16px 150px; }
 
-        .container { max-width: 620px; margin: 0 auto; padding: 28px 16px 150px; }
+    /* META BLOCK IGUAL INDEX */
+    .meta-block { margin-bottom: 36px; }
+    .meta-title { font-size: 1.5rem; font-weight: 900; line-height: 1.2; letter-spacing: -.02em; margin-bottom: 18px; }
+    .meta-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 1px; background: var(--border);
+      border: 1px solid var(--border); border-radius: 14px; overflow: hidden;
+    }
+    .meta-cell { background: var(--surface); padding: 12px 14px; }
+    .meta-key { font-size: .6rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--text-mid); margin-bottom: 3px; }
+    .meta-val { font-size: .88rem; font-weight: 600; color: var(--text); }
 
-        .meta-title { font-size: 1.5rem; font-weight: 900; line-height: 1.2; letter-spacing: -.02em; margin-bottom: 24px; text-align: left; }
+    /* SECTIONS */
+    .section-hd { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; margin-top: 36px; }
+    .section-hd h2 { font-size: .62rem; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: var(--text-mid); white-space: nowrap; }
+    .section-line { flex: 1; height: 1px; background: var(--border); }
 
-        /* SECTIONS */
-        .section-hd { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; margin-top: 36px; }
-        .section-hd h2 { font-size: .62rem; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: var(--text-mid); white-space: nowrap; }
-        .section-line { flex: 1; height: 1px; background: var(--border); }
+    /* CHART WRAP */
+    .chart-wrap {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 20px; padding: 28px 20px;
+      display: flex; flex-direction: column; align-items: center;
+    }
 
-        /* CHART WRAPPER (DONUT) */
-        .chart-wrap {
-            background: var(--surface); border: 1px solid var(--border);
-            border-radius: 20px; padding: 28px 20px;
-            display: flex; flex-direction: column; align-items: center; gap: 28px;
-        }
-        .chart-canvas-wrap { position: relative; width: 190px; height: 190px; }
-        .chart-center {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
-            text-align: center; pointer-events: none;
-        }
-        .chart-center-label { font-size: .55rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--text-mid); }
-        .chart-center-value { font-family: 'JetBrains Mono', monospace; font-size: .95rem; font-weight: 700; color: var(--text); display: block; }
+    /* OPTION CARDS / PRODUTOS */
+    .option-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 14px; padding: 16px; margin-bottom: 10px;
+      cursor: pointer; transition: 0.2s;
+    }
+    .option-card.selected { border-color: var(--primary); background: #021a09; }
+    .option-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+    .option-title { font-size: .95rem; font-weight: 900; color: var(--text); }
+    .option-price { font-family: 'JetBrains Mono', monospace; font-size: 1.1rem; font-weight: 700; color: var(--primary); }
+    
+    .prod-pill-list { display: flex; flex-wrap: wrap; gap: 6px; }
+    .prod-pill {
+      font-size: .62rem; font-weight: 600; padding: 4px 8px;
+      background: var(--surface2); border: 1px solid var(--border2);
+      border-radius: 6px; color: var(--text-mid);
+    }
 
-        /* LEGEND */
-        .chart-legend { width: 100%; display: flex; flex-direction: column; gap: 12px; }
-        .legend-row { display: flex; align-items: center; gap: 10px; }
-        .legend-dot { width: 8px; height: 8px; border-radius: 50%; }
-        .legend-name { flex: 1; font-size: .76rem; font-weight: 600; color: var(--text); }
-        .legend-val { font-family: 'JetBrains Mono', monospace; font-size: .72rem; font-weight: 700; }
-
-        /* OPTION CARDS */
-        .option-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
-        .option-card {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 18px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .option-card:hover { border-color: var(--border2); }
-        .option-card.selected { border-color: var(--primary); background: rgba(34, 197, 94, 0.05); }
-
-        .option-info { display: flex; flex-direction: column; }
-        .option-name { font-weight: 700; font-size: 0.9rem; color: var(--text); }
-        .option-price { font-family: 'JetBrains Mono', monospace; font-size: 1.05rem; font-weight: 700; color: var(--primary); margin-top: 4px; }
-        
-        .radio-circle {
-            width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--border2);
-            display: flex; align-items: center; justify-content: center; transition: 0.2s;
-        }
-        .option-card.selected .radio-circle { border-color: var(--primary); }
-        .option-card.selected .radio-circle::after { content: ''; width: 10px; height: 10px; background: var(--primary); border-radius: 50%; }
-
-        /* STICKY FOOTER */
-        .sticky-footer {
-            position: fixed; bottom: 0; left: 0; right: 0; z-index: 200;
-            padding: 14px 16px calc(20px + env(safe-area-inset-bottom));
-            background: linear-gradient(to top, var(--bg) 80%, transparent);
-        }
-        .btn-approve {
-            max-width: 588px; margin: 0 auto; display: block;
-            width: 100%; background: var(--primary); color: #000; border: none;
-            padding: 18px; border-radius: 16px; font-weight: 900;
-            font-size: .75rem; letter-spacing: .1em; text-transform: uppercase;
-            cursor: pointer; box-shadow: 0 10px 30px rgba(34,197,94,0.2);
-        }
-    </style>
+    /* FOOTER */
+    .sticky-footer {
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 200;
+      padding: 14px 16px calc(20px + env(safe-area-inset-bottom));
+      background: linear-gradient(to top, var(--bg) 80%, transparent);
+    }
+    .btn-confirm {
+      max-width: 588px; margin: 0 auto; display: block;
+      width: 100%; background: var(--primary); color: #000; border: none;
+      padding: 16px; border-radius: 15px; font-weight: 900;
+      font-size: .75rem; letter-spacing: .1em; text-transform: uppercase;
+      cursor: pointer; box-shadow: 0 0 40px rgba(34,197,94,.15);
+    }
+  </style>
 </head>
 <body>
 
-    <div class="top-bar">
-        <span class="brand">AgroCota</span>
-        <div style="font-size: .58rem; font-weight: 800; color: var(--text-mid); text-transform: uppercase; border: 1px solid var(--border); padding: 4px 10px; border-radius: 100px;">
-            Comparativo de Mercado
-        </div>
-    </div>
+<div class="top-bar">
+  <span class="brand">Agrocota</span>
+  <span class="status-pill">Painel Comparativo</span>
+</div>
 
-    <div class="container">
-        <h1 class="meta-title">Análise de Orçamentos</h1>
+<main class="page">
+  <div class="meta-block">
+    <h1 class="meta-title" id="page-title">Comparativo de Safra</h1>
+    <div class="meta-grid" id="meta-grid">
+      </div>
+  </div>
 
-        <div class="section-hd">
-            <h2>Distribuição por Fornecedor</h2>
-            <div class="section-line"></div>
-        </div>
+  <div class="section-hd">
+    <h2>Comparativo de Investimento</h2>
+    <div class="section-line"></div>
+  </div>
 
-        <div class="chart-wrap">
-            <div class="chart-canvas-wrap">
-                <canvas id="chartPizza"></canvas>
-                <div class="chart-center">
-                    <span class="chart-center-label">Média</span>
-                    <span class="chart-center-value" id="center-total">R$ 0,00</span>
-                </div>
-            </div>
-            <div class="chart-legend" id="chart-legend"></div>
-        </div>
+  <div class="chart-wrap">
+    <canvas id="barChart"></canvas>
+  </div>
 
-        <div class="section-hd">
-            <h2>Variação de Preços (Barra)</h2>
-            <div class="section-line"></div>
-        </div>
-        <div class="chart-wrap" style="padding: 20px;">
-            <canvas id="chartBarras"></canvas>
-        </div>
+  <div class="section-hd">
+    <h2>Selecione a Proposta</h2>
+    <div class="section-line"></div>
+  </div>
 
-        <div class="section-hd">
-            <h2>Escolha a melhor proposta</h2>
-            <div class="section-line"></div>
-        </div>
-        <div class="option-grid" id="optionGrid"></div>
-    </div>
+  <div id="option-list"></div>
+</main>
 
-    <div class="sticky-footer">
-        <button class="btn-approve" onclick="enviarAprovacao()">Confirmar Seleção</button>
-    </div>
+<div class="sticky-footer">
+  <button class="btn-confirm" onclick="confirmarEscolha()">Aprovar Proposta Selecionada</button>
+</div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { getFirestore, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getFirestore, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-        const firebaseConfig = {
-            apiKey: "SUA_API_KEY",
-            authDomain: "seu-projeto.firebaseapp.com",
-            projectId: "seu-projeto",
-            storageBucket: "seu-projeto.appspot.com",
-            messagingSenderId: "000000000000",
-            appId: "1:000000000000:web:000000000"
-        };
+  const firebaseConfig = {
+    apiKey: "SUA_API_KEY",
+    authDomain: "seu-projeto.firebaseapp.com",
+    projectId: "seu-projeto",
+    storageBucket: "seu-projeto.appspot.com",
+    messagingSenderId: "000000000000",
+    appId: "1:000000000000:web:000000000"
+  };
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
 
-        const PALETTE = ['#22C55E', '#3B82F6', '#F59E0B', '#EF4444', '#8B5CF6'];
-        const fmtBRL = (n) => Number(n).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const params = new URLSearchParams(window.location.search);
+  const dataEncoded = params.get('data');
+  const cotacaoId = params.get('id');
+  
+  const payload = dataEncoded ? JSON.parse(atob(dataEncoded)) : { cotacoes: [], produtos: [], meta: {} };
+  let selecionado = null;
 
-        const params = new URLSearchParams(window.location.search);
-        const dataEncoded = params.get('data');
-        const cotacaoId = params.get('id');
-        
-        const payload = dataEncoded ? JSON.parse(atob(dataEncoded)) : { cotacoes: [], produtos: [] };
-        let escolhido = null;
+  // Renderiza Cabeçalho IDÊNTICO ao Index
+  const grid = document.getElementById('meta-grid');
+  const addMeta = (k, v) => {
+    grid.innerHTML += `<div class="meta-cell"><div class="meta-key">${k}</div><div class="meta-val">${v || '---'}</div></div>`;
+  };
 
-        // Cálculo da média para o centro do gráfico
-        const media = payload.cotacoes.reduce((acc, c) => acc + c.total, 0) / payload.cotacoes.length;
-        document.getElementById('center-total').textContent = 'R$ ' + fmtBRL(media);
+  document.getElementById('page-title').textContent = payload.meta?.titulo || 'Comparativo';
+  addMeta('Fazenda', payload.meta?.fazenda);
+  addMeta('Produtor', payload.meta?.produtor);
+  addMeta('Consultor', payload.meta?.consultor);
+  addMeta('Área', payload.meta?.area ? payload.meta.area + ' ha' : '---');
 
-        // 1. Gráfico de Pizza (Estilo Index)
-        new Chart(document.getElementById('chartPizza'), {
-            type: 'doughnut',
-            data: {
-                labels: payload.cotacoes.map(c => c.titulo),
-                datasets: [{
-                    data: payload.cotacoes.map(c => c.total),
-                    backgroundColor: PALETTE,
-                    borderColor: '#040404',
-                    borderWidth: 3,
-                    cutout: '80%'
-                }]
-            },
-            options: { plugins: { legend: { display: false } } }
-        });
+  // Gráfico de Barras Horizontais
+  new Chart(document.getElementById('barChart'), {
+    type: 'bar',
+    data: {
+      labels: payload.cotacoes.map(c => c.titulo),
+      datasets: [{
+        data: payload.cotacoes.map(c => c.total),
+        backgroundColor: '#22c55e',
+        borderRadius: 8,
+        barThickness: 30
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { color: '#1e1e1e' }, ticks: { color: '#666', font: { family: 'JetBrains Mono', size: 10 } } },
+        y: { ticks: { color: '#f0f0f0', font: { weight: '800' } } }
+      }
+    }
+  });
 
-        // Legenda personalizada
-        const legendContainer = document.getElementById('chart-legend');
-        payload.cotacoes.forEach((c, i) => {
-            const row = document.createElement('div');
-            row.className = 'legend-row';
-            row.innerHTML = `
-                <div class="legend-dot" style="background:${PALETTE[i]}"></div>
-                <div class="legend-name">${c.titulo}</div>
-                <div class="legend-val" style="color:${PALETTE[i]}">R$ ${fmtBRL(c.total)}</div>
-            `;
-            legendContainer.appendChild(row);
-        });
+  // Renderiza Cards com Detalhes dos Produtos
+  const container = document.getElementById('option-list');
+  payload.cotacoes.forEach((c, idx) => {
+    const card = document.createElement('div');
+    card.className = 'option-card';
+    card.innerHTML = `
+      <div class="option-header">
+        <div class="option-title">${c.titulo}</div>
+        <div class="option-price">R$ ${c.total.toLocaleString('pt-BR', {minimumFractionDigits:2})}</div>
+      </div>
+      <div class="prod-pill-list">
+        ${payload.produtos.map(p => `<span class="prod-pill">${p.nome}</span>`).join('')}
+      </div>
+    `;
+    card.onclick = () => {
+      document.querySelectorAll('.option-card').forEach(el => el.classList.remove('selected'));
+      card.classList.add('selected');
+      selecionado = c;
+    };
+    container.appendChild(card);
+  });
 
-        // 2. Gráfico de Barras Horizontal
-        new Chart(document.getElementById('chartBarras'), {
-            type: 'bar',
-            data: {
-                labels: payload.cotacoes.map(c => c.titulo),
-                datasets: [{
-                    label: 'Investimento Total',
-                    data: payload.cotacoes.map(c => c.total),
-                    backgroundColor: PALETTE,
-                    borderRadius: 8
-                }]
-            },
-            options: {
-                indexAxis: 'y',
-                responsive: true,
-                scales: {
-                    x: { grid: { display: false }, ticks: { color: '#666', font: { size: 10 } } },
-                    y: { grid: { display: false }, ticks: { color: '#f0f0f0', font: { weight: '700' } } }
-                },
-                plugins: { legend: { display: false } }
-            }
-        });
-
-        // 3. Renderizar Cards
-        const grid = document.getElementById('optionGrid');
-        payload.cotacoes.forEach((c, i) => {
-            const card = document.createElement('div');
-            card.className = 'option-card';
-            card.innerHTML = `
-                <div class="option-info">
-                    <span class="option-name">${c.titulo}</span>
-                    <span class="option-price">R$ ${fmtBRL(c.total)}</span>
-                </div>
-                <div class="radio-circle"></div>
-            `;
-            card.onclick = () => {
-                document.querySelectorAll('.option-card').forEach(el => el.classList.remove('selected'));
-                card.classList.add('selected');
-                escolhido = c;
-            };
-            grid.appendChild(card);
-        });
-
-        window.enviarAprovacao = async () => {
-            if (!escolhido) return alert("Por favor, selecione uma proposta.");
-            if (!cotacaoId) return alert("ID da cotação não encontrado.");
-
-            if (confirm(`Confirmar aceite da proposta de ${escolhido.titulo}?`)) {
-                try {
-                    const docRef = doc(db, "cotacoes", cotacaoId);
-                    await updateDoc(docRef, {
-                        status: "Aprovada",
-                        dataAceite: new Date().toISOString(),
-                        fornecedorVencedor: escolhido.titulo,
-                        valorAprovado: escolhido.total
-                    });
-                    alert("✅ Proposta aprovada com sucesso!");
-                } catch (e) {
-                    alert("Erro ao salvar. Verifique o Firebase.");
-                }
-            }
-        };
-    </script>
+  window.confirmarEscolha = async () => {
+    if(!selecionado) return alert("Selecione uma proposta primeiro.");
+    if(confirm(`Confirmar aceite da proposta: ${selecionado.titulo}?`)) {
+        try {
+            await updateDoc(doc(db, "cotacoes", cotacaoId), {
+                status: "Aprovada",
+                fornecedorVencedor: selecionado.titulo,
+                valorAprovado: selecionado.total,
+                dataAceite: new Date().toISOString()
+            });
+            alert("✅ Sucesso! O consultor foi notificado.");
+        } catch(e) { alert("Erro ao gravar no banco de dados."); }
+    }
+  };
+</script>
 </body>
 </html>
