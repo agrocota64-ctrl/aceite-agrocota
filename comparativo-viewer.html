@@ -13,35 +13,29 @@
         body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; padding: 20px; margin: 0; }
         .container { max-width: 800px; margin: 0 auto; }
         .card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 24px; margin-bottom: 20px; }
-        h1 { color: var(--primary); font-weight: 900; text-align: center; }
-        .section-title { font-size: 12px; font-weight: 800; text-transform: uppercase; color: var(--text-mid); margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
+        h1 { color: var(--primary); font-weight: 900; text-align: center; margin-bottom: 20px; }
+        .section-title { font-size: 11px; font-weight: 800; text-transform: uppercase; color: var(--text-mid); margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
         .section-title::after { content: ""; flex: 1; height: 1px; background: var(--border); }
-        .option-card { border: 2px solid var(--border); border-radius: 12px; padding: 15px; margin-bottom: 10px; cursor: pointer; transition: 0.3s; display: flex; justify-content: space-between; }
-        .option-card.selected { border-color: var(--primary); background: #22c55e10; }
-        .btn-approve { width: 100%; background: var(--primary); color: #000; padding: 18px; border-radius: 12px; font-weight: 900; border: none; cursor: pointer; font-size: 16px; margin-top: 20px; }
+        .option-card { border: 2px solid var(--border); border-radius: 12px; padding: 18px; margin-bottom: 12px; cursor: pointer; transition: 0.3s; display: flex; justify-content: space-between; align-items: center; }
+        .option-card.selected { border-color: var(--primary); background: rgba(34, 197, 94, 0.08); }
+        .btn-approve { width: 100%; background: var(--primary); color: #000; padding: 18px; border-radius: 12px; font-weight: 900; border: none; cursor: pointer; font-size: 16px; margin-top: 10px; }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>AgroCota</h1>
-        <div class="card">
-            <div class="section-title">Distribuição do Orçamento</div>
-            <div style="max-width: 250px; margin: 0 auto;"><canvas id="pizzaChart"></canvas></div>
-        </div>
-        <div class="card">
-            <div class="section-title">Comparativo por Insumo</div>
-            <canvas id="barChart"></canvas>
-        </div>
-        <div class="section-title">Selecione a Melhor Opção</div>
+        <div class="card"><div class="section-title">Distribuição do Orçamento</div><canvas id="pizzaChart"></canvas></div>
+        <div class="card"><div class="section-title">Comparativo por Insumo</div><canvas id="barChart"></canvas></div>
+        <div class="section-title">Escolha a Cotação para Aprovar</div>
         <div id="selectionArea"></div>
-        <button class="btn-approve" onclick="enviarAprovacao()">APROVAR COTAÇÃO SELECIONADA</button>
+        <button class="btn-approve" onclick="confirmarAprovacao()">APROVAR AGORA</button>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getFirestore, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-        // IMPORTANTE: Use as mesmas credenciais do seu index.html aqui
+        // IMPORTANTE: Insira aqui as mesmas credenciais do seu index.html
         const firebaseConfig = {
             apiKey: "SUA_API_KEY",
             authDomain: "seu-projeto.firebaseapp.com",
@@ -54,23 +48,18 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        const cores = ['#2D6A4F', '#1E40AF', '#B45309', '#4D7C0F'];
         const params = new URLSearchParams(window.location.search);
         const dataRaw = params.get('data');
         const cotacaoId = params.get('id');
 
         let payload = { cotacoes: [], produtos: [] };
-        try {
-            if (dataRaw) {
-                // Decodifica o Base64 vindo do App
-                payload = JSON.parse(atob(dataRaw));
-            }
-        } catch (e) {
-            console.error("Erro ao ler dados:", e);
+        if (dataRaw) {
+            try { payload = JSON.parse(atob(dataRaw)); } catch (e) { console.error("Erro na decodificação", e); }
         }
 
         if (payload.cotacoes.length > 0) {
-            // Gráfico de Pizza
+            const cores = ['#2D6A4F', '#1E40AF', '#B45309', '#4D7C0F'];
+            
             new Chart(document.getElementById('pizzaChart'), {
                 type: 'doughnut',
                 data: {
@@ -80,7 +69,6 @@
                 options: { plugins: { legend: { labels: { color: '#fff' }, position: 'bottom' } } }
             });
 
-            // Gráfico de Barras
             new Chart(document.getElementById('barChart'), {
                 type: 'bar',
                 data: {
@@ -91,16 +79,9 @@
                         backgroundColor: cores[i]
                     }))
                 },
-                options: { 
-                    scales: { 
-                        y: { ticks: { color: '#94a3b8' }, grid: { color: '#1e1e1e' } },
-                        x: { ticks: { color: '#fff' } }
-                    },
-                    plugins: { legend: { labels: { color: '#fff' } } }
-                }
+                options: { scales: { y: { ticks: { color: '#94a3b8' } }, x: { ticks: { color: '#fff' } } } }
             });
 
-            // Gerar Opções
             const area = document.getElementById('selectionArea');
             payload.cotacoes.forEach((c, i) => {
                 const div = document.createElement('div');
@@ -109,29 +90,25 @@
                 div.onclick = () => {
                     document.querySelectorAll('.option-card').forEach(card => card.classList.remove('selected'));
                     div.classList.add('selected');
-                    window.escolhido = c;
+                    window.selecionada = c;
                 };
                 area.appendChild(div);
             });
         }
 
-        window.enviarAprovacao = async () => {
-            if (!window.escolhido) return alert("Selecione uma cotação!");
-            if (!cotacaoId) return alert("ID da cotação não encontrado!");
+        window.confirmarAprovacao = async () => {
+            if (!window.selecionada) return alert("Selecione uma cotação!");
+            if (!cotacaoId) return alert("ID da cotação inválido.");
 
-            if (confirm(`Deseja aprovar a cotação: ${window.escolhido.titulo}?`)) {
+            if (confirm(`Aprovar a cotação: ${window.selecionada.titulo}?`)) {
                 try {
-                    const docRef = doc(db, "cotacoes", cotacaoId);
-                    await updateDoc(docRef, {
+                    await updateDoc(doc(db, "cotacoes", cotacaoId), {
                         status: "Aprovada",
                         dataAceite: new Date().toISOString(),
-                        fornecedorVencedor: window.escolhido.titulo,
-                        valorAprovado: window.escolhido.total
+                        vencedor: window.selecionada.titulo
                     });
-                    alert("✅ Cotação aprovada com sucesso!");
-                } catch (e) {
-                    alert("Erro ao salvar no Firebase.");
-                }
+                    alert("Aprovada com sucesso!");
+                } catch (e) { alert("Erro ao salvar."); }
             }
         };
     </script>
