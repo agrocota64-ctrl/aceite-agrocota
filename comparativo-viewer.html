@@ -27,7 +27,7 @@
     html { scroll-behavior: smooth; }
     body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; -webkit-font-smoothing: antialiased; }
 
-    /* STATES */
+    /* ── STATES ── */
     #state-loading, #state-error {
       display: flex; flex-direction: column;
       align-items: center; justify-content: center;
@@ -37,10 +37,10 @@
     .loader { width: 32px; height: 32px; border: 2px solid var(--border2); border-top-color: var(--primary); border-radius: 50%; animation: spin .7s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
     .state-label { font-size: .7rem; font-weight: 700; letter-spacing: .1em; color: var(--text-mid); text-transform: uppercase; }
-    .err-title   { font-size: .95rem; font-weight: 800; color: var(--red); }
-    .err-body    { font-size: .78rem; color: var(--text-mid); margin-top: 6px; }
+    .err-title { font-size: .95rem; font-weight: 800; color: var(--red); }
+    .err-body  { font-size: .78rem; color: var(--text-mid); margin-top: 6px; }
 
-    /* TOP BAR */
+    /* ── TOP BAR — idêntico ao index ── */
     .top-bar {
       position: sticky; top: 0; z-index: 100;
       background: rgba(4,4,4,.88);
@@ -52,16 +52,15 @@
     .brand { font-size: .68rem; font-weight: 900; letter-spacing: .2em; color: var(--primary); text-transform: uppercase; }
     .status-pill {
       font-size: .58rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase;
-      padding: 4px 10px; border-radius: 100px;
-      border: 1px solid var(--border2); color: var(--text-mid);
+      padding: 4px 10px; border-radius: 100px; border: 1px solid var(--border2); color: var(--text-mid);
     }
     .status-pill.pendente { border-color: var(--amber); color: var(--amber); }
     .status-pill.aprovado { border-color: var(--primary); color: var(--primary); }
 
-    /* PAGE */
+    /* ── PAGE ── */
     .page { max-width: 620px; margin: 0 auto; padding: 28px 16px 150px; }
 
-    /* META */
+    /* ── META — idêntico ao index ── */
     .meta-block { margin-bottom: 36px; }
     .meta-title { font-size: 1.5rem; font-weight: 900; line-height: 1.2; letter-spacing: -.02em; margin-bottom: 18px; }
     .meta-grid {
@@ -74,12 +73,12 @@
     .meta-key { font-size: .6rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--text-mid); margin-bottom: 3px; }
     .meta-val { font-size: .88rem; font-weight: 600; color: var(--text); }
 
-    /* SECTION HEADER */
+    /* ── SECTION HEADER — idêntico ao index ── */
     .section-hd { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; margin-top: 36px; }
     .section-hd h2 { font-size: .62rem; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: var(--text-mid); white-space: nowrap; }
     .section-line { flex: 1; height: 1px; background: var(--border); }
 
-    /* DONUT — idêntico ao index */
+    /* ── DONUT — idêntico ao index ── */
     .chart-wrap {
       background: var(--surface); border: 1px solid var(--border);
       border-radius: 20px; padding: 28px 20px;
@@ -98,27 +97,27 @@
     .legend-bar { height: 100%; border-radius: 99px; transition: width .6s cubic-bezier(.4,0,.2,1); }
     .legend-val { font-family: 'JetBrains Mono', monospace; font-size: .72rem; font-weight: 700; min-width: 82px; text-align: right; }
 
-    /* BAR CHART — mesmo container que o donut */
+    /* ── BAR CHART — mesmo container que o donut ── */
     .bar-wrap {
       background: var(--surface); border: 1px solid var(--border);
       border-radius: 20px; padding: 28px 20px;
     }
 
-    /* CATEGORY SECTIONS — idêntico ao index */
-    .cat-section { margin-bottom: 36px; }
+    /* ── CATEGORY SECTIONS (proposta) — idêntico ao index ── */
+    .cat-section { margin-bottom: 28px; }
     .cat-section-header {
       display: flex; align-items: center; gap: 12px;
-      margin-bottom: 14px; margin-top: 28px;
       padding: 12px 14px 10px;
       background: var(--surface2); border: 1px solid var(--border2);
       border-radius: 12px; position: relative; overflow: hidden;
+      margin-bottom: 10px;
     }
     .cat-section-dot   { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
     .cat-section-title { font-size: .88rem; font-weight: 900; color: var(--text); flex: 1; }
     .cat-section-count { font-size: .6rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--text-mid); }
     .cat-section-min   { font-family: 'JetBrains Mono', monospace; font-size: .72rem; font-weight: 700; color: var(--primary); white-space: nowrap; }
 
-    /* OPTION CARDS — idêntico ao index */
+    /* ── OPTION CARDS — idêntico ao index ── */
     .option-card {
       display: flex; align-items: center; gap: 12px;
       background: var(--surface); border: 1px solid var(--border);
@@ -136,7 +135,7 @@
     .option-card.menor .option-badge { opacity: 1; }
     .option-info { flex: 1; min-width: 0; }
     .option-forn { font-size: .83rem; font-weight: 700; }
-    .option-cat  { font-size: .63rem; font-weight: 600; color: var(--text-mid); margin-top: 2px; }
+    .option-cat  { font-size: .63rem; font-weight: 600; color: var(--text-mid); margin-top: 3px; }
     .option-price-col { text-align: right; flex-shrink: 0; }
     .option-price { font-family: 'JetBrains Mono', monospace; font-size: .95rem; font-weight: 700; }
 
@@ -144,13 +143,13 @@
     .prod-pill-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
     .prod-pill { font-size: .62rem; font-weight: 600; padding: 4px 8px; background: var(--surface2); border: 1px solid var(--border2); border-radius: 6px; color: var(--text-mid); }
 
-    /* APPROVED BANNER */
+    /* ── APPROVED BANNER — idêntico ao index ── */
     .approved-card { background: var(--primary-dim); border: 1px solid var(--primary); border-radius: 18px; padding: 22px; text-align: center; margin-bottom: 28px; }
     .approved-title { font-size: .95rem; font-weight: 900; color: var(--primary); margin-bottom: 5px; }
     .approved-sub   { font-size: .75rem; color: var(--text-mid); }
     .approved-ts    { font-family: 'JetBrains Mono', monospace; font-size: .68rem; color: var(--primary); margin-top: 8px; }
 
-    /* STICKY FOOTER — idêntico ao index */
+    /* ── STICKY FOOTER — idêntico ao index ── */
     .sticky-footer {
       position: fixed; bottom: 0; left: 0; right: 0; z-index: 200;
       padding: 14px 16px calc(14px + env(safe-area-inset-bottom));
@@ -170,7 +169,7 @@
     .btn-confirm:active { transform: scale(.97); }
     .btn-confirm:disabled { opacity: .3; cursor: not-allowed; box-shadow: none; }
 
-    /* MODAL — idêntico ao index */
+    /* ── MODAL — idêntico ao index ── */
     .modal-backdrop {
       position: fixed; inset: 0; z-index: 500;
       background: rgba(0,0,0,.75); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
@@ -220,10 +219,9 @@
   <div class="loader"></div>
   <span class="state-label">Carregando comparativo</span>
 </div>
-
 <div id="state-error" style="display:none">
-  <span class="err-title" id="err-title">Link inválido ou expirado</span>
-  <p class="err-body">Solicite um novo link ao consultor responsável.</p>
+  <span class="err-title" id="err-title">Dados não encontrados</span>
+  <p class="err-body" id="err-body">Solicite um novo link ao consultor responsável.</p>
 </div>
 
 <div id="app" style="display:none">
@@ -244,6 +242,7 @@
       <div class="approved-ts" id="approved-ts"></div>
     </div>
 
+    <!-- DONUT: composição de custo da proposta selecionada -->
     <div class="section-hd">
       <h2>Composição de Custo</h2>
       <div class="section-line"></div>
@@ -259,6 +258,7 @@
       <div class="chart-legend" id="chart-legend"></div>
     </div>
 
+    <!-- BAR CHART: produto × cotação -->
     <div class="section-hd" style="margin-top:44px">
       <h2>Comparativo por Produto</h2>
       <div class="section-line"></div>
@@ -267,6 +267,7 @@
       <canvas id="barChart"></canvas>
     </div>
 
+    <!-- SELEÇÃO DE PROPOSTA -->
     <div class="section-hd" style="margin-top:44px">
       <h2>Selecione a Proposta</h2>
       <div class="section-line"></div>
@@ -290,6 +291,7 @@
   </div>
 </div>
 
+<!-- MODAL CONFIRMAÇÃO -->
 <div class="modal-backdrop" id="modal-backdrop" onclick="fecharModalExterno(event)">
   <div class="modal">
     <div class="modal-title">Confirmar Aceite</div>
@@ -309,7 +311,9 @@
 <footer class="page-footer">Agrocota 2025 &mdash; Plataforma de Decisão Agrícola</footer>
 
 <script>
-  /* ── CONFIG SUPABASE — IDÊNTICO AO INDEX ── */
+  /* ══════════════════════════════════════════════════════
+     CONFIG — idêntico ao index.html
+  ══════════════════════════════════════════════════════ */
   const SUPABASE_URL  = 'https://fafjknchnibdflpqyssf.supabase.co';
   const SUPABASE_ANON = 'sb_publishable_3HDU_nViFfOubXqNplV5ow_8FV0Ix0r';
 
@@ -320,20 +324,20 @@
     '#22C55E','#A855F7','#0EA5E9','#FB7185',
   ];
 
-  /* cor por opcao_num */
-  const OPCAO_COLORS = {};
-  let _opIdx = 0;
-  function getOpColor(num) {
-    if (OPCAO_COLORS[num] === undefined) { OPCAO_COLORS[num] = PALETTE[_opIdx++ % PALETTE.length]; }
-    return OPCAO_COLORS[num];
+  /* cor por índice de cotação */
+  const _cotColors = {};
+  let _cotIdx = 0;
+  function getCotColor(key) {
+    if (_cotColors[key] === undefined) _cotColors[key] = PALETTE[_cotIdx++ % PALETTE.length];
+    return _cotColors[key];
   }
 
   /* cor por nome de produto (donut) */
-  const PROD_COLORS = {};
-  let _prIdx = 0;
+  const _prodColors = {};
+  let _prodIdx = 0;
   function getProdColor(nome) {
-    if (!PROD_COLORS[nome]) { PROD_COLORS[nome] = PALETTE[_prIdx++ % PALETTE.length]; }
-    return PROD_COLORS[nome];
+    if (!_prodColors[nome]) _prodColors[nome] = PALETTE[_prodIdx++ % PALETTE.length];
+    return _prodColors[nome];
   }
 
   const fmtBRL      = n => Number(n||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -347,55 +351,60 @@
       headers: { apikey: SUPABASE_ANON, Authorization: 'Bearer ' + SUPABASE_ANON, 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
     });
-    if (!r.ok) throw new Error('Erro na comunicação com servidor.');
+    if (!r.ok) throw new Error('RPC error: ' + fn);
     return r.json();
   }
 
-  function showError(msg) {
+  function showError(msg, sub) {
     document.getElementById('state-loading').style.display = 'none';
     document.getElementById('state-error').style.display   = 'flex';
     if (msg) document.getElementById('err-title').textContent = msg;
+    if (sub) document.getElementById('err-body').textContent  = sub;
   }
 
   function addMeta(key, val) {
     const g = document.getElementById('meta-grid');
     const c = document.createElement('div');
     c.className = 'meta-cell';
-    c.innerHTML = '<div class="meta-key">' + key + '</div><div class="meta-val">' + esc(String(val || '—')) + '</div>';
+    c.innerHTML = '<div class="meta-key">' + key + '</div><div class="meta-val">' + esc(String(val||'—')) + '</div>';
     g.appendChild(c);
   }
 
-  /* estado */
+  /* ══ estado ══ */
   let cotacao     = null;
-  let allItens    = [];
-  let opcoes      = [];
+  let payload     = null;   /* dados do ?data= BASE64 */
   let selecionado = null;
   let approved    = false;
-  let areaFactor  = 1;
   let donutChart  = null;
   let barChart    = null;
 
-  /* ─── DONUT: composição por produto de uma opção ─── */
-  function buildDonut(opcao) {
+  /* ══ DONUT: composição por produto de uma cotação ══ */
+  function buildDonut(cotacaoItem) {
     const ctx = document.getElementById('donut').getContext('2d');
     if (donutChart) donutChart.destroy();
 
-    const byProd = {};
-    opcao.itens.forEach(it => {
-      const nome = it.produto_nome || 'Produto';
-      byProd[nome] = (byProd[nome] || 0) + Number(it.valor_ha || 0);
+    /* cotacaoItem.produtos = [{nome, precos:[v1,v2,...]}]
+       usamos o primeiro preço (índice 0) como valor desta cotação */
+    const cotIdx = payload.cotacoes.indexOf(cotacaoItem);
+    const labels = (cotacaoItem.produtos || payload.produtos || []).map(p => p.nome);
+
+    /* pega o preço desta cotação para cada produto */
+    const values = (payload.produtos || []).map(p => {
+      return p.precos && p.precos[cotIdx] != null ? Number(p.precos[cotIdx]) : 0;
     });
 
-    const labels = Object.keys(byProd);
-    const values = Object.values(byProd);
-    const colors = labels.map(l => getProdColor(l));
-    const total  = values.reduce((a, b) => a + b, 0);
+    /* fallback: se a cotação já tiver produtos próprios com preços */
+    const labelsF = labels.length ? labels : (payload.produtos||[]).map(p=>p.nome);
+    const valuesF = values.filter(v => v > 0).length ? values : labelsF.map(()=>0);
 
-    document.getElementById('center-total').textContent = 'R$ ' + fmtBRL(total);
+    const colors = labelsF.map(l => getProdColor(l));
+    const total  = valuesF.reduce((a, b) => a + b, 0);
+
+    document.getElementById('center-total').textContent = 'R$ ' + fmtBRL(cotacaoItem.total || total);
 
     donutChart = new Chart(ctx, {
       type: 'doughnut',
-      data: { labels, datasets: [{ data: values, backgroundColor: colors, borderColor: '#040404', borderWidth: 3, hoverOffset: 8 }] },
+      data: { labels: labelsF, datasets: [{ data: valuesF, backgroundColor: colors, borderColor: '#040404', borderWidth: 3, hoverOffset: 8 }] },
       options: {
         cutout: '80%',
         plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => ' R$ ' + fmtBRL(c.parsed) } } },
@@ -403,42 +412,40 @@
       }
     });
 
+    /* legenda — idêntica ao index */
     const el = document.getElementById('chart-legend');
     el.innerHTML = '';
-    labels.forEach((nome, i) => {
-      const pct = total > 0 ? (values[i] / total * 100) : 0;
+    labelsF.forEach((nome, i) => {
+      const pct = total > 0 ? (valuesF[i] / total * 100) : 0;
       const row = document.createElement('div');
       row.className = 'legend-row';
       row.innerHTML =
         '<div class="legend-dot" style="background:' + colors[i] + '"></div>'
         + '<div class="legend-name">' + esc(nome) + ' <span style="color:var(--text-mid)">(' + pct.toFixed(1) + '%)</span></div>'
         + '<div class="legend-bar-wrap"><div class="legend-bar" style="width:' + pct.toFixed(1) + '%;background:' + colors[i] + '"></div></div>'
-        + '<div class="legend-val" style="color:' + colors[i] + '">R$ ' + fmtBRL(values[i]) + '</div>';
+        + '<div class="legend-val" style="color:' + colors[i] + '">R$ ' + fmtBRL(valuesF[i]) + '</div>';
       el.appendChild(row);
     });
   }
 
-  /* ─── BAR CHART: produto × opção ─── */
+  /* ══ BAR CHART: produto × cotação ══
+     payload.produtos = [{nome, precos:[cotA, cotB, ...]}]
+     payload.cotacoes = [{titulo, total}]
+  ══ */
   function buildBarChart() {
     const ctx = document.getElementById('barChart').getContext('2d');
     if (barChart) barChart.destroy();
 
-    const prodSet = new Set();
-    allItens.forEach(it => { if (it.produto_nome) prodSet.add(it.produto_nome); });
-    const produtos = [...prodSet];
-
-    const datasets = opcoes.map(op => ({
-      label: op.label,
-      data: produtos.map(nome => {
-        const it = op.itens.find(i => i.produto_nome === nome);
-        return it ? Number(it.valor_ha || 0) : 0;
-      }),
-      backgroundColor: getOpColor(op.num),
+    const produtos  = (payload.produtos || []).map(p => p.nome);
+    const datasets  = payload.cotacoes.map((c, ci) => ({
+      label: c.titulo,
+      data: (payload.produtos || []).map(p => p.precos && p.precos[ci] != null ? Number(p.precos[ci]) : 0),
+      backgroundColor: getCotColor(ci),
       borderRadius: 8,
       barThickness: 22,
     }));
 
-    const barH   = 26 * opcoes.length + 12;
+    const barH   = 26 * payload.cotacoes.length + 12;
     const totalH = Math.max(160, produtos.length * barH + 80);
     document.getElementById('barChart').style.height = totalH + 'px';
 
@@ -458,7 +465,7 @@
         scales: {
           x: {
             grid: { color: '#1e1e1e' },
-            ticks: { color: '#666', font: { family: 'JetBrains Mono', size: 10 }, callback: v => 'R$ ' + Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 0 }) }
+            ticks: { color: '#666', font: { family: 'JetBrains Mono', size: 10 }, callback: v => 'R$ ' + Number(v).toLocaleString('pt-BR',{minimumFractionDigits:0}) }
           },
           y: { ticks: { color: '#f0f0f0', font: { weight: '800', family: 'Inter', size: 11 } } }
         }
@@ -466,86 +473,84 @@
     });
   }
 
-  /* ─── CARDS DE SELEÇÃO ─── */
+  /* ══ CARDS DE SELEÇÃO ══ */
   function renderOpcoes() {
     const container = document.getElementById('opcao-list');
     container.innerHTML = '';
-    const minTotal = Math.min(...opcoes.map(o => o.total));
 
-    opcoes.forEach(op => {
-      const color   = getOpColor(op.num);
-      const isMenor = op.total === minTotal;
+    const minTotal = Math.min(...payload.cotacoes.map(c => c.total));
+
+    payload.cotacoes.forEach((c, ci) => {
+      const color   = getCotColor(ci);
+      const isMenor = c.total === minTotal;
 
       const section = document.createElement('div');
       section.className = 'cat-section';
 
-      /* header igual cat-section-header do index */
+      /* header — idêntico ao cat-section-header do index, com borda colorida no topo */
       const hdr = document.createElement('div');
       hdr.className = 'cat-section-header';
-      /* barra colorida no topo via style inline no pseudo-elemento não é possível,
-         usamos um wrapper com border-top */
       hdr.style.borderTop = '3px solid ' + color;
       hdr.innerHTML =
           '<div class="cat-section-dot" style="background:' + color + '"></div>'
-        + '<span class="cat-section-title">' + esc(op.label) + '</span>'
-        + '<span class="cat-section-count">' + op.itens.length + ' produto(s)</span>'
-        + '<span class="cat-section-min">R$ ' + fmtBRL(op.total) + '</span>';
+        + '<span class="cat-section-title">' + esc(c.titulo) + '</span>'
+        + (isMenor ? '<span class="cat-section-count" style="color:var(--primary)">Menor preço</span>' : '<span class="cat-section-count">&nbsp;</span>')
+        + '<span class="cat-section-min">R$ ' + fmtBRL(c.total) + '</span>';
       section.appendChild(hdr);
 
-      /* card clicável */
+      /* card clicável com produtos */
       const card = document.createElement('div');
       card.className = 'option-card' + (isMenor ? ' menor' : '');
 
-      const pills = op.itens.map(it =>
-        '<span class="prod-pill">'
-          + esc(it.produto_nome || 'Produto')
-          + (it.fornecedor ? ' · ' + esc(it.fornecedor) : '')
-          + ' — R$ ' + fmtBRL(it.valor_ha || 0)
-        + '</span>'
-      ).join('');
+      const pills = (payload.produtos || []).map(p => {
+        const val = p.precos && p.precos[ci] != null ? Number(p.precos[ci]) : 0;
+        return '<span class="prod-pill">' + esc(p.nome) + ' — R$ ' + fmtBRL(val) + '</span>';
+      }).join('');
 
       card.innerHTML =
           '<div class="option-info">'
-          + '<div class="option-forn" style="color:' + color + '">' + esc(op.label) + '</div>'
+          + '<div class="option-forn" style="color:' + color + '">' + esc(c.titulo) + '</div>'
           + '<div class="prod-pill-list">' + pills + '</div>'
         + '</div>'
         + '<div class="option-price-col">'
-          + '<div class="option-price" style="color:' + color + '">R$ ' + fmtBRL(op.total) + '</div>'
+          + '<div class="option-price" style="color:' + color + '">R$ ' + fmtBRL(c.total) + '</div>'
         + '</div>'
         + '<div class="option-badge">Menor</div>';
 
-      card.onclick = () => selecionar(op, card);
+      card.onclick = () => selecionar(c, ci, card);
       section.appendChild(card);
       container.appendChild(section);
     });
   }
 
-  function selecionar(op, card) {
+  function selecionar(c, ci, card) {
     if (approved) return;
     document.querySelectorAll('#opcao-list .option-card').forEach(el => el.classList.remove('selected'));
     card.classList.add('selected');
-    selecionado = op;
-    document.getElementById('footer-sub').textContent   = op.label;
-    document.getElementById('footer-total').textContent = 'R$ ' + fmtBRL(op.total);
+    selecionado = { cotacao: c, idx: ci };
+    document.getElementById('footer-sub').textContent   = c.titulo;
+    document.getElementById('footer-total').textContent = 'R$ ' + fmtBRL(c.total);
     document.getElementById('btn-aceite').disabled      = false;
-    buildDonut(op);
+    buildDonut(c);
   }
 
-  /* ─── MODAL ─── */
+  /* ══ MODAL ══ */
   function abrirModal() {
     if (!selecionado) return;
-    const el = document.getElementById('modal-summary');
+    const c   = selecionado.cotacao;
+    const ci  = selecionado.idx;
+    const el  = document.getElementById('modal-summary');
     el.innerHTML = '';
-    selecionado.itens.forEach(it => {
+    (payload.produtos || []).forEach(p => {
+      const val = p.precos && p.precos[ci] != null ? Number(p.precos[ci]) : 0;
       const row = document.createElement('div');
       row.className = 'modal-item';
       row.innerHTML =
-          '<div><div class="modal-item-name">' + esc(it.produto_nome || 'Produto') + '</div>'
-        + '<div class="modal-item-forn">' + esc(it.fornecedor || '') + '</div></div>'
-        + '<div class="modal-item-price">R$ ' + fmtBRL(it.valor_ha || 0) + '</div>';
+          '<div><div class="modal-item-name">' + esc(p.nome) + '</div></div>'
+        + '<div class="modal-item-price">R$ ' + fmtBRL(val) + '</div>';
       el.appendChild(row);
     });
-    document.getElementById('modal-total-val').textContent = 'R$ ' + fmtBRL(selecionado.total);
+    document.getElementById('modal-total-val').textContent = 'R$ ' + fmtBRL(c.total);
     document.getElementById('modal-backdrop').classList.add('open');
   }
   function fecharModal() { document.getElementById('modal-backdrop').classList.remove('open'); }
@@ -558,8 +563,8 @@
     try {
       await rpc('registrar_aceite_cotacao', {
         p_cotacao_id: cotacao.id,
-        p_itens:      selecionado.itens.map(it => it.id),
-        p_total_ha:   selecionado.total,
+        p_itens:      [],
+        p_total_ha:   selecionado.cotacao.total,
         p_user_agent: navigator.userAgent,
       });
       fecharModal();
@@ -581,17 +586,40 @@
     document.getElementById('sticky-footer').style.display = 'none';
   }
 
-  /* ─── MAIN — idêntico ao index ─── */
+  /* ══════════════════════════════════════════════════════
+     MAIN — busca meta do Supabase via ?id=, lê gráficos via ?data=
+  ══════════════════════════════════════════════════════ */
   async function main() {
-    const params = new URLSearchParams(window.location.search);
-    const token  = params.get('t') || params.get('token');
-    if (!token) { showError('Token não encontrado na URL.'); return; }
+    const params      = new URLSearchParams(window.location.search);
+    const cotacaoId   = params.get('id');
+    const dataEncoded = params.get('data');
+
+    /* valida os dois parâmetros */
+    if (!cotacaoId) { showError('Link inválido', 'O parâmetro "id" não foi encontrado na URL.'); return; }
+    if (!dataEncoded) { showError('Dados não encontrados', 'O parâmetro "data" não foi encontrado na URL.'); return; }
+
+    /* decodifica payload BASE64 enviado pelo app */
+    try {
+      payload = JSON.parse(decodeURIComponent(escape(atob(dataEncoded))));
+    } catch(e) {
+      showError('Erro ao decodificar dados', 'O link pode estar corrompido. Solicite um novo ao consultor.');
+      return;
+    }
+
+    if (!payload.cotacoes || payload.cotacoes.length < 2) {
+      showError('Comparativo inválido', 'São necessárias pelo menos 2 cotações para exibir o comparativo.');
+      return;
+    }
 
     try {
-      /* 1. cotação por token */
-      const cotRows = await rpc('get_cotacao_by_token', { p_token: token });
-      if (!cotRows || cotRows.length === 0) { showError('Cotação não encontrada.'); return; }
-      cotacao = cotRows[0];
+      /* 1. busca cotação base (para meta: título, fazenda, data, consultor) */
+      const { data: cotRow, error: cotErr } = await fetch(
+        SUPABASE_URL + '/rest/v1/cotacoes?id=eq.' + cotacaoId + '&select=*&limit=1',
+        { headers: { apikey: SUPABASE_ANON, Authorization: 'Bearer ' + SUPABASE_ANON } }
+      ).then(r => r.json().then(d => ({ data: d[0] || null, error: r.ok ? null : d })));
+
+      if (!cotRow) { showError('Cotação não encontrada', 'Verifique o link ou solicite um novo ao consultor.'); return; }
+      cotacao = cotRow;
 
       /* 2. consultor */
       let consultorNome = '—';
@@ -609,58 +637,30 @@
         } catch(_) {}
       }
 
-      /* 4. itens */
-      allItens = await rpc('get_itens_by_cotacao', { p_cotacao_id: cotacao.id });
-      allItens = allItens || [];
-
-      /* 5. fator área — idêntico ao index */
+      /* 4. área — idêntico ao index */
       const areaManual = Number(cotacao?.area_ha || 0);
       const areaTalhao = Number(cotacao?.talhao_area_ha || 0);
       const areaFinal  = areaManual > 0 ? areaManual : (areaTalhao > 0 ? areaTalhao : 0);
-      areaFactor = areaFinal > 0 ? areaFinal : 1;
-      if (areaFinal > 0) {
-        allItens = allItens.map(it => ({ ...it, valor_ha: Number(it?.valor_ha || 0) * areaFactor }));
-      }
 
-      /* 6. agrupa por opcao_num */
-      const byOpcao = {};
-      allItens.forEach(it => {
-        const num = it.opcao_num != null ? it.opcao_num : 1;
-        if (!byOpcao[num]) byOpcao[num] = [];
-        byOpcao[num].push(it);
-      });
-
-      opcoes = Object.entries(byOpcao)
-        .sort((a, b) => Number(a[0]) - Number(b[0]))
-        .map(([num, itens]) => {
-          const total    = itens.reduce((s, it) => s + Number(it.valor_ha || 0), 0);
-          /* label: fornecedores únicos, senão "Proposta N" */
-          const fornSet  = [...new Set(itens.map(it => it.fornecedor).filter(Boolean))];
-          const label    = fornSet.length >= 1 ? fornSet.join(' / ') : 'Proposta ' + num;
-          return { num: Number(num), label, itens, total };
-        });
-
-      if (opcoes.length < 2) {
-        showError('Esta cotação não possui múltiplas propostas para comparar.');
-        return;
-      }
-
-      /* 7. meta */
+      /* 5. preenche meta */
       document.title = (cotacao.titulo || 'Comparativo') + ' — Agrocota';
-      document.getElementById('meta-titulo').textContent = cotacao.titulo || 'Comparativo';
+      document.getElementById('meta-titulo').textContent = cotacao.titulo || 'Comparativo de Cotação';
       addMeta('Fazenda',   fazendaNome);
       addMeta('Área',      areaFinal > 0 ? fmtBRL(areaFinal) + ' ha' : '—');
       addMeta('Data',      fmtDate(cotacao.created_at));
       addMeta('Consultor', consultorNome);
 
-      /* 8. status */
+      /* 6. status */
       const aceiteEm = cotacao.aceite_em || cotacao.approved_at;
       if (cotacao.status === 'aprovada' || cotacao.status === 'aprovado' || aceiteEm) {
         setAprovado(aceiteEm || new Date().toISOString());
       }
 
-      /* 9. renderiza — inicia donut na proposta mais barata */
-      const menor = [...opcoes].sort((a, b) => a.total - b.total)[0];
+      /* 7. renderiza gráficos e cards */
+      const menor = [...payload.cotacoes].sort((a, b) => a.total - b.total)[0];
+      /* pré-aquece as cores para manter a mesma ordem no donut e na barra */
+      payload.cotacoes.forEach((_, i) => getCotColor(i));
+
       buildDonut(menor);
       buildBarChart();
       renderOpcoes();
@@ -669,7 +669,7 @@
       document.getElementById('app').style.display           = 'block';
 
     } catch(e) {
-      showError('Erro ao carregar os dados.');
+      showError('Erro ao carregar os dados', 'Tente novamente ou solicite um novo link ao consultor.');
     }
   }
 
