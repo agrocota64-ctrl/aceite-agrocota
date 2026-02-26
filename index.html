@@ -107,20 +107,6 @@
     .chart-center-label { font-size: .55rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--text-mid); }
     .chart-center-value { font-family: 'JetBrains Mono', monospace; font-size: .95rem; font-weight: 700; color: var(--text); display: block; line-height: 1.3; }
     .chart-legend { width: 100%; display: flex; flex-direction: column; gap: 9px; }
-    .chart-note {
-      width: 100%;
-      font-size: .62rem;
-      color: var(--text-mid);
-      border-top: 1px solid var(--border);
-      padding-top: 10px;
-      line-height: 1.6;
-    }
-    .chart-note strong {
-      color: #d1d5db;
-      text-transform: uppercase;
-      letter-spacing: .08em;
-      font-size: .58rem;
-    }
     .legend-row { display: flex; align-items: center; gap: 10px; }
     .legend-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
     .legend-name { flex: 1; font-size: .76rem; font-weight: 600; color: var(--text); }
@@ -135,19 +121,11 @@
       margin-bottom: 14px; margin-top: 28px;
       padding: 12px 14px 10px;
       background: var(--surface2); border: 1px solid var(--border2);
-      border-radius: 12px;
-      position: relative;
-      overflow: hidden;
+      border-radius: 12px; position: relative; overflow: hidden;
     }
     .cat-section-header::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 3px;
-      background: #ffffff;
-      opacity: 0.9;
+      content: ''; position: absolute; top: 0; left: 0; right: 0;
+      height: 3px; background: #ffffff; opacity: 0.9;
     }
     .cat-section-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
     .cat-section-title { font-size: .88rem; font-weight: 900; color: var(--text); flex: 1; }
@@ -186,12 +164,8 @@
       background: var(--primary-dim); border: 1px solid var(--primary);
       border-radius: 18px; padding: 22px; text-align: center; margin-bottom: 28px;
     }
-    .approved-card.recusado {
-      background: rgba(239,68,68,.08);
-      border-color: var(--red);
-    }
-    .approved-card.recusado .approved-title,
-    .approved-card.recusado .approved-ts { color: var(--red); }
+    .approved-card.recusado { background: rgba(239,68,68,.08); border-color: var(--red); }
+    .approved-card.recusado .approved-title, .approved-card.recusado .approved-ts { color: var(--red); }
     .approved-title { font-size: .95rem; font-weight: 900; color: var(--primary); margin-bottom: 5px; }
     .approved-sub   { font-size: .75rem; color: var(--text-mid); }
     .approved-ts    { font-family: 'JetBrains Mono', monospace; font-size: .68rem; color: var(--primary); margin-top: 8px; }
@@ -209,11 +183,9 @@
     .total-sub { font-size: .58rem; color: var(--text-mid); text-align: right; display: block; }
     .btn-confirm {
       width: 100%; background: var(--primary); color: #000; border: none;
-      padding: 16px 24px; border-radius: 15px;
-      font-family: 'Inter', sans-serif; font-size: .75rem; font-weight: 900;
+      padding: 16px 24px; border-radius: 15px; font-family: 'Inter', sans-serif; font-size: .75rem; font-weight: 900;
       letter-spacing: .1em; text-transform: uppercase; cursor: pointer;
-      transition: opacity .18s, transform .12s;
-      box-shadow: 0 0 40px rgba(34,197,94,.12);
+      transition: opacity .18s, transform .12s; box-shadow: 0 0 40px rgba(34,197,94,.12);
     }
     .btn-confirm:active { transform: scale(.97); }
     .btn-confirm:disabled { opacity: .3; cursor: not-allowed; box-shadow: none; }
@@ -301,7 +273,7 @@
     </div>
 
     <div class="approved-card" id="approved-banner" style="display:none">
-      <div class="approved-title">Aceite da Cotação Registrado</div>
+      <div class="approved-title">Aceite Registrado</div>
       <div class="approved-sub">Seu consultor foi notificado. Obrigado pela confirmação.</div>
       <div class="approved-ts" id="approved-ts"></div>
     </div>
@@ -315,25 +287,17 @@
       <div class="chart-canvas-wrap">
         <canvas id="donut"></canvas>
         <div class="chart-center">
-          <span class="chart-center-label" id="center-label">Total da Cotação</span>
+          <span class="chart-center-label">Investimento</span>
           <span class="chart-center-value" id="center-total">R$ 0,00</span>
         </div>
       </div>
       <div class="chart-legend" id="chart-legend"></div>
-      <div class="chart-note">
-        <strong>Custo por categoria:</strong><br />
-        O gráfico mostra a cotação completa importada. A lista traz a porcentagem e o valor de cada categoria.
-      </div>
     </div>
 
     <div class="section-hd" style="margin-top:44px">
       <h2>Produtos por categoria</h2>
       <div class="section-line"></div>
     </div>
-    <p style="font-size:.72rem;color:var(--text-mid);margin-bottom:22px;line-height:1.6">
-      Esta visualização exibe todos os itens da cotação importada.
-      O aceite é do orçamento completo (não há seleção manual por categoria).
-    </p>
     <div id="prod-list"></div>
   </main>
 
@@ -342,11 +306,10 @@
       <div class="total-row">
         <div>
           <div class="total-label-sm">Investimento Total</div>
-          <span class="total-sub" id="footer-count">0 itens na cotação</span>
+          <span class="total-sub" id="footer-count">0 itens</span>
         </div>
         <div style="text-align:right">
           <div class="total-amount" id="footer-total">R$ 0,00</div>
-          <span class="total-sub" id="footer-unit">Valor final calculado</span>
         </div>
       </div>
       <div class="footer-actions">
@@ -510,7 +473,7 @@
       hdr.className = 'cat-section-header';
       hdr.innerHTML = '<div class="cat-section-dot" style="background:'+color+'"></div>'
         + '<span class="cat-section-title">'+esc(cat)+'</span>'
-        + '<span class="cat-section-count">'+prodNames.length+' produto(s) &mdash; '+totalOpts+' opções</span>'
+        + '<span class="cat-section-count">'+prodNames.length+' produto(s)</span>'
         + '<span class="cat-section-min">R$ '+fmtBRL(catTotal)+'</span>';
       section.appendChild(hdr);
 
@@ -523,7 +486,7 @@
         const group  = document.createElement('div');
         group.className = 'prod-group';
 
-        let html = '<div class="prod-group-title">'+esc(nome)+'</div><div class="prod-group-sub">'+sorted.length+' opções de fornecedor</div>';
+        let html = '<div class="prod-group-title">'+esc(nome)+'</div>';
 
         sorted.forEach((it,idx) => {
           const isCategoryMin = !!catMin && String(it.id) === String(catMin.id);
@@ -610,7 +573,7 @@
     const colors  = donutEntries.map(([c])=>getCatColor(c));
     
     if (donutEntries.length === 0) {
-      buildChart(['Sem selecao'], [1], ['#1e1e1e']); buildLegend([], [], 0);
+      buildChart(['Sem itens'], [1], ['#1e1e1e']); buildLegend([], [], 0);
     } else {
       buildChart(donutEntries.map(e=>e[0]), donutEntries.map(e=>e[1]), colors);
       buildLegend(donutEntries, colors, donutEntries.reduce((a,[,v])=>a+v,0));
@@ -698,7 +661,7 @@
 
     try {
       const cotRows = await rpc('get_cotacao_by_token',{ p_token: token });
-      if(!cotRows || cotRows.length===0){ showError('Cotacao nao encontrada.'); return; }
+      if(!cotRows || cotRows.length===0){ showError('Cotação não encontrada.'); return; }
       cotacao = cotRows[0];
 
       let consultorNome = '\u2014';
@@ -732,12 +695,8 @@
       document.getElementById('meta-titulo').textContent = cotacao.titulo || 'Cotação';
       addMeta('Fazenda', fazendaNome);
       
-      if (cotacao?.talhao_nome) {
-         addMeta('Talhão', `${cotacao.talhao_nome} (${fmtBRL(areaFactor)} ha)`);
-      } else if (areaFinal > 0) {
-         addMeta('Área de Cálculo', `${fmtBRL(areaFinal)} ha`);
-      } else {
-         addMeta('Área de Cálculo', 'Geral (1 ha)');
+      if (areaFactor > 0) {
+         addMeta('Área', `${fmtBRL(areaFactor)} ha`);
       }
       addMeta('Data', fmtDate(cotacao.created_at));
       addMeta('Consultor', consultorNome);
