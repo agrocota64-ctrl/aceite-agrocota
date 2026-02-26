@@ -25,13 +25,20 @@
     }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; }
-    body {
-      font-family: 'Inter', sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      -webkit-font-smoothing: antialiased;
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; -webkit-font-smoothing: antialiased; }
+
+    /* STATES */
+    #state-loading, #state-error {
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      min-height: 100svh; gap: 16px;
     }
+    #state-error { padding: 32px; text-align: center; }
+    .loader { width: 32px; height: 32px; border: 2px solid var(--border2); border-top-color: var(--primary); border-radius: 50%; animation: spin .7s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .state-label { font-size: .7rem; font-weight: 700; letter-spacing: .1em; color: var(--text-mid); text-transform: uppercase; }
+    .err-title   { font-size: .95rem; font-weight: 800; color: var(--red); }
+    .err-body    { font-size: .78rem; color: var(--text-mid); margin-top: 6px; }
 
     /* TOP BAR */
     .top-bar {
@@ -46,8 +53,9 @@
     .status-pill {
       font-size: .58rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase;
       padding: 4px 10px; border-radius: 100px;
-      border: 1px solid var(--amber); color: var(--amber);
+      border: 1px solid var(--border2); color: var(--text-mid);
     }
+    .status-pill.pendente { border-color: var(--amber); color: var(--amber); }
     .status-pill.aprovado { border-color: var(--primary); color: var(--primary); }
 
     /* PAGE */
@@ -71,7 +79,7 @@
     .section-hd h2 { font-size: .62rem; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: var(--text-mid); white-space: nowrap; }
     .section-line { flex: 1; height: 1px; background: var(--border); }
 
-    /* CHART WRAP — identical to index */
+    /* DONUT — idêntico ao index */
     .chart-wrap {
       background: var(--surface); border: 1px solid var(--border);
       border-radius: 20px; padding: 28px 20px;
@@ -79,10 +87,7 @@
     }
     .chart-canvas-wrap { position: relative; width: 190px; height: 190px; flex-shrink: 0; }
     canvas#donut { width: 190px !important; height: 190px !important; }
-    .chart-center {
-      position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
-      text-align: center; pointer-events: none;
-    }
+    .chart-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); text-align: center; pointer-events: none; }
     .chart-center-label { font-size: .55rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--text-mid); }
     .chart-center-value { font-family: 'JetBrains Mono', monospace; font-size: .95rem; font-weight: 700; color: var(--text); display: block; line-height: 1.3; }
     .chart-legend { width: 100%; display: flex; flex-direction: column; gap: 9px; }
@@ -93,32 +98,27 @@
     .legend-bar { height: 100%; border-radius: 99px; transition: width .6s cubic-bezier(.4,0,.2,1); }
     .legend-val { font-family: 'JetBrains Mono', monospace; font-size: .72rem; font-weight: 700; min-width: 82px; text-align: right; }
 
-    /* BAR CHART WRAP — same sizing as donut wrap */
-    .bar-chart-wrap {
+    /* BAR CHART — mesmo container que o donut */
+    .bar-wrap {
       background: var(--surface); border: 1px solid var(--border);
       border-radius: 20px; padding: 28px 20px;
-      display: flex; flex-direction: column; align-items: center; gap: 28px;
     }
-    .bar-canvas-wrap { position: relative; width: 100%; }
 
-    /* COTACAO CARDS */
-    .cotacao-section { margin-bottom: 28px; }
-    .cotacao-section-header {
+    /* CATEGORY SECTIONS — idêntico ao index */
+    .cat-section { margin-bottom: 36px; }
+    .cat-section-header {
       display: flex; align-items: center; gap: 12px;
       margin-bottom: 14px; margin-top: 28px;
       padding: 12px 14px 10px;
       background: var(--surface2); border: 1px solid var(--border2);
       border-radius: 12px; position: relative; overflow: hidden;
     }
-    .cotacao-section-header::before {
-      content: ''; position: absolute; top: 0; left: 0; right: 0;
-      height: 3px; opacity: 0.9;
-    }
-    .cotacao-section-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-    .cotacao-section-title { font-size: .88rem; font-weight: 900; color: var(--text); flex: 1; }
-    .cotacao-section-total { font-family: 'JetBrains Mono', monospace; font-size: .72rem; font-weight: 700; color: var(--primary); white-space: nowrap; }
+    .cat-section-dot   { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .cat-section-title { font-size: .88rem; font-weight: 900; color: var(--text); flex: 1; }
+    .cat-section-count { font-size: .6rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--text-mid); }
+    .cat-section-min   { font-family: 'JetBrains Mono', monospace; font-size: .72rem; font-weight: 700; color: var(--primary); white-space: nowrap; }
 
-    /* PRODUCT OPTION CARDS — identical style to index */
+    /* OPTION CARDS — idêntico ao index */
     .option-card {
       display: flex; align-items: center; gap: 12px;
       background: var(--surface); border: 1px solid var(--border);
@@ -128,37 +128,29 @@
     }
     .option-card:active { transform: scale(.98); }
     .option-card.selected { border-color: var(--primary); background: var(--primary-dim); }
-    .option-info { flex: 1; min-width: 0; }
-    .option-forn { font-size: .83rem; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .option-cat  { font-size: .63rem; font-weight: 600; color: var(--text-mid); margin-top: 2px; }
-    .option-price-col { text-align: right; flex-shrink: 0; }
-    .option-price { font-family: 'JetBrains Mono', monospace; font-size: .95rem; font-weight: 700; }
     .option-badge {
       font-size: .54rem; font-weight: 900; letter-spacing: .08em; text-transform: uppercase;
       padding: 3px 7px; border-radius: 6px; background: var(--primary); color: #000;
-      flex-shrink: 0;
+      opacity: 0; flex-shrink: 0; transition: opacity .2s;
     }
-    .option-badge.menor { background: var(--primary); color: #000; }
-    .option-badge.selecionada { background: var(--primary); color: #000; }
+    .option-card.menor .option-badge { opacity: 1; }
+    .option-info { flex: 1; min-width: 0; }
+    .option-forn { font-size: .83rem; font-weight: 700; }
+    .option-cat  { font-size: .63rem; font-weight: 600; color: var(--text-mid); margin-top: 2px; }
+    .option-price-col { text-align: right; flex-shrink: 0; }
+    .option-price { font-family: 'JetBrains Mono', monospace; font-size: .95rem; font-weight: 700; }
 
-    /* PILL LIST for products inside each cotação card */
-    .prod-pill-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
-    .prod-pill {
-      font-size: .62rem; font-weight: 600; padding: 4px 8px;
-      background: var(--surface2); border: 1px solid var(--border2);
-      border-radius: 6px; color: var(--text-mid);
-    }
+    /* pills de produto dentro do card */
+    .prod-pill-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+    .prod-pill { font-size: .62rem; font-weight: 600; padding: 4px 8px; background: var(--surface2); border: 1px solid var(--border2); border-radius: 6px; color: var(--text-mid); }
 
     /* APPROVED BANNER */
-    .approved-card {
-      background: var(--primary-dim); border: 1px solid var(--primary);
-      border-radius: 18px; padding: 22px; text-align: center; margin-bottom: 28px;
-    }
+    .approved-card { background: var(--primary-dim); border: 1px solid var(--primary); border-radius: 18px; padding: 22px; text-align: center; margin-bottom: 28px; }
     .approved-title { font-size: .95rem; font-weight: 900; color: var(--primary); margin-bottom: 5px; }
     .approved-sub   { font-size: .75rem; color: var(--text-mid); }
     .approved-ts    { font-family: 'JetBrains Mono', monospace; font-size: .68rem; color: var(--primary); margin-top: 8px; }
 
-    /* STICKY FOOTER */
+    /* STICKY FOOTER — idêntico ao index */
     .sticky-footer {
       position: fixed; bottom: 0; left: 0; right: 0; z-index: 200;
       padding: 14px 16px calc(14px + env(safe-area-inset-bottom));
@@ -178,7 +170,7 @@
     .btn-confirm:active { transform: scale(.97); }
     .btn-confirm:disabled { opacity: .3; cursor: not-allowed; box-shadow: none; }
 
-    /* MODAL */
+    /* MODAL — idêntico ao index */
     .modal-backdrop {
       position: fixed; inset: 0; z-index: 500;
       background: rgba(0,0,0,.75); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
@@ -194,11 +186,7 @@
     .modal-backdrop.open .modal { transform: translateY(0); }
     .modal-title { font-size: .95rem; font-weight: 900; margin-bottom: 5px; }
     .modal-sub   { font-size: .75rem; color: var(--text-mid); margin-bottom: 20px; }
-    .modal-summary {
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: 14px; padding: 14px; margin-bottom: 16px;
-      max-height: 210px; overflow-y: auto;
-    }
+    .modal-summary { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 14px; margin-bottom: 16px; max-height: 240px; overflow-y: auto; }
     .modal-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); }
     .modal-item:last-child { border-bottom: none; }
     .modal-item-name  { font-size: .78rem; font-weight: 600; }
@@ -228,76 +216,80 @@
 </head>
 <body>
 
-<div class="top-bar">
-  <span class="brand">Agrocota</span>
-  <span class="status-pill" id="status-pill">Aguardando aceite</span>
+<div id="state-loading">
+  <div class="loader"></div>
+  <span class="state-label">Carregando comparativo</span>
 </div>
 
-<main class="page">
+<div id="state-error" style="display:none">
+  <span class="err-title" id="err-title">Link inválido ou expirado</span>
+  <p class="err-body">Solicite um novo link ao consultor responsável.</p>
+</div>
 
-  <div class="meta-block">
-    <h1 class="meta-title" id="meta-titulo">Comparativo de Cotação</h1>
-    <div class="meta-grid" id="meta-grid"></div>
+<div id="app" style="display:none">
+  <div class="top-bar">
+    <span class="brand">Agrocota</span>
+    <span class="status-pill pendente" id="status-pill">Aguardando aceite</span>
   </div>
 
-  <div class="approved-card" id="approved-banner" style="display:none">
-    <div class="approved-title">Aceite Registrado</div>
-    <div class="approved-sub">Seu consultor foi notificado. Obrigado pela confirmação.</div>
-    <div class="approved-ts" id="approved-ts"></div>
-  </div>
-
-  <!-- DONUT: Composição de custo (cotação selecionada ou menor) -->
-  <div class="section-hd">
-    <h2>Composição de Custo</h2>
-    <div class="section-line"></div>
-  </div>
-  <div class="chart-wrap">
-    <div class="chart-canvas-wrap">
-      <canvas id="donut"></canvas>
-      <div class="chart-center">
-        <span class="chart-center-label">Investimento</span>
-        <span class="chart-center-value" id="center-total">R$ 0,00</span>
-      </div>
+  <main class="page">
+    <div class="meta-block">
+      <h1 class="meta-title" id="meta-titulo">Comparativo de Cotação</h1>
+      <div class="meta-grid" id="meta-grid"></div>
     </div>
-    <div class="chart-legend" id="chart-legend"></div>
-  </div>
 
-  <!-- BAR CHART: Comparativo por produto entre cotações -->
-  <div class="section-hd" style="margin-top:44px">
-    <h2>Comparativo por Produto</h2>
-    <div class="section-line"></div>
-  </div>
-  <div class="bar-chart-wrap">
-    <div class="bar-canvas-wrap">
+    <div class="approved-card" id="approved-banner" style="display:none">
+      <div class="approved-title">Aceite Registrado</div>
+      <div class="approved-sub">Seu consultor foi notificado. Obrigado pela confirmação.</div>
+      <div class="approved-ts" id="approved-ts"></div>
+    </div>
+
+    <div class="section-hd">
+      <h2>Composição de Custo</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="chart-wrap">
+      <div class="chart-canvas-wrap">
+        <canvas id="donut"></canvas>
+        <div class="chart-center">
+          <span class="chart-center-label">Investimento</span>
+          <span class="chart-center-value" id="center-total">R$ 0,00</span>
+        </div>
+      </div>
+      <div class="chart-legend" id="chart-legend"></div>
+    </div>
+
+    <div class="section-hd" style="margin-top:44px">
+      <h2>Comparativo por Produto</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="bar-wrap">
       <canvas id="barChart"></canvas>
     </div>
-  </div>
 
-  <!-- SELECIONAR PROPOSTA -->
-  <div class="section-hd" style="margin-top:44px">
-    <h2>Selecione a Proposta</h2>
-    <div class="section-line"></div>
-  </div>
-  <div id="option-list"></div>
-
-</main>
-
-<div class="sticky-footer" id="sticky-footer">
-  <div class="footer-inner">
-    <div class="total-row">
-      <div>
-        <div class="total-label-sm">Proposta Selecionada</div>
-        <span class="total-sub" id="footer-sub">Nenhuma selecionada</span>
-      </div>
-      <div style="text-align:right">
-        <div class="total-amount" id="footer-total">—</div>
-      </div>
+    <div class="section-hd" style="margin-top:44px">
+      <h2>Selecione a Proposta</h2>
+      <div class="section-line"></div>
     </div>
-    <button class="btn-confirm" id="btn-aceite" onclick="abrirModal()" disabled>Confirmar Aceite da Proposta</button>
+    <div id="opcao-list"></div>
+  </main>
+
+  <div class="sticky-footer" id="sticky-footer">
+    <div class="footer-inner">
+      <div class="total-row">
+        <div>
+          <div class="total-label-sm">Proposta Selecionada</div>
+          <span class="total-sub" id="footer-sub">Nenhuma selecionada</span>
+        </div>
+        <div style="text-align:right">
+          <div class="total-amount" id="footer-total">—</div>
+        </div>
+      </div>
+      <button class="btn-confirm" id="btn-aceite" onclick="abrirModal()" disabled>Confirmar Aceite da Proposta</button>
+    </div>
   </div>
 </div>
 
-<!-- MODAL CONFIRMAÇÃO -->
 <div class="modal-backdrop" id="modal-backdrop" onclick="fecharModalExterno(event)">
   <div class="modal">
     <div class="modal-title">Confirmar Aceite</div>
@@ -316,148 +308,139 @@
 
 <footer class="page-footer">Agrocota 2025 &mdash; Plataforma de Decisão Agrícola</footer>
 
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-  import { getFirestore, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+<script>
+  /* ── CONFIG SUPABASE — IDÊNTICO AO INDEX ── */
+  const SUPABASE_URL  = 'https://fafjknchnibdflpqyssf.supabase.co';
+  const SUPABASE_ANON = 'sb_publishable_3HDU_nViFfOubXqNplV5ow_8FV0Ix0r';
 
-  const firebaseConfig = {
-    apiKey: "SUA_API_KEY",
-    authDomain: "seu-projeto.firebaseapp.com",
-    projectId: "seu-projeto",
-    storageBucket: "seu-projeto.appspot.com",
-    messagingSenderId: "000000000000",
-    appId: "1:000000000000:web:000000000"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const db  = getFirestore(app);
-
-  // ──── PALETA IDÊNTICA AO INDEX ────
   const PALETTE = [
     '#3B82F6','#EF4444','#F59E0B','#10B981',
     '#8B5CF6','#06B6D4','#EC4899','#84CC16',
     '#F97316','#14B8A6','#6366F1','#EAB308',
     '#22C55E','#A855F7','#0EA5E9','#FB7185',
   ];
-  const COTACAO_COLORS = {};
-  let _colorIdx = 0;
-  function getCotacaoColor(titulo) {
-    if (!COTACAO_COLORS[titulo]) {
-      COTACAO_COLORS[titulo] = PALETTE[_colorIdx % PALETTE.length];
-      _colorIdx++;
-    }
-    return COTACAO_COLORS[titulo];
+
+  /* cor por opcao_num */
+  const OPCAO_COLORS = {};
+  let _opIdx = 0;
+  function getOpColor(num) {
+    if (OPCAO_COLORS[num] === undefined) { OPCAO_COLORS[num] = PALETTE[_opIdx++ % PALETTE.length]; }
+    return OPCAO_COLORS[num];
   }
 
-  const fmtBRL      = n  => Number(n||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
-  const fmtDate     = s  => !s ? '—' : new Date(s).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'});
-  const fmtDateTime = s  => !s ? '—' : new Date(s).toLocaleString('pt-BR');
-  const esc         = s  => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  /* cor por nome de produto (donut) */
+  const PROD_COLORS = {};
+  let _prIdx = 0;
+  function getProdColor(nome) {
+    if (!PROD_COLORS[nome]) { PROD_COLORS[nome] = PALETTE[_prIdx++ % PALETTE.length]; }
+    return PROD_COLORS[nome];
+  }
 
-  // ──── PARSE URL ────
-  const params      = new URLSearchParams(window.location.search);
-  const dataEncoded = params.get('data');
-  const cotacaoId   = params.get('id');
+  const fmtBRL      = n => Number(n||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const fmtDate     = s => !s ? '—' : new Date(s).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'});
+  const fmtDateTime = s => !s ? '—' : new Date(s).toLocaleString('pt-BR');
+  const esc         = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 
-  // payload esperado: { meta: { titulo, fazenda, produtor, consultor, area, data }, cotacoes: [{ titulo, total, produtos: [{nome, valor}] }] }
-  const payload = dataEncoded
-    ? JSON.parse(atob(dataEncoded))
-    : {
-        meta: { titulo:'Comparativo de Safra', fazenda:'Fazenda Exemplo', produtor:'João Silva', consultor:'Carlos', area:'500', data: new Date().toISOString() },
-        cotacoes: [
-          { titulo:'Proposta A', total: 128000, produtos: [{nome:'Herbicida X', valor:42000},{nome:'Fungicida Y', valor:38000},{nome:'Inseticida Z', valor:28000},{nome:'Fertilizante', valor:20000}] },
-          { titulo:'Proposta B', total: 145000, produtos: [{nome:'Herbicida X', valor:51000},{nome:'Fungicida Y', valor:41000},{nome:'Inseticida Z', valor:30000},{nome:'Fertilizante', valor:23000}] },
-          { titulo:'Proposta C', total: 119000, produtos: [{nome:'Herbicida X', valor:38000},{nome:'Fungicida Y', valor:35000},{nome:'Inseticida Z', valor:25000},{nome:'Fertilizante', valor:21000}] },
-        ]
-      };
+  async function rpc(fn, body) {
+    const r = await fetch(SUPABASE_URL + '/rest/v1/rpc/' + fn, {
+      method: 'POST',
+      headers: { apikey: SUPABASE_ANON, Authorization: 'Bearer ' + SUPABASE_ANON, 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    if (!r.ok) throw new Error('Erro na comunicação com servidor.');
+    return r.json();
+  }
 
-  let selecionado = null;
-  let donutChart  = null;
-  let barChart    = null;
-  let aprovado    = false;
+  function showError(msg) {
+    document.getElementById('state-loading').style.display = 'none';
+    document.getElementById('state-error').style.display   = 'flex';
+    if (msg) document.getElementById('err-title').textContent = msg;
+  }
 
-  // ──── META GRID ────
   function addMeta(key, val) {
     const g = document.getElementById('meta-grid');
     const c = document.createElement('div');
     c.className = 'meta-cell';
-    c.innerHTML = '<div class="meta-key">'+key+'</div><div class="meta-val">'+esc(val||'—')+'</div>';
+    c.innerHTML = '<div class="meta-key">' + key + '</div><div class="meta-val">' + esc(String(val || '—')) + '</div>';
     g.appendChild(c);
   }
 
-  document.getElementById('meta-titulo').textContent = payload.meta?.titulo || 'Comparativo';
-  addMeta('Fazenda',   payload.meta?.fazenda);
-  addMeta('Área',      payload.meta?.area ? payload.meta.area + ' ha' : '—');
-  addMeta('Data',      payload.meta?.data ? fmtDate(payload.meta.data) : fmtDate(new Date().toISOString()));
-  addMeta('Consultor', payload.meta?.consultor);
+  /* estado */
+  let cotacao     = null;
+  let allItens    = [];
+  let opcoes      = [];
+  let selecionado = null;
+  let approved    = false;
+  let areaFactor  = 1;
+  let donutChart  = null;
+  let barChart    = null;
 
-  // ──── DONUT: composição da cotação mais barata (ou selecionada) ────
-  function buildDonut(cotacao) {
+  /* ─── DONUT: composição por produto de uma opção ─── */
+  function buildDonut(opcao) {
     const ctx = document.getElementById('donut').getContext('2d');
     if (donutChart) donutChart.destroy();
 
-    const labels = cotacao.produtos.map(p => p.nome);
-    const values = cotacao.produtos.map(p => p.valor);
-    const colors = labels.map((_, i) => PALETTE[i % PALETTE.length]);
-    const total  = values.reduce((a,b)=>a+b, 0);
+    const byProd = {};
+    opcao.itens.forEach(it => {
+      const nome = it.produto_nome || 'Produto';
+      byProd[nome] = (byProd[nome] || 0) + Number(it.valor_ha || 0);
+    });
+
+    const labels = Object.keys(byProd);
+    const values = Object.values(byProd);
+    const colors = labels.map(l => getProdColor(l));
+    const total  = values.reduce((a, b) => a + b, 0);
 
     document.getElementById('center-total').textContent = 'R$ ' + fmtBRL(total);
 
     donutChart = new Chart(ctx, {
       type: 'doughnut',
-      data: {
-        labels,
-        datasets: [{ data: values, backgroundColor: colors, borderColor: '#040404', borderWidth: 3, hoverOffset: 8 }]
-      },
+      data: { labels, datasets: [{ data: values, backgroundColor: colors, borderColor: '#040404', borderWidth: 3, hoverOffset: 8 }] },
       options: {
         cutout: '80%',
-        plugins: {
-          legend: { display: false },
-          tooltip: { callbacks: { label: ctx => ' R$ ' + fmtBRL(ctx.parsed) } }
-        },
-        animation: { duration: 700, easing: 'easeInOutQuart' }
+        plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => ' R$ ' + fmtBRL(c.parsed) } } },
+        animation: { duration: 700, easing: 'easeInOutQuart' },
       }
     });
 
-    // legenda idêntica ao index
     const el = document.getElementById('chart-legend');
     el.innerHTML = '';
-    cotacao.produtos.forEach((p, i) => {
-      const pct = total > 0 ? (p.valor / total * 100) : 0;
+    labels.forEach((nome, i) => {
+      const pct = total > 0 ? (values[i] / total * 100) : 0;
       const row = document.createElement('div');
       row.className = 'legend-row';
       row.innerHTML =
-        '<div class="legend-dot" style="background:'+colors[i]+'"></div>'
-        + '<div class="legend-name">'+esc(p.nome)+' <span style="color:var(--text-mid)">('+pct.toFixed(1)+'%)</span></div>'
-        + '<div class="legend-bar-wrap"><div class="legend-bar" style="width:'+pct.toFixed(1)+'%;background:'+colors[i]+'"></div></div>'
-        + '<div class="legend-val" style="color:'+colors[i]+'">R$ '+fmtBRL(p.valor)+'</div>';
+        '<div class="legend-dot" style="background:' + colors[i] + '"></div>'
+        + '<div class="legend-name">' + esc(nome) + ' <span style="color:var(--text-mid)">(' + pct.toFixed(1) + '%)</span></div>'
+        + '<div class="legend-bar-wrap"><div class="legend-bar" style="width:' + pct.toFixed(1) + '%;background:' + colors[i] + '"></div></div>'
+        + '<div class="legend-val" style="color:' + colors[i] + '">R$ ' + fmtBRL(values[i]) + '</div>';
       el.appendChild(row);
     });
   }
 
-  // ──── BAR CHART: por produto, uma barra por cotação ────
+  /* ─── BAR CHART: produto × opção ─── */
   function buildBarChart() {
     const ctx = document.getElementById('barChart').getContext('2d');
     if (barChart) barChart.destroy();
 
-    // coleta todos os produtos únicos
-    const produtosSet = new Set();
-    payload.cotacoes.forEach(c => c.produtos.forEach(p => produtosSet.add(p.nome)));
-    const produtos = [...produtosSet];
+    const prodSet = new Set();
+    allItens.forEach(it => { if (it.produto_nome) prodSet.add(it.produto_nome); });
+    const produtos = [...prodSet];
 
-    const datasets = payload.cotacoes.map(c => {
-      const color = getCotacaoColor(c.titulo);
-      return {
-        label: c.titulo,
-        data: produtos.map(nome => {
-          const item = c.produtos.find(p => p.nome === nome);
-          return item ? item.valor : 0;
-        }),
-        backgroundColor: color,
-        borderRadius: 8,
-        barThickness: 24,
-      };
-    });
+    const datasets = opcoes.map(op => ({
+      label: op.label,
+      data: produtos.map(nome => {
+        const it = op.itens.find(i => i.produto_nome === nome);
+        return it ? Number(it.valor_ha || 0) : 0;
+      }),
+      backgroundColor: getOpColor(op.num),
+      borderRadius: 8,
+      barThickness: 22,
+    }));
+
+    const barH   = 26 * opcoes.length + 12;
+    const totalH = Math.max(160, produtos.length * barH + 80);
+    document.getElementById('barChart').style.height = totalH + 'px';
 
     barChart = new Chart(ctx, {
       type: 'bar',
@@ -467,157 +450,230 @@
         responsive: true,
         plugins: {
           legend: {
-            display: true,
-            position: 'bottom',
+            display: true, position: 'bottom',
             labels: { color: '#f0f0f0', font: { family: 'Inter', weight: '700', size: 11 }, boxWidth: 10, borderRadius: 4, padding: 16 }
           },
-          tooltip: { callbacks: { label: ctx => ' ' + ctx.dataset.label + ': R$ ' + fmtBRL(ctx.parsed.x) } }
+          tooltip: { callbacks: { label: c => ' ' + c.dataset.label + ': R$ ' + fmtBRL(c.parsed.x) } }
         },
         scales: {
           x: {
             grid: { color: '#1e1e1e' },
-            ticks: { color: '#666', font: { family: 'JetBrains Mono', size: 10 },
-              callback: v => 'R$ ' + Number(v).toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:0}) }
+            ticks: { color: '#666', font: { family: 'JetBrains Mono', size: 10 }, callback: v => 'R$ ' + Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 0 }) }
           },
-          y: {
-            ticks: { color: '#f0f0f0', font: { weight: '800', family: 'Inter', size: 11 } }
-          }
+          y: { ticks: { color: '#f0f0f0', font: { weight: '800', family: 'Inter', size: 11 } } }
         }
       }
     });
-
-    // ajusta altura baseado em qtd de produtos × cotações
-    const barHeight = 28 * payload.cotacoes.length + 10;
-    const totalHeight = Math.max(160, produtos.length * barHeight + 60);
-    document.getElementById('barChart').style.height = totalHeight + 'px';
   }
 
-  // ──── CARDS DE SELEÇÃO ────
-  function renderCards() {
-    const container = document.getElementById('option-list');
+  /* ─── CARDS DE SELEÇÃO ─── */
+  function renderOpcoes() {
+    const container = document.getElementById('opcao-list');
     container.innerHTML = '';
+    const minTotal = Math.min(...opcoes.map(o => o.total));
 
-    const minTotal = Math.min(...payload.cotacoes.map(c => c.total));
-
-    payload.cotacoes.forEach((c) => {
-      const color  = getCotacaoColor(c.titulo);
-      const isMenor = c.total === minTotal;
+    opcoes.forEach(op => {
+      const color   = getOpColor(op.num);
+      const isMenor = op.total === minTotal;
 
       const section = document.createElement('div');
-      section.className = 'cotacao-section';
+      section.className = 'cat-section';
 
-      // header da cotação — igual cat-section-header do index
+      /* header igual cat-section-header do index */
       const hdr = document.createElement('div');
-      hdr.className = 'cotacao-section-header';
-      hdr.style.setProperty('--hdr-color', color);
+      hdr.className = 'cat-section-header';
+      /* barra colorida no topo via style inline no pseudo-elemento não é possível,
+         usamos um wrapper com border-top */
+      hdr.style.borderTop = '3px solid ' + color;
       hdr.innerHTML =
-        '<style>.cotacao-section-header::before{background:' + color + '}</style>'
-        + '<div class="cotacao-section-dot" style="background:'+color+'"></div>'
-        + '<span class="cotacao-section-title">'+esc(c.titulo)+'</span>'
-        + (isMenor ? '<span class="option-badge menor">Menor</span>' : '')
-        + '<span class="cotacao-section-total">R$ '+fmtBRL(c.total)+'</span>';
+          '<div class="cat-section-dot" style="background:' + color + '"></div>'
+        + '<span class="cat-section-title">' + esc(op.label) + '</span>'
+        + '<span class="cat-section-count">' + op.itens.length + ' produto(s)</span>'
+        + '<span class="cat-section-min">R$ ' + fmtBRL(op.total) + '</span>';
       section.appendChild(hdr);
 
-      // card clicável com produtos
+      /* card clicável */
       const card = document.createElement('div');
-      card.className = 'option-card';
-      card.setAttribute('data-idx', payload.cotacoes.indexOf(c));
+      card.className = 'option-card' + (isMenor ? ' menor' : '');
 
-      const prodPills = c.produtos.map(p =>
-        '<span class="prod-pill">'+esc(p.nome)+' — R$ '+fmtBRL(p.valor)+'</span>'
+      const pills = op.itens.map(it =>
+        '<span class="prod-pill">'
+          + esc(it.produto_nome || 'Produto')
+          + (it.fornecedor ? ' · ' + esc(it.fornecedor) : '')
+          + ' — R$ ' + fmtBRL(it.valor_ha || 0)
+        + '</span>'
       ).join('');
 
       card.innerHTML =
-        '<div class="option-info">'
-          + '<div class="option-forn">Selecionar esta proposta</div>'
-          + '<div class="prod-pill-list">' + prodPills + '</div>'
+          '<div class="option-info">'
+          + '<div class="option-forn" style="color:' + color + '">' + esc(op.label) + '</div>'
+          + '<div class="prod-pill-list">' + pills + '</div>'
         + '</div>'
         + '<div class="option-price-col">'
-          + '<div class="option-price" style="color:'+color+'">R$ '+fmtBRL(c.total)+'</div>'
-        + '</div>';
+          + '<div class="option-price" style="color:' + color + '">R$ ' + fmtBRL(op.total) + '</div>'
+        + '</div>'
+        + '<div class="option-badge">Menor</div>';
 
-      card.onclick = () => selecionar(c, card);
+      card.onclick = () => selecionar(op, card);
       section.appendChild(card);
       container.appendChild(section);
     });
   }
 
-  function selecionar(c, card) {
-    if (aprovado) return;
-    document.querySelectorAll('.option-card').forEach(el => el.classList.remove('selected'));
+  function selecionar(op, card) {
+    if (approved) return;
+    document.querySelectorAll('#opcao-list .option-card').forEach(el => el.classList.remove('selected'));
     card.classList.add('selected');
-    selecionado = c;
-
-    document.getElementById('footer-sub').textContent   = c.titulo;
-    document.getElementById('footer-total').textContent = 'R$ ' + fmtBRL(c.total);
+    selecionado = op;
+    document.getElementById('footer-sub').textContent   = op.label;
+    document.getElementById('footer-total').textContent = 'R$ ' + fmtBRL(op.total);
     document.getElementById('btn-aceite').disabled      = false;
-
-    // atualiza donut para a cotação selecionada
-    buildDonut(c);
+    buildDonut(op);
   }
 
-  // ──── MODAL ────
-  window.abrirModal = () => {
+  /* ─── MODAL ─── */
+  function abrirModal() {
     if (!selecionado) return;
     const el = document.getElementById('modal-summary');
     el.innerHTML = '';
-    selecionado.produtos.forEach(p => {
+    selecionado.itens.forEach(it => {
       const row = document.createElement('div');
       row.className = 'modal-item';
       row.innerHTML =
-        '<div><div class="modal-item-name">'+esc(p.nome)+'</div></div>'
-        + '<div class="modal-item-price">R$ '+fmtBRL(p.valor)+'</div>';
+          '<div><div class="modal-item-name">' + esc(it.produto_nome || 'Produto') + '</div>'
+        + '<div class="modal-item-forn">' + esc(it.fornecedor || '') + '</div></div>'
+        + '<div class="modal-item-price">R$ ' + fmtBRL(it.valor_ha || 0) + '</div>';
       el.appendChild(row);
     });
     document.getElementById('modal-total-val').textContent = 'R$ ' + fmtBRL(selecionado.total);
     document.getElementById('modal-backdrop').classList.add('open');
-  };
+  }
+  function fecharModal() { document.getElementById('modal-backdrop').classList.remove('open'); }
+  function fecharModalExterno(e) { if (e.target === document.getElementById('modal-backdrop')) fecharModal(); }
 
-  window.fecharModal = () => document.getElementById('modal-backdrop').classList.remove('open');
-  window.fecharModalExterno = (e) => { if (e.target === document.getElementById('modal-backdrop')) fecharModal(); };
-
-  window.confirmarAceite = async () => {
+  async function confirmarAceite() {
     if (!selecionado) return;
     const btn = document.getElementById('btn-confirm-modal');
     btn.disabled = true; btn.textContent = 'Registrando...';
     try {
-      await updateDoc(doc(db, 'cotacoes', cotacaoId), {
-        status: 'Aprovada',
-        fornecedorVencedor: selecionado.titulo,
-        valorAprovado: selecionado.total,
-        dataAceite: new Date().toISOString()
+      await rpc('registrar_aceite_cotacao', {
+        p_cotacao_id: cotacao.id,
+        p_itens:      selecionado.itens.map(it => it.id),
+        p_total_ha:   selecionado.total,
+        p_user_agent: navigator.userAgent,
       });
       fecharModal();
       setAprovado(new Date().toISOString());
     } catch(e) {
-      alert('Erro ao gravar no banco de dados.');
+      alert('Erro ao registrar o aceite.');
     } finally {
       btn.disabled = false; btn.textContent = 'Confirmar Aceite';
     }
-  };
+  }
 
   function setAprovado(ts) {
-    aprovado = true;
-    const pill = document.getElementById('status-pill');
-    pill.textContent  = 'Aceite registrado';
-    pill.className    = 'status-pill aprovado';
+    approved = true;
+    document.getElementById('status-pill').textContent = 'Aceite registrado';
+    document.getElementById('status-pill').className   = 'status-pill aprovado';
+    document.querySelector('#approved-banner .approved-title').textContent = 'Aceite Registrado';
     document.getElementById('approved-banner').style.display = 'block';
     document.getElementById('approved-ts').textContent = 'Registrado em ' + fmtDateTime(ts);
     document.getElementById('sticky-footer').style.display = 'none';
   }
 
-  // ──── INIT ────
-  function init() {
-    // cotação mais barata como padrão para o donut
-    const menor = [...payload.cotacoes].sort((a,b) => a.total - b.total)[0];
-    if (menor) buildDonut(menor);
-    buildBarChart();
-    renderCards();
-    // atribuir cores às cotações antes de render
-    payload.cotacoes.forEach(c => getCotacaoColor(c.titulo));
+  /* ─── MAIN — idêntico ao index ─── */
+  async function main() {
+    const params = new URLSearchParams(window.location.search);
+    const token  = params.get('t') || params.get('token');
+    if (!token) { showError('Token não encontrado na URL.'); return; }
+
+    try {
+      /* 1. cotação por token */
+      const cotRows = await rpc('get_cotacao_by_token', { p_token: token });
+      if (!cotRows || cotRows.length === 0) { showError('Cotação não encontrada.'); return; }
+      cotacao = cotRows[0];
+
+      /* 2. consultor */
+      let consultorNome = '—';
+      try {
+        const perf = await rpc('get_profile_name', { p_id: cotacao.consultor_id });
+        if (perf && perf[0]) consultorNome = perf[0].full_name || '—';
+      } catch(_) {}
+
+      /* 3. fazenda */
+      let fazendaNome = '—';
+      if (cotacao.fazenda_id) {
+        try {
+          const faz = await rpc('get_fazenda_by_id', { p_id: cotacao.fazenda_id });
+          if (faz && faz[0]) fazendaNome = faz[0].nome || '—';
+        } catch(_) {}
+      }
+
+      /* 4. itens */
+      allItens = await rpc('get_itens_by_cotacao', { p_cotacao_id: cotacao.id });
+      allItens = allItens || [];
+
+      /* 5. fator área — idêntico ao index */
+      const areaManual = Number(cotacao?.area_ha || 0);
+      const areaTalhao = Number(cotacao?.talhao_area_ha || 0);
+      const areaFinal  = areaManual > 0 ? areaManual : (areaTalhao > 0 ? areaTalhao : 0);
+      areaFactor = areaFinal > 0 ? areaFinal : 1;
+      if (areaFinal > 0) {
+        allItens = allItens.map(it => ({ ...it, valor_ha: Number(it?.valor_ha || 0) * areaFactor }));
+      }
+
+      /* 6. agrupa por opcao_num */
+      const byOpcao = {};
+      allItens.forEach(it => {
+        const num = it.opcao_num != null ? it.opcao_num : 1;
+        if (!byOpcao[num]) byOpcao[num] = [];
+        byOpcao[num].push(it);
+      });
+
+      opcoes = Object.entries(byOpcao)
+        .sort((a, b) => Number(a[0]) - Number(b[0]))
+        .map(([num, itens]) => {
+          const total    = itens.reduce((s, it) => s + Number(it.valor_ha || 0), 0);
+          /* label: fornecedores únicos, senão "Proposta N" */
+          const fornSet  = [...new Set(itens.map(it => it.fornecedor).filter(Boolean))];
+          const label    = fornSet.length >= 1 ? fornSet.join(' / ') : 'Proposta ' + num;
+          return { num: Number(num), label, itens, total };
+        });
+
+      if (opcoes.length < 2) {
+        showError('Esta cotação não possui múltiplas propostas para comparar.');
+        return;
+      }
+
+      /* 7. meta */
+      document.title = (cotacao.titulo || 'Comparativo') + ' — Agrocota';
+      document.getElementById('meta-titulo').textContent = cotacao.titulo || 'Comparativo';
+      addMeta('Fazenda',   fazendaNome);
+      addMeta('Área',      areaFinal > 0 ? fmtBRL(areaFinal) + ' ha' : '—');
+      addMeta('Data',      fmtDate(cotacao.created_at));
+      addMeta('Consultor', consultorNome);
+
+      /* 8. status */
+      const aceiteEm = cotacao.aceite_em || cotacao.approved_at;
+      if (cotacao.status === 'aprovada' || cotacao.status === 'aprovado' || aceiteEm) {
+        setAprovado(aceiteEm || new Date().toISOString());
+      }
+
+      /* 9. renderiza — inicia donut na proposta mais barata */
+      const menor = [...opcoes].sort((a, b) => a.total - b.total)[0];
+      buildDonut(menor);
+      buildBarChart();
+      renderOpcoes();
+
+      document.getElementById('state-loading').style.display = 'none';
+      document.getElementById('app').style.display           = 'block';
+
+    } catch(e) {
+      showError('Erro ao carregar os dados.');
+    }
   }
 
-  init();
+  main();
 </script>
 </body>
 </html>
