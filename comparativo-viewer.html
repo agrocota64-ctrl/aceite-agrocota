@@ -27,7 +27,7 @@
     html { scroll-behavior: smooth; }
     body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; -webkit-font-smoothing: antialiased; }
 
-    /* STATES */
+    /* ── STATES ── */
     #state-loading, #state-error { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100svh; gap: 16px; }
     #state-error { padding: 32px; text-align: center; }
     .loader { width: 32px; height: 32px; border: 2px solid var(--border2); border-top-color: var(--primary); border-radius: 50%; animation: spin .7s linear infinite; }
@@ -36,93 +36,110 @@
     .err-title { font-size: .95rem; font-weight: 800; color: var(--red); }
     .err-body  { font-size: .78rem; color: var(--text-mid); margin-top: 6px; }
 
-    /* TOP BAR */
+    /* ── TOP BAR ── */
     .top-bar {
       position: sticky; top: 0; z-index: 100;
       background: rgba(4,4,4,.92);
       backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
       border-bottom: 1px solid var(--border);
       padding: 13px 20px;
-      display: flex; align-items: center; justify-content: space-between;
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
     }
-    .brand { font-size: .68rem; font-weight: 900; letter-spacing: .2em; color: var(--primary); text-transform: uppercase; }
+    .brand { font-size: .68rem; font-weight: 900; letter-spacing: .2em; color: var(--primary); text-transform: uppercase; flex-shrink: 0; }
+    .top-bar-right { display: flex; align-items: center; gap: 10px; }
     .status-pill { font-size: .58rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; padding: 4px 10px; border-radius: 100px; border: 1px solid var(--amber); color: var(--amber); }
     .status-pill.aprovado { border-color: var(--primary); color: var(--primary); }
+    .btn-pdf {
+      font-size: .58rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase;
+      padding: 4px 12px; border-radius: 100px;
+      background: var(--primary); color: #000; border: none; cursor: pointer;
+      transition: opacity .15s;
+    }
+    .btn-pdf:hover { opacity: .85; }
 
-    /* PAGE */
-    .page { max-width: 620px; margin: 0 auto; padding: 28px 16px 140px; }
+    /* ── PAGE ── */
+    .page { max-width: 640px; margin: 0 auto; padding: 28px 16px 160px; }
 
-    /* META */
+    /* ── META ── */
     .meta-block { margin-bottom: 32px; }
     .meta-title { font-size: 1.5rem; font-weight: 900; line-height: 1.2; letter-spacing: -.02em; margin-bottom: 16px; }
     .meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
     @media (max-width: 380px) { .meta-grid { grid-template-columns: 1fr; } }
     .meta-cell { background: var(--surface); padding: 12px 14px; }
+    .meta-cell.full { grid-column: 1 / -1; }
     .meta-key { font-size: .6rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--text-mid); margin-bottom: 3px; }
     .meta-val { font-size: .88rem; font-weight: 600; color: var(--text); }
 
-    /* SECTION HEADER */
+    /* ── SECTION HEADER ── */
     .section-hd { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; margin-top: 36px; }
     .section-hd h2 { font-size: .62rem; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: var(--text-mid); white-space: nowrap; }
     .section-line { flex: 1; height: 1px; background: var(--border); }
 
-    /* CHART CARD */
-    .chart-card {
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: 20px; padding: 28px 20px;
-    }
+    /* ── CHART CARD ── */
+    .chart-card { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 28px 20px; }
 
-    /* DONUT */
+    /* ── DONUT ── */
     .donut-wrap { display: flex; flex-direction: column; align-items: center; gap: 24px; }
     .donut-canvas-wrap { position: relative; width: 190px; height: 190px; flex-shrink: 0; }
     canvas#donut { width: 190px !important; height: 190px !important; }
     .donut-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); text-align: center; pointer-events: none; }
     .donut-center-label { font-size: .52rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--text-mid); }
     .donut-center-value { font-family: 'JetBrains Mono', monospace; font-size: .82rem; font-weight: 700; color: var(--text); display: block; line-height: 1.4; margin-top: 1px; }
-
-    /* DONUT LEGEND — discreta, horizontal em chips */
     .donut-legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; width: 100%; }
-    .donut-chip {
-      display: flex; align-items: center; gap: 6px;
-      background: var(--surface2); border: 1px solid var(--border2);
-      border-radius: 100px; padding: 5px 10px;
-    }
+    .donut-chip { display: flex; align-items: center; gap: 6px; background: var(--surface2); border: 1px solid var(--border2); border-radius: 100px; padding: 5px 10px; }
     .donut-chip-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
     .donut-chip-name { font-size: .68rem; font-weight: 700; color: var(--text-mid); }
     .donut-chip-pct  { font-family: 'JetBrains Mono', monospace; font-size: .68rem; font-weight: 700; }
-
-    /* DIFERENÇA entre cotações */
-    .diff-badge {
-      display: flex; align-items: center; justify-content: center; gap: 6px;
-      background: var(--surface2); border: 1px solid var(--border2);
-      border-radius: 12px; padding: 10px 16px; margin-top: 4px;
-    }
+    .diff-badge { display: flex; align-items: center; justify-content: center; gap: 6px; background: var(--surface2); border: 1px solid var(--border2); border-radius: 12px; padding: 10px 16px; margin-top: 4px; }
     .diff-label { font-size: .62rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--text-mid); }
     .diff-value { font-family: 'JetBrains Mono', monospace; font-size: .9rem; font-weight: 900; color: var(--primary); }
 
-    /* BAR CHART — produto com nome + barra + % + valor */
-    .bar-list { display: flex; flex-direction: column; gap: 10px; }
-    .bar-row { display: flex; align-items: center; gap: 10px; }
-    .bar-label { font-size: .75rem; font-weight: 700; color: var(--text); width: 110px; flex-shrink: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .bar-track { flex: 1; height: 8px; background: var(--border2); border-radius: 99px; overflow: hidden; }
-    .bar-fill  { height: 100%; border-radius: 99px; transition: width .6s cubic-bezier(.4,0,.2,1); }
-    .bar-right { display: flex; align-items: center; gap: 6px; flex-shrink: 0; min-width: 110px; justify-content: flex-end; }
-    .bar-pct   { font-size: .62rem; font-weight: 700; color: var(--text-mid); min-width: 32px; text-align: right; }
-    .bar-val   { font-family: 'JetBrains Mono', monospace; font-size: .72rem; font-weight: 700; min-width: 72px; text-align: right; }
+    /* ── PRODUCT BAR BLOCK ── */
+    .prod-block { margin-bottom: 22px; }
+    .prod-block:last-child { margin-bottom: 0; }
 
-    /* SELEÇÃO — cards compactos */
-    .select-list { display: flex; flex-direction: column; gap: 8px; }
-    .select-card {
-      display: flex; align-items: center; gap: 14px;
+    /* Cabeçalho do produto com empresa, princípio ativo e fontes */
+    .prod-header {
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: 12px;
+      padding: 10px 14px;
+      margin-bottom: 10px;
+    }
+    .prod-name { font-size: .82rem; font-weight: 800; color: var(--text); margin-bottom: 6px; }
+    .prod-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+    .prod-tag {
+      display: flex; align-items: center; gap: 4px;
       background: var(--surface); border: 1px solid var(--border);
-      border-radius: 14px; padding: 14px 16px;
+      border-radius: 6px; padding: 3px 8px;
+    }
+    .prod-tag-key { font-size: .55rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--text-mid); }
+    .prod-tag-val { font-size: .68rem; font-weight: 700; color: var(--text); }
+    .prod-tag-sep { font-size: .55rem; color: var(--text-low); }
+
+    /* Barras */
+    .bar-list { display: flex; flex-direction: column; gap: 8px; }
+    .bar-row { display: flex; align-items: center; gap: 10px; }
+    .bar-label { font-size: .72rem; font-weight: 700; color: var(--text); width: 100px; flex-shrink: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .bar-track { flex: 1; height: 7px; background: var(--border2); border-radius: 99px; overflow: hidden; }
+    .bar-fill  { height: 100%; border-radius: 99px; transition: width .6s cubic-bezier(.4,0,.2,1); }
+    .bar-right { display: flex; align-items: center; gap: 6px; flex-shrink: 0; min-width: 105px; justify-content: flex-end; }
+    .bar-pct   { font-size: .6rem; font-weight: 700; color: var(--text-mid); min-width: 30px; text-align: right; }
+    .bar-val   { font-family: 'JetBrains Mono', monospace; font-size: .7rem; font-weight: 700; min-width: 68px; text-align: right; }
+
+    /* ── SELECT CARDS ── */
+    .select-list { display: flex; flex-direction: column; gap: 10px; }
+    .select-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 16px; padding: 16px;
       cursor: pointer; transition: border-color .18s, background .18s, transform .1s;
       -webkit-tap-highlight-color: transparent; user-select: none;
     }
-    .select-card:active { transform: scale(.98); }
+    .select-card:active { transform: scale(.99); }
     .select-card.active { border-color: var(--primary); background: var(--primary-dim); }
     .select-card.active .select-radio { background: var(--primary); border-color: var(--primary); }
     .select-card.active .select-radio::after { opacity: 1; }
+    .select-card-top { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
     .select-radio {
       width: 18px; height: 18px; border-radius: 50%;
       border: 2px solid var(--border2); flex-shrink: 0;
@@ -135,27 +152,35 @@
       background: #000; opacity: 0; transition: opacity .18s;
     }
     .select-info { flex: 1; min-width: 0; }
-    .select-title { font-size: .88rem; font-weight: 800; color: var(--text); }
-    .select-badge { font-size: .55rem; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; padding: 2px 7px; border-radius: 6px; background: var(--primary); color: #000; margin-left: 7px; vertical-align: middle; }
+    .select-title { font-size: .9rem; font-weight: 800; color: var(--text); }
+    .select-badge { font-size: .52rem; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; padding: 2px 7px; border-radius: 6px; background: var(--primary); color: #000; margin-left: 7px; vertical-align: middle; }
     .select-price { font-family: 'JetBrains Mono', monospace; font-size: 1rem; font-weight: 900; flex-shrink: 0; }
 
-    /* APPROVED */
+    /* Produtos dentro do select card */
+    .select-products { border-top: 1px solid var(--border); padding-top: 10px; display: flex; flex-direction: column; gap: 6px; }
+    .select-prod-row { display: flex; flex-direction: column; gap: 2px; padding: 8px 10px; background: var(--surface2); border-radius: 9px; border: 1px solid var(--border); }
+    .select-prod-name { font-size: .78rem; font-weight: 700; color: var(--text); }
+    .select-prod-meta { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 3px; }
+    .select-prod-detail { font-size: .62rem; font-weight: 600; color: var(--text-mid); }
+    .select-prod-detail span { color: var(--text); }
+    .select-prod-price { font-family: 'JetBrains Mono', monospace; font-size: .72rem; font-weight: 700; margin-top: 4px; }
+
+    /* ── APPROVED BANNER ── */
     .approved-card { background: var(--primary-dim); border: 1px solid var(--primary); border-radius: 18px; padding: 22px; text-align: center; margin-bottom: 28px; }
     .approved-title { font-size: .95rem; font-weight: 900; color: var(--primary); margin-bottom: 5px; }
     .approved-sub   { font-size: .75rem; color: var(--text-mid); }
     .approved-ts    { font-family: 'JetBrains Mono', monospace; font-size: .68rem; color: var(--primary); margin-top: 8px; }
 
-    /* STICKY FOOTER */
+    /* ── STICKY FOOTER ── */
     .sticky-footer {
       position: fixed; bottom: 0; left: 0; right: 0; z-index: 200;
       padding: 14px 16px calc(14px + env(safe-area-inset-bottom));
       background: linear-gradient(to top, var(--bg) 70%, transparent);
     }
-    .footer-inner { max-width: 620px; margin: 0 auto; }
+    .footer-inner { max-width: 640px; margin: 0 auto; }
     .footer-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; padding: 0 2px; }
     .footer-label { font-size: .62rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--text-mid); }
     .footer-selected { font-size: .8rem; font-weight: 700; color: var(--text); }
-    .footer-total { font-family: 'JetBrains Mono', monospace; font-size: 1.15rem; font-weight: 700; color: var(--text); }
     .btn-confirm {
       width: 100%; background: var(--primary); color: #000; border: none;
       padding: 16px; border-radius: 15px; font-family: 'Inter', sans-serif; font-size: .75rem; font-weight: 900;
@@ -165,36 +190,64 @@
     .btn-confirm:active { transform: scale(.97); }
     .btn-confirm:disabled { opacity: .3; cursor: not-allowed; box-shadow: none; }
 
-    /* MODAL */
+    /* ── MODAL ── */
     .modal-backdrop {
       position: fixed; inset: 0; z-index: 500;
-      background: rgba(0,0,0,.8); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+      background: rgba(0,0,0,.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
       display: flex; align-items: flex-end; justify-content: center; padding: 16px;
       opacity: 0; pointer-events: none; transition: opacity .25s;
     }
     .modal-backdrop.open { opacity: 1; pointer-events: all; }
     .modal {
       background: var(--surface2); border: 1px solid var(--border2);
-      border-radius: 24px; padding: 26px 22px; width: 100%; max-width: 600px;
+      border-radius: 24px; padding: 26px 22px; width: 100%; max-width: 620px;
       transform: translateY(24px); transition: transform .3s cubic-bezier(.4,0,.2,1);
+      max-height: 88svh; display: flex; flex-direction: column;
     }
     .modal-backdrop.open .modal { transform: translateY(0); }
-    .modal-title { font-size: .95rem; font-weight: 900; margin-bottom: 5px; }
-    .modal-sub   { font-size: .75rem; color: var(--text-mid); margin-bottom: 20px; }
-    .modal-row { display: flex; justify-content: space-between; align-items: center; padding: 9px 0; border-bottom: 1px solid var(--border); }
-    .modal-row:last-child { border-bottom: none; }
-    .modal-row-name  { font-size: .78rem; font-weight: 600; }
-    .modal-row-price { font-family: 'JetBrains Mono', monospace; font-size: .76rem; font-weight: 700; color: var(--primary); }
-    .modal-total { display: flex; justify-content: space-between; align-items: center; padding-top: 14px; margin-top: 4px; border-top: 1px solid var(--border2); }
+    .modal-title { font-size: .95rem; font-weight: 900; margin-bottom: 5px; flex-shrink: 0; }
+    .modal-sub   { font-size: .75rem; color: var(--text-mid); margin-bottom: 16px; flex-shrink: 0; }
+    .modal-scroll { overflow-y: auto; flex: 1; }
+    .modal-prod {
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .modal-prod:last-child { border-bottom: none; }
+    .modal-prod-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 5px; }
+    .modal-prod-name { font-size: .82rem; font-weight: 700; color: var(--text); flex: 1; }
+    .modal-prod-price { font-family: 'JetBrains Mono', monospace; font-size: .8rem; font-weight: 700; color: var(--primary); flex-shrink: 0; }
+    .modal-prod-details { display: flex; flex-wrap: wrap; gap: 6px; }
+    .modal-detail-chip {
+      font-size: .6rem; font-weight: 600;
+      padding: 2px 7px; border-radius: 5px;
+      background: var(--surface); border: 1px solid var(--border);
+      color: var(--text-mid);
+    }
+    .modal-detail-chip b { color: var(--text); font-weight: 700; }
+    .modal-total { display: flex; justify-content: space-between; align-items: center; padding-top: 14px; margin-top: 12px; border-top: 1px solid var(--border2); flex-shrink: 0; }
     .modal-total-label { font-size: .62rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--text-mid); }
     .modal-total-val   { font-family: 'JetBrains Mono', monospace; font-size: 1.05rem; font-weight: 900; }
-    .modal-summary-box { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 4px 14px; margin-bottom: 16px; max-height: 220px; overflow-y: auto; }
-    .modal-actions { display: flex; gap: 10px; margin-top: 16px; }
+    .modal-actions { display: flex; gap: 10px; margin-top: 16px; flex-shrink: 0; }
     .btn-cancel { flex: 1; background: transparent; border: 1px solid var(--border2); color: var(--text-mid); padding: 14px; border-radius: 12px; font-family: 'Inter', sans-serif; font-size: .72rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; cursor: pointer; }
     .btn-ok { flex: 2; background: var(--primary); color: #000; border: none; padding: 14px; border-radius: 12px; font-family: 'Inter', sans-serif; font-size: .72rem; font-weight: 900; letter-spacing: .1em; text-transform: uppercase; cursor: pointer; }
     .btn-ok:disabled { opacity: .5; cursor: not-allowed; }
 
     .page-footer { text-align: center; padding: 12px 16px; font-size: .6rem; color: var(--text-low); letter-spacing: .06em; text-transform: uppercase; }
+
+    /* ── PDF PRINT ── */
+    @media print {
+      body { background: #fff !important; color: #111 !important; font-size: 11pt; }
+      .top-bar, .sticky-footer, .modal-backdrop, .btn-pdf { display: none !important; }
+      .page { padding: 0 !important; max-width: 100% !important; }
+      .chart-card, .select-card, .prod-header, .select-prod-row, .meta-cell {
+        background: #f8f8f8 !important; border-color: #ddd !important; color: #111 !important;
+      }
+      .approved-card { background: #e8f5e9 !important; border-color: #4caf50 !important; }
+      canvas { max-width: 160px !important; }
+      .section-hd { margin-top: 24px !important; }
+      .select-card { break-inside: avoid; }
+      .prod-block { break-inside: avoid; }
+    }
   </style>
 </head>
 <body>
@@ -211,7 +264,10 @@
 <div id="app" style="display:none">
   <div class="top-bar">
     <span class="brand">Agrocota</span>
-    <span class="status-pill" id="status-pill">Aguardando aceite</span>
+    <div class="top-bar-right">
+      <button class="btn-pdf" onclick="window.print()">Baixar PDF</button>
+      <span class="status-pill" id="status-pill">Aguardando aceite</span>
+    </div>
   </div>
 
   <main class="page">
@@ -229,7 +285,7 @@
       <div class="approved-ts" id="approved-ts"></div>
     </div>
 
-    <!-- GRÁFICO 1: DONUT — cotações entre si -->
+    <!-- GRÁFICO 1: DONUT -->
     <div class="section-hd">
       <h2>Comparativo de Investimento</h2>
       <div class="section-line"></div>
@@ -251,16 +307,16 @@
       </div>
     </div>
 
-    <!-- GRÁFICO 2: BARRAS — produtos -->
+    <!-- GRÁFICO 2: BARRAS POR PRODUTO -->
     <div class="section-hd" style="margin-top:36px">
       <h2>Comparativo por Produto</h2>
       <div class="section-line"></div>
     </div>
     <div class="chart-card">
-      <div class="bar-list" id="bar-list"></div>
+      <div id="bar-list"></div>
     </div>
 
-    <!-- SELEÇÃO -->
+    <!-- SELEÇÃO DE PROPOSTA -->
     <div class="section-hd" style="margin-top:36px">
       <h2>Selecione a Proposta</h2>
       <div class="section-line"></div>
@@ -284,8 +340,8 @@
 <div class="modal-backdrop" id="modal-backdrop" onclick="fecharModalFora(event)">
   <div class="modal">
     <div class="modal-title">Confirmar Aceite</div>
-    <div class="modal-sub">Revise a proposta antes de confirmar. Esta ação será registrada.</div>
-    <div class="modal-summary-box" id="modal-rows"></div>
+    <div class="modal-sub">Revise os produtos antes de confirmar. Esta ação será registrada.</div>
+    <div class="modal-scroll" id="modal-rows"></div>
     <div class="modal-total">
       <span class="modal-total-label">Total</span>
       <span class="modal-total-val" id="modal-total">—</span>
@@ -297,13 +353,12 @@
   </div>
 </div>
 
-<footer class="page-footer">Agrocota 2025 &mdash; Plataforma de Decisão Agrícola</footer>
+<footer class="page-footer">Agrocota 2025 — Plataforma de Decisão Agrícola</footer>
 
 <script>
   const SUPABASE_URL  = 'https://fafjknchnibdflpqyssf.supabase.co';
   const SUPABASE_ANON = 'sb_publishable_3HDU_nViFfOubXqNplV5ow_8FV0Ix0r';
 
-  /* paleta de cotações — verde primeiro (menor), depois azul, laranja... */
   const COT_PALETTE = ['#22c55e','#3B82F6','#F59E0B','#8B5CF6','#EF4444','#06B6D4','#EC4899','#84CC16'];
 
   const fmtBRL      = n => Number(n||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -328,10 +383,10 @@
     if (sub) document.getElementById('err-body').textContent  = sub;
   }
 
-  function addMeta(key, val) {
+  function addMeta(key, val, full) {
     const g = document.getElementById('meta-grid');
     const c = document.createElement('div');
-    c.className = 'meta-cell';
+    c.className = 'meta-cell' + (full ? ' full' : '');
     c.innerHTML = '<div class="meta-key">' + key + '</div><div class="meta-val">' + esc(String(val||'—')) + '</div>';
     g.appendChild(c);
   }
@@ -342,12 +397,20 @@
   let approved    = false;
   let donutChart  = null;
 
-  /* ordena cotações do menor para o maior — verde = mais barata */
   function cotacoesOrdenadas() {
     return [...payload.cotacoes].sort((a,b) => a.total - b.total);
   }
 
-  /* ── DONUT: cada cotação = uma fatia, mostra diferença no centro ── */
+  /* helper: retorna detalhes do produto (empresa, principio_ativo, fontes) */
+  function prodDetails(prod) {
+    return {
+      empresa:         prod.empresa || prod.fabricante || prod.marca || '',
+      principioAtivo:  prod.principio_ativo || prod.principioAtivo || prod.ativo || '',
+      fontes:          prod.fontes || prod.fonte || prod.sources || '',
+    };
+  }
+
+  /* ── DONUT ── */
   function buildDonut() {
     const sorted = cotacoesOrdenadas();
     const labels = sorted.map(c => c.titulo);
@@ -358,12 +421,10 @@
     const max    = values[values.length-1] || 0;
     const diff   = max - min;
 
-    /* centro: diferença entre maior e menor */
     const diffEl = document.getElementById('donut-diff');
     diffEl.textContent = diff > 0 ? 'R$ ' + fmtBRL(diff) : '—';
     diffEl.style.color = diff > 0 ? '#22c55e' : 'var(--text-mid)';
 
-    /* badge economia */
     if (diff > 0) {
       document.getElementById('diff-badge').style.display = 'flex';
       document.getElementById('diff-value').textContent   = 'R$ ' + fmtBRL(diff);
@@ -387,7 +448,6 @@
       }
     });
 
-    /* legenda discreta em chips */
     const el = document.getElementById('donut-legend');
     el.innerHTML = '';
     sorted.forEach((c, i) => {
@@ -402,19 +462,18 @@
     });
   }
 
-  /* ── BARRAS: produto × porcentagem relativa ao maior valor, mostra todos os preços ── */
+  /* ── BARRAS POR PRODUTO — com empresa, princípio ativo e fontes ── */
   function buildBars() {
     const container = document.getElementById('bar-list');
     container.innerHTML = '';
     const produtos  = payload.produtos || [];
     const sorted    = cotacoesOrdenadas();
 
-    /* para cada produto, mostra uma barra por cotação */
-    produtos.forEach(prod => {
-      /* monta array [{titulo, valor, color}] */
+    produtos.forEach((prod, pi) => {
       const entries = sorted.map((c, i) => {
-        const val = prod.precos && prod.precos[payload.cotacoes.indexOf(c)] != null
-          ? Number(prod.precos[payload.cotacoes.indexOf(c)])
+        const origIdx = payload.cotacoes.indexOf(c);
+        const val = prod.precos && prod.precos[origIdx] != null
+          ? Number(prod.precos[origIdx])
           : 0;
         return { titulo: c.titulo, valor: val, color: COT_PALETTE[i % COT_PALETTE.length] };
       }).filter(e => e.valor > 0);
@@ -422,15 +481,31 @@
       if (!entries.length) return;
       const maxVal = Math.max(...entries.map(e => e.valor));
 
-      /* título do produto */
-      const title = document.createElement('div');
-      title.style.cssText = 'font-size:.78rem;font-weight:800;color:var(--text);margin-bottom:6px;' + (container.children.length > 0 ? 'margin-top:16px;' : '');
-      title.textContent = prod.nome;
-      container.appendChild(title);
+      const details = prodDetails(prod);
 
+      /* bloco do produto */
+      const block = document.createElement('div');
+      block.className = 'prod-block';
+
+      /* cabeçalho com nome + detalhes */
+      let tagsHtml = '';
+      if (details.empresa)        tagsHtml += buildTag('Empresa', details.empresa);
+      if (details.principioAtivo) tagsHtml += buildTag('Princípio ativo', details.principioAtivo);
+      if (details.fontes)         tagsHtml += buildTag('Fontes', details.fontes);
+
+      block.innerHTML =
+        '<div class="prod-header">'
+          + '<div class="prod-name">' + esc(prod.nome) + '</div>'
+          + (tagsHtml ? '<div class="prod-tags">' + tagsHtml + '</div>' : '')
+        + '</div>'
+        + '<div class="bar-list" id="bars-prod-' + pi + '"></div>';
+
+      container.appendChild(block);
+
+      const barContainer = document.getElementById('bars-prod-' + pi);
       entries.forEach(e => {
-        const pct  = maxVal > 0 ? (e.valor / maxVal * 100) : 0;
-        const row  = document.createElement('div');
+        const pct = maxVal > 0 ? (e.valor / maxVal * 100) : 0;
+        const row = document.createElement('div');
         row.className = 'bar-row';
         row.innerHTML =
           '<div class="bar-label">' + esc(e.titulo) + '</div>'
@@ -439,12 +514,20 @@
             + '<span class="bar-pct" style="color:' + e.color + '">' + pct.toFixed(0) + '%</span>'
             + '<span class="bar-val" style="color:' + e.color + '">R$ ' + fmtBRL(e.valor) + '</span>'
           + '</div>';
-        container.appendChild(row);
+        barContainer.appendChild(row);
       });
     });
   }
 
-  /* ── SELEÇÃO — cards compactos com radio ── */
+  function buildTag(key, val) {
+    return '<div class="prod-tag">'
+      + '<span class="prod-tag-key">' + esc(key) + '</span>'
+      + '<span class="prod-tag-sep">·</span>'
+      + '<span class="prod-tag-val">' + esc(val) + '</span>'
+    + '</div>';
+  }
+
+  /* ── SELEÇÃO — cards com lista de produtos detalhada ── */
   function renderSelecao() {
     const container = document.getElementById('select-list');
     container.innerHTML = '';
@@ -458,13 +541,40 @@
 
       const card = document.createElement('div');
       card.className = 'select-card';
-      card.innerHTML =
-        '<div class="select-radio"></div>'
-        + '<div class="select-info">'
-          + '<span class="select-title">' + esc(c.titulo) + '</span>'
-          + (isMenor ? '<span class="select-badge">Menor</span>' : '')
-        + '</div>'
-        + '<div class="select-price" style="color:' + color + '">R$ ' + fmtBRL(c.total) + '</div>';
+
+      /* topo do card */
+      let topHtml =
+        '<div class="select-card-top">'
+          + '<div class="select-radio"></div>'
+          + '<div class="select-info">'
+            + '<span class="select-title">' + esc(c.titulo) + '</span>'
+            + (isMenor ? '<span class="select-badge">Menor</span>' : '')
+          + '</div>'
+          + '<div class="select-price" style="color:' + color + '">R$ ' + fmtBRL(c.total) + '</div>'
+        + '</div>';
+
+      /* produtos desta cotação */
+      const produtos = payload.produtos || [];
+      let prodsHtml = '<div class="select-products">';
+      produtos.forEach(prod => {
+        const val = prod.precos && prod.precos[origIdx] != null ? Number(prod.precos[origIdx]) : 0;
+        if (!val) return;
+        const d = prodDetails(prod);
+        let detailsHtml = '';
+        if (d.empresa)        detailsHtml += '<span class="select-prod-detail">Empresa: <span>' + esc(d.empresa) + '</span></span>';
+        if (d.principioAtivo) detailsHtml += '<span class="select-prod-detail">P. Ativo: <span>' + esc(d.principioAtivo) + '</span></span>';
+        if (d.fontes)         detailsHtml += '<span class="select-prod-detail">Fontes: <span>' + esc(d.fontes) + '</span></span>';
+
+        prodsHtml +=
+          '<div class="select-prod-row">'
+            + '<div class="select-prod-name">' + esc(prod.nome) + '</div>'
+            + (detailsHtml ? '<div class="select-prod-meta">' + detailsHtml + '</div>' : '')
+            + '<div class="select-prod-price" style="color:' + color + '">R$ ' + fmtBRL(val) + '</div>'
+          + '</div>';
+      });
+      prodsHtml += '</div>';
+
+      card.innerHTML = topHtml + prodsHtml;
 
       card.onclick = () => {
         if (approved) return;
@@ -474,29 +584,44 @@
         document.getElementById('footer-selected').textContent = c.titulo;
         document.getElementById('btn-aceite').disabled = false;
       };
+
       container.appendChild(card);
     });
   }
 
-  /* ── MODAL ── */
+  /* ── MODAL — com detalhes dos produtos ── */
   function abrirModal() {
     if (!selecionado) return;
     const c   = selecionado.cotacao;
     const ci  = selecionado.idx;
     const el  = document.getElementById('modal-rows');
     el.innerHTML = '';
-    (payload.produtos || []).forEach(p => {
-      const val = p.precos && p.precos[ci] != null ? Number(p.precos[ci]) : 0;
+
+    (payload.produtos || []).forEach(prod => {
+      const val = prod.precos && prod.precos[ci] != null ? Number(prod.precos[ci]) : 0;
+      if (!val) return;
+      const d = prodDetails(prod);
+
+      let chipsHtml = '';
+      if (d.empresa)        chipsHtml += '<span class="modal-detail-chip">Empresa: <b>' + esc(d.empresa) + '</b></span>';
+      if (d.principioAtivo) chipsHtml += '<span class="modal-detail-chip">P. Ativo: <b>' + esc(d.principioAtivo) + '</b></span>';
+      if (d.fontes)         chipsHtml += '<span class="modal-detail-chip">Fontes: <b>' + esc(d.fontes) + '</b></span>';
+
       const row = document.createElement('div');
-      row.className = 'modal-row';
+      row.className = 'modal-prod';
       row.innerHTML =
-        '<span class="modal-row-name">' + esc(p.nome) + '</span>'
-        + '<span class="modal-row-price">R$ ' + fmtBRL(val) + '</span>';
+        '<div class="modal-prod-top">'
+          + '<span class="modal-prod-name">' + esc(prod.nome) + '</span>'
+          + '<span class="modal-prod-price">R$ ' + fmtBRL(val) + '</span>'
+        + '</div>'
+        + (chipsHtml ? '<div class="modal-prod-details">' + chipsHtml + '</div>' : '');
       el.appendChild(row);
     });
+
     document.getElementById('modal-total').textContent = 'R$ ' + fmtBRL(c.total);
     document.getElementById('modal-backdrop').classList.add('open');
   }
+
   function fecharModal() { document.getElementById('modal-backdrop').classList.remove('open'); }
   function fecharModalFora(e) { if (e.target === document.getElementById('modal-backdrop')) fecharModal(); }
 
@@ -532,7 +657,7 @@
     const cotacaoId   = params.get('id');
     const dataEncoded = params.get('data');
 
-    if (!cotacaoId) { showError('Link inválido', 'Parâmetro "id" não encontrado na URL.'); return; }
+    if (!cotacaoId)   { showError('Link inválido', 'Parâmetro "id" não encontrado na URL.'); return; }
     if (!dataEncoded) { showError('Dados não encontrados', 'Parâmetro "data" não encontrado na URL.'); return; }
 
     try {
@@ -546,7 +671,6 @@
     }
 
     try {
-      /* busca meta da cotação via REST */
       const rows = await fetch(
         SUPABASE_URL + '/rest/v1/cotacoes?id=eq.' + cotacaoId + '&select=*&limit=1',
         { headers: { apikey: SUPABASE_ANON, Authorization: 'Bearer ' + SUPABASE_ANON } }
@@ -579,7 +703,7 @@
       /* preenche meta */
       document.title = (cotacao.titulo || 'Comparativo') + ' — Agrocota';
       document.getElementById('meta-titulo').textContent = cotacao.titulo || 'Comparativo de Cotação';
-      addMeta('Fazenda',   fazendaNome);
+      addMeta('Fazenda',   fazendaNome, true);   /* linha inteira */
       addMeta('Área',      areaFinal > 0 ? fmtBRL(areaFinal) + ' ha' : '—');
       addMeta('Data',      fmtDate(cotacao.created_at));
       addMeta('Consultor', consultorNome);
@@ -595,7 +719,6 @@
         document.getElementById('sticky-footer').style.display = 'none';
       }
 
-      /* renderiza */
       buildDonut();
       buildBars();
       renderSelecao();
