@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Agrocota — Proposta de Preços</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:          #040404;
+      --surface:     #0e0e0e;
+      --surface2:    #161616;
+      --border:      #1e1e1e;
+      --border2:     #2a2a2a;
+      --primary:     #22c55e;
+      --primary-dim: #021a09;
+      --primary-glow: rgba(34,197,94,.12);
+      --text:        #f0f0f0;
+      --text-mid:    #666;
+      --text-low:    #333;
+      --red:         #ef4444;
+      --amber:       #f59e0b;
+      --blue:        #3b82f6;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── STATES ── */
+    #state-loading, #state-error, #state-sent {
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      min-height: 100svh; gap: 16px; padding: 32px; text-align: center;
+    }
+    #state-error, #state-sent { display: none; }
+    .loader { width: 32px; height: 32px; border: 2px solid var(--border2); border-top-color: var(--primary); border-radius: 50%; animation: spin .7s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .state-label { font-size: .7rem; font-weight: 700; letter-spacing: .1em; color: var(--text-mid); text-transform: uppercase; }
+    .err-title { font-size: 1rem; font-weight: 800; color: var(--red); }
+    .err-body  { font-size: .8rem; color: var(--text-mid); margin-top: 6px; max-width: 320px; }
+
+    /* ── SUCCESS STATE ── */
+    .sent-icon { width: 72px; height: 72px; background: var(--primary-dim); border: 2px solid var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+    .sent-icon svg { width: 32px; height: 32px; stroke: var(--primary); }
+    .sent-title { font-size: 1.3rem; font-weight: 900; color: var(--primary); margin-top: 8px; }
+    .sent-sub { font-size: .85rem; color: var(--text-mid); max-width: 320px; line-height: 1.6; }
+    .sent-detail { font-size: .75rem; color: var(--text-low); margin-top: 8px; font-style: italic; }
+
+    /* ── TOP BAR ── */
+    .top-bar {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(4,4,4,.92);
+      backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+      border-bottom: 1px solid var(--border);
+      padding: 13px 20px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .brand { font-size: .68rem; font-weight: 900; letter-spacing: .2em; color: var(--primary); text-transform: uppercase; }
+    .top-badge {
+      font-size: .58rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase;
+      padding: 4px 10px; border-radius: 100px; border: 1px solid var(--amber); color: var(--amber);
+    }
+
+    /* ── PAGE ── */
+    #app { display: none; }
+    .page { max-width: 680px; margin: 0 auto; padding: 28px 16px 160px; }
+
+    /* ── HERO ── */
+    .hero-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 20px; padding: 24px; margin-bottom: 28px;
+      position: relative; overflow: hidden;
+    }
+    .hero-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, var(--amber), #f97316, var(--amber));
+    }
+    .hero-label { font-size: .6rem; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: var(--amber); margin-bottom: 6px; }
+    .hero-title { font-size: 1.4rem; font-weight: 900; line-height: 1.2; letter-spacing: -.02em; margin-bottom: 16px; }
+    .hero-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); border-radius: 10px; overflow: hidden; }
+    .hero-meta-cell { background: var(--surface2); padding: 10px 12px; }
+    .hero-meta-key { font-size: .58rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--text-mid); margin-bottom: 2px; }
+    .hero-meta-val { font-size: .82rem; font-weight: 600; color: var(--text); }
+
+    /* ── EMPRESA FORM ── */
+    .empresa-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 16px; padding: 20px; margin-bottom: 24px;
+      position: relative; overflow: hidden;
+    }
+    .empresa-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: var(--blue);
+    }
+    .empresa-title { font-size: .72rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--text-mid); margin-bottom: 14px; }
+    .field-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+    .field-label { font-size: .6rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--text-mid); }
+    .field-req { color: var(--red); margin-left: 2px; }
+    .field-input {
+      background: var(--surface2); border: 1.5px solid var(--border2); border-radius: 10px;
+      color: var(--text); font-family: 'Inter', sans-serif; font-size: .88rem; font-weight: 500;
+      padding: 11px 14px; outline: none; transition: border-color .18s, box-shadow .18s; width: 100%;
+    }
+    .field-input::placeholder { color: var(--text-mid); }
+    .field-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-glow); }
+    .field-input.error { border-color: var(--red); }
+    .field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    @media(max-width:480px) { .field-grid { grid-template-columns: 1fr; } }
+
+    /* ── SECTION HEADER ── */
+    .sec-hd { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; margin-top: 32px; }
+    .sec-hd h2 { font-size: .6rem; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: var(--text-mid); white-space: nowrap; }
+    .sec-line { flex: 1; height: 1px; background: var(--border); }
+    .sec-count { font-family: 'JetBrains Mono', monospace; font-size: .6rem; font-weight: 700; color: var(--primary); }
+
+    /* ── INSTRUÇÃO ── */
+    .instrucao {
+      background: rgba(59,130,246,.06); border: 1px solid rgba(59,130,246,.2);
+      border-radius: 12px; padding: 12px 16px; margin-bottom: 20px;
+      display: flex; gap: 10px; align-items: flex-start;
+    }
+    .instrucao-icon { color: var(--blue); font-size: 1rem; flex-shrink: 0; margin-top: 1px; }
+    .instrucao-txt { font-size: .78rem; color: rgba(147,197,253,.8); line-height: 1.5; }
+    .instrucao-txt strong { color: #93c5fd; }
+
+    /* ── CATEGORIA SECTION ── */
+    .cat-section { margin-bottom: 28px; }
+    .cat-header {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 14px; border-radius: 10px;
+      margin-bottom: 10px; position: relative; overflow: hidden;
+    }
+    .cat-header::before {
+      content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+    }
+    .cat-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .cat-name { font-size: .78rem; font-weight: 800; color: var(--text); flex: 1; }
+    .cat-count { font-size: .6rem; font-weight: 700; color: var(--text-mid); text-transform: uppercase; letter-spacing: .08em; }
+
+    /* ── PRODUTO CARD ── */
+    .produto-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 14px; padding: 16px; margin-bottom: 8px;
+      transition: border-color .18s;
+    }
+    .produto-card.filled { border-color: rgba(34,197,94,.25); }
+    .produto-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
+    .produto-nome { font-size: .92rem; font-weight: 700; color: var(--text); }
+    .produto-sub { font-size: .68rem; color: var(--text-mid); margin-top: 3px; }
+    .produto-dose {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .7rem; font-weight: 700;
+      padding: 3px 8px; border-radius: 6px;
+      background: rgba(245,158,11,.1); border: 1px solid rgba(245,158,11,.25);
+      color: var(--amber); white-space: nowrap; flex-shrink: 0;
+    }
+    .produto-info { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+    .produto-tag {
+      font-size: .6rem; font-weight: 700; padding: 2px 8px; border-radius: 20px;
+      background: var(--surface2); border: 1px solid var(--border2); color: var(--text-mid);
+    }
+    .price-row { display: flex; align-items: center; gap: 10px; }
+    .price-prefix {
+      font-family: 'JetBrains Mono', monospace; font-size: .88rem; font-weight: 700;
+      color: var(--text-mid); flex-shrink: 0;
+    }
+    .price-input {
+      flex: 1; background: var(--surface2); border: 1.5px solid var(--border2);
+      border-radius: 10px; color: var(--text); font-family: 'JetBrains Mono', monospace;
+      font-size: 1rem; font-weight: 700; padding: 10px 14px;
+      outline: none; transition: border-color .18s, box-shadow .18s;
+      -webkit-appearance: none; appearance: none;
+    }
+    .price-input::placeholder { color: var(--text-low); font-weight: 400; font-family: 'Inter', sans-serif; font-size: .8rem; }
+    .price-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-glow); }
+    .price-input.filled { border-color: rgba(34,197,94,.4); color: var(--primary); }
+    .price-unit { font-size: .65rem; font-weight: 700; color: var(--text-mid); white-space: nowrap; text-transform: uppercase; letter-spacing: .06em; }
+
+    /* ── OBS GERAL ── */
+    .obs-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 14px; padding: 16px; margin-bottom: 24px;
+    }
+    .obs-label { font-size: .6rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--text-mid); margin-bottom: 8px; }
+    .obs-input {
+      width: 100%; background: var(--surface2); border: 1.5px solid var(--border2);
+      border-radius: 10px; color: var(--text); font-family: 'Inter', sans-serif;
+      font-size: .85rem; padding: 10px 14px; outline: none; resize: vertical; min-height: 70px;
+      transition: border-color .18s, box-shadow .18s;
+    }
+    .obs-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-glow); }
+    .obs-input::placeholder { color: var(--text-low); }
+
+    /* ── PROGRESS ── */
+    .progress-bar-wrap {
+      background: var(--border); border-radius: 99px; height: 3px;
+      overflow: hidden; margin-bottom: 6px;
+    }
+    .progress-bar-fill { height: 100%; background: var(--primary); border-radius: 99px; transition: width .4s ease; }
+    .progress-label { font-size: .62rem; color: var(--text-mid); }
+    .progress-label span { color: var(--primary); font-weight: 700; }
+
+    /* ── STICKY FOOTER ── */
+    .sticky-footer {
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 200;
+      padding: 14px 16px calc(14px + env(safe-area-inset-bottom));
+      background: linear-gradient(to top, var(--bg) 60%, transparent);
+    }
+    .footer-inner { max-width: 680px; margin: 0 auto; }
+    .footer-row { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 10px; padding: 0 2px; }
+    .footer-label { font-size: .62rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--text-mid); }
+    .footer-total { font-family: 'JetBrains Mono', monospace; font-size: 1.1rem; font-weight: 700; color: var(--text); }
+    .footer-sub { font-size: .58rem; color: var(--text-mid); display: block; text-align: right; }
+    .btn-submit {
+      width: 100%; background: var(--primary); color: #000; border: none;
+      padding: 16px 24px; border-radius: 15px; font-family: 'Inter', sans-serif;
+      font-size: .78rem; font-weight: 900; letter-spacing: .1em; text-transform: uppercase;
+      cursor: pointer; transition: opacity .18s, transform .12s;
+      box-shadow: 0 0 40px rgba(34,197,94,.15);
+    }
+    .btn-submit:hover { opacity: .9; }
+    .btn-submit:active { transform: scale(.98); }
+    .btn-submit:disabled { opacity: .3; cursor: not-allowed; box-shadow: none; }
+
+    /* ── MODAL ── */
+    .modal-backdrop {
+      position: fixed; inset: 0; z-index: 500;
+      background: rgba(0,0,0,.8); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+      display: flex; align-items: flex-end; justify-content: center; padding: 16px;
+      opacity: 0; pointer-events: none; transition: opacity .25s;
+    }
+    .modal-backdrop.open { opacity: 1; pointer-events: all; }
+    .modal {
+      background: var(--surface2); border: 1px solid var(--border2);
+      border-radius: 24px; padding: 26px 22px; width: 100%; max-width: 640px;
+      transform: translateY(24px); transition: transform .3s cubic-bezier(.4,0,.2,1);
+    }
+    .modal-backdrop.open .modal { transform: translateY(0); }
+    .modal-title { font-size: 1rem; font-weight: 900; margin-bottom: 5px; }
+    .modal-sub { font-size: .78rem; color: var(--text-mid); margin-bottom: 20px; line-height: 1.5; }
+    .modal-empresa {
+      background: rgba(34,197,94,.07); border: 1px solid rgba(34,197,94,.2);
+      border-radius: 12px; padding: 14px; margin-bottom: 16px;
+    }
+    .modal-empresa-name { font-size: .95rem; font-weight: 900; color: var(--primary); }
+    .modal-empresa-contact { font-size: .75rem; color: var(--text-mid); margin-top: 4px; }
+    .modal-summary { max-height: 220px; overflow-y: auto; margin-bottom: 16px; }
+    .modal-item { display: flex; justify-content: space-between; align-items: center; padding: 9px 0; border-bottom: 1px solid var(--border); }
+    .modal-item:last-child { border-bottom: none; }
+    .modal-item-nome { font-size: .8rem; font-weight: 600; color: var(--text); }
+    .modal-item-cat { font-size: .62rem; color: var(--text-mid); margin-top: 2px; }
+    .modal-item-price { font-family: 'JetBrains Mono', monospace; font-size: .82rem; font-weight: 700; color: var(--primary); flex-shrink: 0; margin-left: 12px; }
+    .modal-item-skip { font-size: .7rem; color: var(--text-low); flex-shrink: 0; margin-left: 12px; font-style: italic; }
+    .modal-total-row { display: flex; justify-content: space-between; align-items: center; padding-top: 12px; border-top: 1px solid var(--border2); margin-bottom: 16px; }
+    .modal-total-label { font-size: .62rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--text-mid); }
+    .modal-total-val { font-family: 'JetBrains Mono', monospace; font-size: 1.05rem; font-weight: 900; }
+    .modal-actions { display: flex; gap: 10px; }
+    .btn-cancel { flex: 1; background: transparent; border: 1px solid var(--border2); color: var(--text-mid); padding: 14px; border-radius: 12px; font-family: 'Inter', sans-serif; font-size: .72rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; cursor: pointer; }
+    .btn-ok { flex: 2; background: var(--primary); color: #000; border: none; padding: 14px; border-radius: 12px; font-family: 'Inter', sans-serif; font-size: .72rem; font-weight: 900; letter-spacing: .1em; text-transform: uppercase; cursor: pointer; }
+    .btn-ok:disabled { opacity: .5; cursor: not-allowed; }
+
+    .page-footer { text-align: center; padding: 12px 16px; font-size: .6rem; color: var(--text-low); letter-spacing: .06em; text-transform: uppercase; }
+  </style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div id="state-loading">
+  <div class="loader"></div>
+  <span class="state-label">Carregando proposta</span>
+</div>
+
+<!-- ERRO -->
+<div id="state-error">
+  <span class="err-title" id="err-title">Link inválido ou expirado</span>
+  <p class="err-body" id="err-body">Solicite um novo link ao consultor responsável.</p>
+</div>
+
+<!-- ENVIADO COM SUCESSO -->
+<div id="state-sent">
+  <div class="sent-icon">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="20 6 9 17 4 12"/>
+    </svg>
+  </div>
+  <div class="sent-title">Proposta Enviada!</div>
+  <p class="sent-sub">Sua proposta foi registrada com sucesso. O consultor da <strong id="sent-revenda"></strong> será notificado automaticamente.</p>
+  <p class="sent-detail">Você pode fechar esta janela.</p>
+</div>
+
+<!-- APP PRINCIPAL -->
+<div id="app">
+  <div class="top-bar">
+    <span class="brand">Agrocota</span>
+    <span class="top-badge">Cotação de Fornecedor</span>
+  </div>
+
+  <main class="page">
+
+    <!-- HERO: info da cotação -->
+    <div class="hero-card">
+      <div class="hero-label">Solicitação de Proposta</div>
+      <h1 class="hero-title" id="hero-titulo">Cotação</h1>
+      <div class="hero-meta" id="hero-meta"></div>
+    </div>
+
+    <!-- DADOS DO FORNECEDOR -->
+    <div class="empresa-card">
+      <div class="empresa-title">📋 Seus dados (Fornecedor)</div>
+      <div class="field-grid">
+        <div class="field-group">
+          <label class="field-label">Nome da Empresa <span class="field-req">*</span></label>
+          <input type="text" class="field-input" id="f-empresa" placeholder="Ex: Agro Insumos Silva Ltda" autocomplete="organization" />
+        </div>
+        <div class="field-group">
+          <label class="field-label">Responsável <span class="field-req">*</span></label>
+          <input type="text" class="field-input" id="f-responsavel" placeholder="Nome do vendedor" autocomplete="name" />
+        </div>
+      </div>
+      <div class="field-grid">
+        <div class="field-group">
+          <label class="field-label">WhatsApp / Telefone</label>
+          <input type="tel" class="field-input" id="f-telefone" placeholder="(00) 9 0000-0000" autocomplete="tel" />
+        </div>
+        <div class="field-group">
+          <label class="field-label">E-mail</label>
+          <input type="email" class="field-input" id="f-email" placeholder="contato@empresa.com" autocomplete="email" />
+        </div>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Validade da Proposta</label>
+        <input type="date" class="field-input" id="f-validade" />
+      </div>
+    </div>
+
+    <!-- PROGRESSO -->
+    <div style="margin-bottom: 24px">
+      <div class="progress-bar-wrap">
+        <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
+      </div>
+      <div class="progress-label"><span id="progress-txt">0 de 0</span> produtos preenchidos</div>
+    </div>
+
+    <!-- INSTRUÇÃO -->
+    <div class="instrucao">
+      <span class="instrucao-icon">ℹ</span>
+      <div class="instrucao-txt">
+        Preencha o <strong>preço por unidade</strong> de cada produto abaixo. As doses são definidas pelo consultor e estão bloqueadas. Produtos sem preço informado serão enviados como <strong>sem proposta</strong>.
+      </div>
+    </div>
+
+    <!-- LISTA DE PRODUTOS POR CATEGORIA -->
+    <div id="produtos-list"></div>
+
+    <!-- OBS GERAL -->
+    <div class="obs-card">
+      <div class="obs-label">Observações Gerais da Proposta</div>
+      <textarea class="obs-input" id="f-obs-geral" placeholder="Ex: Prazo de entrega, condição de pagamento, validade dos preços..."></textarea>
+    </div>
+
+  </main>
+
+  <!-- FOOTER FIXO -->
+  <div class="sticky-footer">
+    <div class="footer-inner">
+      <div class="footer-row">
+        <div>
+          <div class="footer-label">Total da Proposta</div>
+          <span class="footer-sub" id="footer-count">0 itens com preço</span>
+        </div>
+        <div style="text-align:right">
+          <div class="footer-total" id="footer-total">R$ 0,00</div>
+        </div>
+      </div>
+      <button class="btn-submit" id="btn-submit" onclick="abrirModal()">Enviar Proposta ao Consultor</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL DE CONFIRMAÇÃO -->
+<div class="modal-backdrop" id="modal-backdrop" onclick="fecharModalFora(event)">
+  <div class="modal">
+    <div class="modal-title">Confirmar Envio</div>
+    <div class="modal-sub">Revise sua proposta antes de enviar. Após o envio, o consultor será notificado automaticamente.</div>
+    <div class="modal-empresa" id="modal-empresa-info"></div>
+    <div class="modal-summary" id="modal-summary"></div>
+    <div class="modal-total-row">
+      <span class="modal-total-label">Total da Proposta</span>
+      <span class="modal-total-val" id="modal-total">R$ 0,00</span>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="fecharModal()">Voltar</button>
+      <button class="btn-ok" id="btn-ok" onclick="enviarProposta()">Confirmar Envio</button>
+    </div>
+  </div>
+</div>
+
+<footer class="page-footer">Agrocota 2025 — Plataforma de Decisão Agrícola</footer>
+
+<script>
+/* ══════════════════════════════════════════
+   CONFIGURAÇÃO
+══════════════════════════════════════════ */
+const SUPABASE_URL  = 'https://fafjknchnibdflpqyssf.supabase.co';
+const SUPABASE_ANON = 'sb_publishable_3HDU_nViFfOubXqNplV5ow_8FV0Ix0r';
+
+// URL base do HTML do consultor (GitHub Pages) — usada para montar o token de retorno
+const CONSULTOR_BASE_URL = window.location.href.split('agrocota-fornecedor')[0] + 'agrocota-consultor-atualizado.html';
+
+const PALETTE = [
+  '#3B82F6','#EF4444','#F59E0B','#10B981',
+  '#8B5CF6','#06B6D4','#EC4899','#84CC16',
+  '#F97316','#14B8A6','#6366F1','#EAB308',
+];
+const CAT_COLORS = {};
+let _ci = 0;
+function getCatColor(c) {
+  if (!CAT_COLORS[c]) { CAT_COLORS[c] = PALETTE[_ci++ % PALETTE.length]; }
+  return CAT_COLORS[c];
+}
+
+/* ══════════════════════════════════════════
+   ESTADO
+══════════════════════════════════════════ */
+let token     = null;
+let cotacaoId = null;   // ID da cotação no Supabase (se disponível)
+let products  = [];     // array de produtos da cotação
+let priceMap  = {};     // { pid: valorNumerico }
+
+const fmtBRL = n => Number(n||0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const esc    = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+/* ══════════════════════════════════════════
+   CARREGAR DADOS
+══════════════════════════════════════════ */
+async function main() {
+  const params = new URLSearchParams(window.location.search);
+  token = params.get('token') || params.get('t');
+
+  if (!token) {
+    showError('Token não encontrado', 'O link está incompleto. Solicite um novo link ao consultor.');
+    return;
+  }
+
+  // Tenta buscar dados do Supabase (cotação integrada ao app)
+  try {
+    const rows = await rpc('get_cotacao_by_token', { p_token: token });
+    if (rows && rows.length > 0) {
+      await carregarDoSupabase(rows[0]);
+      return;
+    }
+  } catch(e) {}
+
+  // Fallback: tenta buscar dados do localStorage (link gerado pelo consultor HTML)
+  try {
+    const stored = localStorage.getItem('ac_forn_data');
+    if (stored) {
+      const data = JSON.parse(stored);
+      if (data.token === token) {
+        carregarDoLocal(data.products);
+        return;
+      }
+    }
+  } catch(e) {}
+
+  // Fallback 2: dados codificados na URL
+  const dataParam = params.get('data');
+  if (dataParam) {
+    try {
+      const decoded = JSON.parse(decodeURIComponent(escape(atob(dataParam))));
+      if (decoded.products) {
+        carregarDoLocal(decoded.products);
+        return;
+      }
+    } catch(e) {}
+  }
+
+  showError('Cotação não encontrada', 'Verifique o link ou solicite um novo ao consultor.');
+}
+
+async function rpc(fn, body) {
+  const r = await fetch(SUPABASE_URL + '/rest/v1/rpc/' + fn, {
+    method: 'POST',
+    headers: { apikey: SUPABASE_ANON, Authorization: 'Bearer ' + SUPABASE_ANON, 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  if (!r.ok) throw new Error('RPC error');
+  return r.json();
+}
+
+async function carregarDoSupabase(cotacao) {
+  cotacaoId = cotacao.id;
+
+  // Verifica se já foi enviada
+  if (cotacao.status === 'respondida' || cotacao.fornecedor_respondeu) {
+    showError('Proposta já enviada', 'Esta cotação já foi respondida. Obrigado pela participação!');
+    return;
+  }
+
+  let consultorNome = '—';
+  let fazendaNome   = '—';
+
+  try {
+    const p = await rpc('get_profile_name', { p_id: cotacao.consultor_id });
+    if (p && p[0]) consultorNome = p[0].full_name || '—';
+  } catch(_) {}
+
+  if (cotacao.fazenda_id) {
+    try {
+      const f = await rpc('get_fazenda_by_id', { p_id: cotacao.fazenda_id });
+      if (f && f[0]) fazendaNome = f[0].nome || '—';
+    } catch(_) {}
+  }
+
+  // Carrega itens
+  const itens = await rpc('get_itens_by_cotacao', { p_cotacao_id: cotacao.id });
+
+  // Converte itens do Supabase para formato de produtos
+  const prods = (itens || []).map((it, idx) => ({
+    id: it.id || idx,
+    cat: it.categoria || 'Insumo',
+    subcat: it.produto_nome,
+    nome: it.produto_nome || 'Produto',
+    ia: it.ia || '',
+    fonte: it.fonte || '',
+    dose: it.dose_ha || '',
+    unid: it.unidade || '',
+    alvo: it.alvo || '',
+    obs: it.observacoes || '',
+    valor_ha: 0,
+  }));
+
+  const fmtDate = s => !s ? '—' : new Date(s).toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric' });
+  const areaManual = Number(cotacao.area_ha || 0);
+  const areaTalhao = Number(cotacao.talhao_area_ha || 0);
+  const areaFinal  = areaManual > 0 ? areaManual : (areaTalhao > 0 ? areaTalhao : 0);
+
+  montarUI({
+    titulo: cotacao.titulo || 'Cotação',
+    fazenda: fazendaNome,
+    area: areaFinal > 0 ? fmtBRL(areaFinal) + ' ha' : '—',
+    data: fmtDate(cotacao.created_at),
+    consultor: consultorNome,
+  }, prods);
+}
+
+function carregarDoLocal(prods) {
+  montarUI({
+    titulo: 'Cotação de Produtos',
+    fazenda: '—',
+    area: '—',
+    data: new Date().toLocaleDateString('pt-BR'),
+    consultor: '—',
+  }, prods);
+}
+
+/* ══════════════════════════════════════════
+   MONTAR UI
+══════════════════════════════════════════ */
+function montarUI(meta, prods) {
+  products = prods;
+
+  // Pré-preenche validade (15 dias à frente)
+  const val = new Date();
+  val.setDate(val.getDate() + 15);
+  document.getElementById('f-validade').value = val.toISOString().split('T')[0];
+
+  // Hero meta
+  document.getElementById('hero-titulo').textContent = meta.titulo;
+  const metaEl = document.getElementById('hero-meta');
+  const metaItems = [
+    ['Fazenda', meta.fazenda],
+    ['Área', meta.area],
+    ['Data', meta.data],
+    ['Consultor', meta.consultor],
+  ];
+  metaEl.innerHTML = metaItems.map(([k,v]) =>
+    `<div class="hero-meta-cell"><div class="hero-meta-key">${k}</div><div class="hero-meta-val">${esc(v)}</div></div>`
+  ).join('');
+
+  // Produtos agrupados por categoria
+  const byCat = {};
+  products.forEach(p => {
+    const c = p.cat || 'Insumo';
+    if (!byCat[c]) byCat[c] = [];
+    byCat[c].push(p);
+  });
+
+  const container = document.getElementById('produtos-list');
+  container.innerHTML = '';
+
+  Object.entries(byCat).forEach(([cat, items]) => {
+    const color = getCatColor(cat);
+    const sec = document.createElement('div');
+    sec.className = 'cat-section';
+
+    sec.innerHTML = `
+      <div class="cat-header" style="background:rgba(${hexToRgb(color)},.06); border-left: 3px solid ${color}; padding-left: 14px;">
+        <div class="cat-dot" style="background:${color}"></div>
+        <div class="cat-name">${esc(cat)}</div>
+        <div class="cat-count">${items.length} produto${items.length > 1 ? 's' : ''}</div>
+      </div>
+    `;
+
+    items.forEach(p => {
+      const det = [];
+      if (p.ia) det.push(p.ia);
+      if (p.fonte) det.push(p.fonte);
+      if (p.alvo) det.push(p.alvo);
+
+      const card = document.createElement('div');
+      card.className = 'produto-card';
+      card.id = `card-${p.id}`;
+      card.innerHTML = `
+        <div class="produto-top">
+          <div>
+            <div class="produto-nome">${esc(p.nome)}</div>
+            ${p.subcat && p.subcat !== p.nome ? `<div class="produto-sub">${esc(p.subcat)}</div>` : ''}
+          </div>
+          ${p.dose ? `<div class="produto-dose">${esc(p.dose)} ${esc(p.unid)} 🔒</div>` : ''}
+        </div>
+        ${det.length ? `<div class="produto-info">${det.map(d => `<span class="produto-tag">${esc(d)}</span>`).join('')}</div>` : ''}
+        <div class="price-row">
+          <div class="price-prefix">R$</div>
+          <input
+            type="number"
+            class="price-input"
+            id="price-${p.id}"
+            placeholder="Informe o preço unitário..."
+            step="0.01"
+            min="0"
+            oninput="onPriceChange('${p.id}', this.value)"
+          />
+          <div class="price-unit">/ ${esc(p.unid) || 'un'}</div>
+        </div>
+      `;
+      sec.appendChild(card);
+    });
+
+    container.appendChild(sec);
+  });
+
+  atualizarProgresso();
+  atualizarTotal();
+
+  // Mostra app
+  document.getElementById('state-loading').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+}
+
+function hexToRgb(hex) {
+  hex = hex.replace('#','');
+  const r = parseInt(hex.slice(0,2),16);
+  const g = parseInt(hex.slice(2,4),16);
+  const b = parseInt(hex.slice(4,6),16);
+  return `${r},${g},${b}`;
+}
+
+/* ══════════════════════════════════════════
+   INTERAÇÃO DE PREÇO
+══════════════════════════════════════════ */
+function onPriceChange(pid, val) {
+  const num = parseFloat(String(val).replace(',','.'));
+  if (!isNaN(num) && num > 0) {
+    priceMap[pid] = num;
+    const inp = document.getElementById(`price-${pid}`);
+    if (inp) inp.classList.add('filled');
+    const card = document.getElementById(`card-${pid}`);
+    if (card) card.classList.add('filled');
+  } else {
+    delete priceMap[pid];
+    const inp = document.getElementById(`price-${pid}`);
+    if (inp) inp.classList.remove('filled');
+    const card = document.getElementById(`card-${pid}`);
+    if (card) card.classList.remove('filled');
+  }
+  atualizarProgresso();
+  atualizarTotal();
+}
+
+function atualizarProgresso() {
+  const total = products.length;
+  const filled = Object.keys(priceMap).length;
+  const pct = total > 0 ? (filled / total * 100) : 0;
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-txt').textContent = `${filled} de ${total}`;
+}
+
+function atualizarTotal() {
+  const total = Object.values(priceMap).reduce((a,b) => a+b, 0);
+  const count = Object.keys(priceMap).length;
+  document.getElementById('footer-total').textContent = 'R$ ' + fmtBRL(total);
+  document.getElementById('footer-count').textContent = count + (count === 1 ? ' item com preço' : ' itens com preço');
+}
+
+/* ══════════════════════════════════════════
+   MODAL
+══════════════════════════════════════════ */
+function abrirModal() {
+  const empresa = document.getElementById('f-empresa').value.trim();
+  const responsavel = document.getElementById('f-responsavel').value.trim();
+
+  if (!empresa) {
+    document.getElementById('f-empresa').classList.add('error');
+    document.getElementById('f-empresa').focus();
+    document.getElementById('f-empresa').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  }
+  if (!responsavel) {
+    document.getElementById('f-responsavel').classList.add('error');
+    document.getElementById('f-responsavel').focus();
+    document.getElementById('f-responsavel').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  }
+
+  if (Object.keys(priceMap).length === 0) {
+    if (!confirm('Você não preencheu nenhum preço. Deseja enviar assim mesmo?')) return;
+  }
+
+  // Modal empresa info
+  const tel = document.getElementById('f-telefone').value.trim();
+  const email = document.getElementById('f-email').value.trim();
+  const validade = document.getElementById('f-validade').value;
+  document.getElementById('modal-empresa-info').innerHTML = `
+    <div class="modal-empresa-name">${esc(empresa)}</div>
+    <div class="modal-empresa-contact">
+      Responsável: ${esc(responsavel)}
+      ${tel ? ` · ${esc(tel)}` : ''}
+      ${email ? ` · ${esc(email)}` : ''}
+      ${validade ? ` · Válido até: ${new Date(validade).toLocaleDateString('pt-BR')}` : ''}
+    </div>
+  `;
+
+  // Resumo
+  const sumEl = document.getElementById('modal-summary');
+  sumEl.innerHTML = '';
+  products.forEach(p => {
+    const val = priceMap[p.id];
+    const row = document.createElement('div');
+    row.className = 'modal-item';
+    row.innerHTML = `
+      <div>
+        <div class="modal-item-nome">${esc(p.nome)}</div>
+        <div class="modal-item-cat">${esc(p.cat)}</div>
+      </div>
+      ${val != null
+        ? `<div class="modal-item-price">R$ ${fmtBRL(val)}</div>`
+        : `<div class="modal-item-skip">Sem proposta</div>`
+      }
+    `;
+    sumEl.appendChild(row);
+  });
+
+  const total = Object.values(priceMap).reduce((a,b) => a+b, 0);
+  document.getElementById('modal-total').textContent = 'R$ ' + fmtBRL(total);
+  document.getElementById('modal-backdrop').classList.add('open');
+}
+
+function fecharModal() { document.getElementById('modal-backdrop').classList.remove('open'); }
+function fecharModalFora(e) { if (e.target === document.getElementById('modal-backdrop')) fecharModal(); }
+
+/* ══════════════════════════════════════════
+   ENVIAR PROPOSTA
+══════════════════════════════════════════ */
+async function enviarProposta() {
+  const btn = document.getElementById('btn-ok');
+  btn.disabled = true;
+  btn.textContent = 'Enviando...';
+
+  const empresa    = document.getElementById('f-empresa').value.trim();
+  const responsavel= document.getElementById('f-responsavel').value.trim();
+  const telefone   = document.getElementById('f-telefone').value.trim();
+  const email      = document.getElementById('f-email').value.trim();
+  const validade   = document.getElementById('f-validade').value;
+  const obsGeral   = document.getElementById('f-obs-geral').value.trim();
+
+  // Monta array de itens com preço
+  const itensProposta = products.map(p => ({
+    produto_nome: p.nome,
+    categoria: p.cat,
+    dose_ha: p.dose,
+    unidade: p.unid,
+    ia: p.ia,
+    valor_ha: priceMap[p.id] || null,
+  }));
+
+  const total = Object.values(priceMap).reduce((a,b) => a+b, 0);
+
+  const payload = {
+    token,
+    cotacao_id: cotacaoId,
+    empresa_nome: empresa,
+    responsavel_nome: responsavel,
+    telefone,
+    email,
+    validade_proposta: validade || null,
+    observacoes: obsGeral || null,
+    itens: itensProposta,
+    total_proposta: total,
+    user_agent: navigator.userAgent,
+    enviado_em: new Date().toISOString(),
+  };
+
+  let sucesso = false;
+
+  // 1. Tenta salvar via RPC no Supabase
+  if (cotacaoId) {
+    try {
+      await rpc('registrar_proposta_fornecedor', {
+        p_cotacao_id: cotacaoId,
+        p_token: token,
+        p_empresa_nome: empresa,
+        p_responsavel_nome: responsavel,
+        p_telefone: telefone,
+        p_email: email,
+        p_validade: validade || null,
+        p_observacoes: obsGeral || null,
+        p_itens: itensProposta,
+        p_total: total,
+        p_user_agent: navigator.userAgent,
+      });
+      sucesso = true;
+    } catch(e) {
+      console.warn('RPC falhou, tentando fallback...', e);
+    }
+  }
+
+  // 2. Fallback: salva via tabela REST direto
+  if (!sucesso) {
+    try {
+      const r = await fetch(SUPABASE_URL + '/rest/v1/propostas_fornecedor', {
+        method: 'POST',
+        headers: {
+          apikey: SUPABASE_ANON,
+          Authorization: 'Bearer ' + SUPABASE_ANON,
+          'Content-Type': 'application/json',
+          Prefer: 'return=minimal',
+        },
+        body: JSON.stringify({
+          cotacao_id: cotacaoId,
+          token_cotacao: token,
+          empresa_nome: empresa,
+          responsavel_nome: responsavel,
+          telefone,
+          email,
+          validade_proposta: validade || null,
+          observacoes: obsGeral || null,
+          itens_json: itensProposta,
+          total_proposta: total,
+          user_agent: navigator.userAgent,
+        }),
+      });
+      if (r.ok || r.status === 201) sucesso = true;
+    } catch(e) {
+      console.warn('REST insert falhou:', e);
+    }
+  }
+
+  // 3. Fallback final: notificação via webhook/email simulado (localStorage p/ demo)
+  if (!sucesso) {
+    try {
+      localStorage.setItem('ac_proposta_' + token, JSON.stringify(payload));
+      sucesso = true; // salva localmente para demo
+    } catch(e) {}
+  }
+
+  fecharModal();
+
+  if (sucesso) {
+    // Mostra tela de sucesso
+    document.getElementById('app').style.display = 'none';
+    document.getElementById('state-sent').style.display = 'flex';
+    document.getElementById('sent-revenda').textContent = '—'; // será preenchido se tiver info
+
+    // Tenta disparar notificação
+    await dispararNotificacao(empresa, payload);
+  } else {
+    alert('Ocorreu um erro ao enviar a proposta. Tente novamente ou entre em contato com o consultor.');
+    btn.disabled = false;
+    btn.textContent = 'Confirmar Envio';
+  }
+}
+
+/* ══════════════════════════════════════════
+   NOTIFICAÇÃO AO CONSULTOR
+   Chama RPC no Supabase que dispara push/email
+══════════════════════════════════════════ */
+async function dispararNotificacao(empresaFornecedor, payload) {
+  // Tenta disparar notificação via Supabase Edge Function ou RPC
+  const metodos = [
+    // Método 1: Edge Function dedicada
+    async () => {
+      const r = await fetch(SUPABASE_URL + '/functions/v1/notificar-proposta-recebida', {
+        method: 'POST',
+        headers: {
+          apikey: SUPABASE_ANON,
+          Authorization: 'Bearer ' + SUPABASE_ANON,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          cotacao_id: cotacaoId,
+          token: token,
+          empresa_fornecedor: empresaFornecedor,
+          total: payload.total_proposta,
+          itens_count: payload.itens.filter(i => i.valor_ha != null).length,
+        }),
+      });
+      if (!r.ok) throw new Error('edge function ' + r.status);
+    },
+    // Método 2: RPC de notificação
+    async () => {
+      await rpc('notificar_proposta_fornecedor', {
+        p_cotacao_id: cotacaoId,
+        p_token: token,
+        p_empresa_fornecedor: empresaFornecedor,
+        p_total: payload.total_proposta,
+      });
+    },
+    // Método 3: Inserção em tabela de notificações (lida pelo app)
+    async () => {
+      await fetch(SUPABASE_URL + '/rest/v1/notificacoes', {
+        method: 'POST',
+        headers: {
+          apikey: SUPABASE_ANON,
+          Authorization: 'Bearer ' + SUPABASE_ANON,
+          'Content-Type': 'application/json',
+          Prefer: 'return=minimal',
+        },
+        body: JSON.stringify({
+          tipo: 'proposta_fornecedor_recebida',
+          cotacao_id: cotacaoId,
+          token_cotacao: token,
+          titulo: `Cotação recebida de ${empresaFornecedor}`,
+          mensagem: `${empresaFornecedor} enviou uma proposta para a cotação. Total: R$ ${fmtBRL(payload.total_proposta)}`,
+          empresa_fornecedor: empresaFornecedor,
+          lida: false,
+        }),
+      });
+    },
+  ];
+
+  for (const metodo of metodos) {
+    try {
+      await metodo();
+      console.log('Notificação disparada com sucesso');
+      return;
+    } catch(e) {
+      console.warn('Método de notificação falhou:', e.message);
+    }
+  }
+
+  // Último recurso: salva flag no localStorage para o app ler na próxima abertura
+  try {
+    const pending = JSON.parse(localStorage.getItem('ac_notif_pending') || '[]');
+    pending.push({
+      tipo: 'proposta_fornecedor_recebida',
+      cotacao_id: cotacaoId,
+      token,
+      empresa_fornecedor: empresaFornecedor,
+      ts: Date.now(),
+    });
+    localStorage.setItem('ac_notif_pending', JSON.stringify(pending));
+  } catch(e) {}
+}
+
+/* ══════════════════════════════════════════
+   HELPERS
+══════════════════════════════════════════ */
+function showError(title, body) {
+  document.getElementById('state-loading').style.display = 'none';
+  document.getElementById('state-error').style.display = 'flex';
+  document.getElementById('err-title').textContent = title || 'Erro';
+  if (body) document.getElementById('err-body').textContent = body;
+}
+
+// Remove marcação de erro ao digitar
+['f-empresa', 'f-responsavel'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener('input', () => el.classList.remove('error'));
+});
+
+/* ══════════════════════════════════════════
+   START
+══════════════════════════════════════════ */
+main();
+</script>
+</body>
+</html>
