@@ -10,243 +10,164 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
   <style>
     :root {
-      --bg:          #040404;
-      --surface:     #0e0e0e;
-      --surface2:    #161616;
-      --border:      #1e1e1e;
-      --border2:     #2a2a2a;
-      --primary:     #22c55e;
-      --primary-dim: #021a09;
-      --text:        #f0f0f0;
-      --text-mid:    #666;
-      --text-low:    #333;
-      --red:         #ef4444;
-      --amber:       #f59e0b;
+      --bg:#040404; --surface:#0e0e0e; --surface2:#161616;
+      --border:#1e1e1e; --border2:#2a2a2a;
+      --primary:#22c55e; --primary-dim:#021a09;
+      --text:#f0f0f0; --text-mid:#666; --text-low:#333;
+      --red:#ef4444; --amber:#f59e0b;
     }
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { scroll-behavior: smooth; }
-    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; -webkit-font-smoothing: antialiased; }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased}
 
     /* ── STATES ── */
-    #state-loading, #state-error { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100svh; gap: 16px; }
-    #state-error { padding: 32px; text-align: center; }
-    .loader { width: 32px; height: 32px; border: 2px solid var(--border2); border-top-color: var(--primary); border-radius: 50%; animation: spin .7s linear infinite; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .state-label { font-size: .7rem; font-weight: 700; letter-spacing: .1em; color: var(--text-mid); text-transform: uppercase; }
-    .err-title { font-size: .95rem; font-weight: 800; color: var(--red); }
-    .err-body  { font-size: .78rem; color: var(--text-mid); margin-top: 6px; }
+    #state-loading,#state-error{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100svh;gap:16px}
+    #state-error{padding:32px;text-align:center}
+    .loader{width:32px;height:32px;border:2px solid var(--border2);border-top-color:var(--primary);border-radius:50%;animation:spin .7s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .state-label{font-size:.7rem;font-weight:700;letter-spacing:.1em;color:var(--text-mid);text-transform:uppercase}
+    .err-title{font-size:.95rem;font-weight:800;color:var(--red)}
+    .err-body{font-size:.78rem;color:var(--text-mid);margin-top:6px}
 
     /* ── TOP BAR ── */
-    .top-bar {
-      position: sticky; top: 0; z-index: 100;
-      background: rgba(4,4,4,.92);
-      backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
-      border-bottom: 1px solid var(--border);
-      padding: 13px 20px;
-      display: flex; align-items: center; justify-content: space-between; gap: 10px;
-    }
-    .brand { font-size: .68rem; font-weight: 900; letter-spacing: .2em; color: var(--primary); text-transform: uppercase; flex-shrink: 0; }
-    .top-bar-right { display: flex; align-items: center; gap: 10px; }
-    .status-pill { font-size: .58rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; padding: 4px 10px; border-radius: 100px; border: 1px solid var(--amber); color: var(--amber); }
-    .status-pill.aprovado { border-color: var(--primary); color: var(--primary); }
-    .btn-pdf {
-      font-size: .58rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase;
-      padding: 4px 12px; border-radius: 100px;
-      background: var(--primary); color: #000; border: none; cursor: pointer;
-      transition: opacity .15s;
-    }
-    .btn-pdf:hover { opacity: .85; }
+    .top-bar{position:sticky;top:0;z-index:100;background:rgba(4,4,4,.92);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-bottom:1px solid var(--border);padding:13px 20px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+    .brand{font-size:.68rem;font-weight:900;letter-spacing:.2em;color:var(--primary);text-transform:uppercase;flex-shrink:0}
+    .top-bar-right{display:flex;align-items:center;gap:10px}
+    .status-pill{font-size:.58rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:4px 10px;border-radius:100px;border:1px solid var(--amber);color:var(--amber)}
+    .status-pill.aprovado{border-color:var(--primary);color:var(--primary)}
+    .btn-pdf{font-size:.58rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:4px 12px;border-radius:100px;background:var(--primary);color:#000;border:none;cursor:pointer;transition:opacity .15s}
+    .btn-pdf:hover{opacity:.85}
 
     /* ── PAGE ── */
-    .page { max-width: 640px; margin: 0 auto; padding: 28px 16px 160px; }
+    .page{max-width:640px;margin:0 auto;padding:28px 16px 140px}
 
     /* ── META ── */
-    .meta-block { margin-bottom: 32px; }
-    .meta-title { font-size: 1.5rem; font-weight: 900; line-height: 1.2; letter-spacing: -.02em; margin-bottom: 16px; }
-    .meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
-    @media (max-width: 380px) { .meta-grid { grid-template-columns: 1fr; } }
-    .meta-cell { background: var(--surface); padding: 12px 14px; }
-    .meta-cell.full { grid-column: 1 / -1; }
-    .meta-key { font-size: .6rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--text-mid); margin-bottom: 3px; }
-    .meta-val { font-size: .88rem; font-weight: 600; color: var(--text); }
+    .meta-block{margin-bottom:32px}
+    .meta-title{font-size:1.5rem;font-weight:900;line-height:1.2;letter-spacing:-.02em;margin-bottom:16px}
+    .meta-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+    @media(max-width:380px){.meta-grid{grid-template-columns:1fr}}
+    .meta-cell{background:var(--surface);padding:12px 14px}
+    .meta-cell.full{grid-column:1/-1}
+    .meta-key{font-size:.6rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-mid);margin-bottom:3px}
+    .meta-val{font-size:.88rem;font-weight:600;color:var(--text)}
 
     /* ── SECTION HEADER ── */
-    .section-hd { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; margin-top: 36px; }
-    .section-hd h2 { font-size: .62rem; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: var(--text-mid); white-space: nowrap; }
-    .section-line { flex: 1; height: 1px; background: var(--border); }
+    .section-hd{display:flex;align-items:center;gap:10px;margin-bottom:14px;margin-top:36px}
+    .section-hd h2{font-size:.62rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--text-mid);white-space:nowrap}
+    .section-line{flex:1;height:1px;background:var(--border)}
 
     /* ── CHART CARD ── */
-    .chart-card { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 28px 20px; }
+    .chart-card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:28px 20px}
 
     /* ── DONUT ── */
-    .donut-wrap { display: flex; flex-direction: column; align-items: center; gap: 24px; }
-    .donut-canvas-wrap { position: relative; width: 190px; height: 190px; flex-shrink: 0; }
-    canvas#donut { width: 190px !important; height: 190px !important; }
-    .donut-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); text-align: center; pointer-events: none; }
-    .donut-center-label { font-size: .52rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--text-mid); }
-    .donut-center-value { font-family: 'JetBrains Mono', monospace; font-size: .82rem; font-weight: 700; color: var(--text); display: block; line-height: 1.4; margin-top: 1px; }
-    .donut-legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; width: 100%; }
-    .donut-chip { display: flex; align-items: center; gap: 6px; background: var(--surface2); border: 1px solid var(--border2); border-radius: 100px; padding: 5px 10px; }
-    .donut-chip-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
-    .donut-chip-name { font-size: .68rem; font-weight: 700; color: var(--text-mid); }
-    .donut-chip-pct  { font-family: 'JetBrains Mono', monospace; font-size: .68rem; font-weight: 700; }
-    .diff-badge { display: flex; align-items: center; justify-content: center; gap: 6px; background: var(--surface2); border: 1px solid var(--border2); border-radius: 12px; padding: 10px 16px; margin-top: 4px; }
-    .diff-label { font-size: .62rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--text-mid); }
-    .diff-value { font-family: 'JetBrains Mono', monospace; font-size: .9rem; font-weight: 900; color: var(--primary); }
+    .donut-wrap{display:flex;flex-direction:column;align-items:center;gap:24px}
+    .donut-canvas-wrap{position:relative;width:190px;height:190px;flex-shrink:0}
+    canvas#donut{width:190px !important;height:190px !important}
+    .donut-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none}
+    .donut-center-label{font-size:.52rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-mid)}
+    .donut-center-value{font-family:'JetBrains Mono',monospace;font-size:.82rem;font-weight:700;color:var(--text);display:block;line-height:1.4;margin-top:1px}
+    .donut-legend{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;width:100%}
+    .donut-chip{display:flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border2);border-radius:100px;padding:5px 10px}
+    .donut-chip-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+    .donut-chip-name{font-size:.68rem;font-weight:700;color:var(--text-mid)}
+    .donut-chip-pct{font-family:'JetBrains Mono',monospace;font-size:.68rem;font-weight:700}
+    .diff-badge{display:flex;align-items:center;justify-content:center;gap:6px;background:var(--surface2);border:1px solid var(--border2);border-radius:12px;padding:10px 16px;margin-top:4px}
+    .diff-label{font-size:.62rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-mid)}
+    .diff-value{font-family:'JetBrains Mono',monospace;font-size:.9rem;font-weight:900;color:var(--primary)}
 
-    /* ── PRODUCT BAR BLOCK ── */
-    .prod-block { margin-bottom: 22px; }
-    .prod-block:last-child { margin-bottom: 0; }
+    /* ── BAR CHART ── */
+    .bar-list{display:flex;flex-direction:column;gap:6px}
+    /* cabeçalho do produto nas barras */
+    .bar-prod-header{margin-top:20px;margin-bottom:6px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+    .bar-prod-header:first-child{margin-top:0}
+    .bar-prod-name{font-size:.8rem;font-weight:800;color:var(--text);margin-bottom:5px}
+    .bar-prod-chips{display:flex;flex-wrap:wrap;gap:4px}
+    .bar-prod-chip{font-size:.6rem;font-weight:600;padding:2px 8px;border-radius:5px;background:var(--surface2);border:1px solid var(--border2);color:var(--text-mid)}
+    .bar-prod-chip b{color:var(--text);font-weight:700}
+    .bar-row{display:flex;align-items:center;gap:10px}
+    .bar-label{font-size:.75rem;font-weight:700;color:var(--text);width:110px;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .bar-track{flex:1;height:8px;background:var(--border2);border-radius:99px;overflow:hidden}
+    .bar-fill{height:100%;border-radius:99px;transition:width .6s cubic-bezier(.4,0,.2,1)}
+    .bar-right{display:flex;align-items:center;gap:6px;flex-shrink:0;min-width:110px;justify-content:flex-end}
+    .bar-pct{font-size:.62rem;font-weight:700;color:var(--text-mid);min-width:32px;text-align:right}
+    .bar-val{font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:700;min-width:72px;text-align:right}
 
-    /* Cabeçalho do produto com empresa, princípio ativo e fontes */
-    .prod-header {
-      background: var(--surface2);
-      border: 1px solid var(--border2);
-      border-radius: 12px;
-      padding: 10px 14px;
-      margin-bottom: 10px;
-    }
-    .prod-name { font-size: .82rem; font-weight: 800; color: var(--text); margin-bottom: 6px; }
-    .prod-tags { display: flex; flex-wrap: wrap; gap: 6px; }
-    .prod-tag {
-      display: flex; align-items: center; gap: 4px;
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: 6px; padding: 3px 8px;
-    }
-    .prod-tag-key { font-size: .55rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--text-mid); }
-    .prod-tag-val { font-size: .68rem; font-weight: 700; color: var(--text); }
-    .prod-tag-sep { font-size: .55rem; color: var(--text-low); }
+    /* ── SELEÇÃO ── */
+    .select-list{display:flex;flex-direction:column;gap:8px}
+    .select-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px 16px;cursor:pointer;transition:border-color .18s,background .18s,transform .1s;-webkit-tap-highlight-color:transparent;user-select:none}
+    .select-card:active{transform:scale(.98)}
+    .select-card.active{border-color:var(--primary);background:var(--primary-dim)}
+    /* linha superior: radio + título + badge + preço */
+    .select-top{display:flex;align-items:center;gap:12px}
+    .select-radio{width:18px;height:18px;border-radius:50%;border:2px solid var(--border2);flex-shrink:0;position:relative;transition:.18s}
+    .select-card.active .select-radio{background:var(--primary);border-color:var(--primary)}
+    .select-radio::after{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:7px;height:7px;border-radius:50%;background:#000;opacity:0;transition:opacity .18s}
+    .select-card.active .select-radio::after{opacity:1}
+    .select-info{flex:1;min-width:0}
+    .select-title{font-size:.88rem;font-weight:800;color:var(--text)}
+    .select-badge{font-size:.55rem;font-weight:900;letter-spacing:.08em;text-transform:uppercase;padding:2px 7px;border-radius:6px;background:var(--primary);color:#000;margin-left:7px;vertical-align:middle}
+    .select-price{font-family:'JetBrains Mono',monospace;font-size:1rem;font-weight:900;flex-shrink:0}
+    /* produtos dentro do card de seleção */
+    .select-prods{margin-top:10px;display:flex;flex-direction:column;gap:7px;padding-top:10px;border-top:1px solid var(--border2)}
+    .select-prod-row{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+    .select-prod-name{font-size:.75rem;font-weight:700;color:var(--text);flex:1}
+    .select-prod-price{font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:700;color:var(--primary);flex-shrink:0}
+    .select-prod-chips{display:flex;flex-wrap:wrap;gap:3px;margin-top:3px}
+    .select-prod-chip{font-size:.58rem;font-weight:600;padding:1px 6px;border-radius:4px;background:var(--surface2);border:1px solid var(--border);color:var(--text-mid)}
+    .select-prod-chip b{color:var(--text);font-weight:700}
 
-    /* Barras */
-    .bar-list { display: flex; flex-direction: column; gap: 8px; }
-    .bar-row { display: flex; align-items: center; gap: 10px; }
-    .bar-label { font-size: .72rem; font-weight: 700; color: var(--text); width: 100px; flex-shrink: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .bar-track { flex: 1; height: 7px; background: var(--border2); border-radius: 99px; overflow: hidden; }
-    .bar-fill  { height: 100%; border-radius: 99px; transition: width .6s cubic-bezier(.4,0,.2,1); }
-    .bar-right { display: flex; align-items: center; gap: 6px; flex-shrink: 0; min-width: 105px; justify-content: flex-end; }
-    .bar-pct   { font-size: .6rem; font-weight: 700; color: var(--text-mid); min-width: 30px; text-align: right; }
-    .bar-val   { font-family: 'JetBrains Mono', monospace; font-size: .7rem; font-weight: 700; min-width: 68px; text-align: right; }
-
-    /* ── SELECT CARDS ── */
-    .select-list { display: flex; flex-direction: column; gap: 10px; }
-    .select-card {
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: 16px; padding: 16px;
-      cursor: pointer; transition: border-color .18s, background .18s, transform .1s;
-      -webkit-tap-highlight-color: transparent; user-select: none;
-    }
-    .select-card:active { transform: scale(.99); }
-    .select-card.active { border-color: var(--primary); background: var(--primary-dim); }
-    .select-card.active .select-radio { background: var(--primary); border-color: var(--primary); }
-    .select-card.active .select-radio::after { opacity: 1; }
-    .select-card-top { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
-    .select-radio {
-      width: 18px; height: 18px; border-radius: 50%;
-      border: 2px solid var(--border2); flex-shrink: 0;
-      position: relative; transition: .18s;
-    }
-    .select-radio::after {
-      content: ''; position: absolute; top: 50%; left: 50%;
-      transform: translate(-50%,-50%);
-      width: 7px; height: 7px; border-radius: 50%;
-      background: #000; opacity: 0; transition: opacity .18s;
-    }
-    .select-info { flex: 1; min-width: 0; }
-    .select-title { font-size: .9rem; font-weight: 800; color: var(--text); }
-    .select-badge { font-size: .52rem; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; padding: 2px 7px; border-radius: 6px; background: var(--primary); color: #000; margin-left: 7px; vertical-align: middle; }
-    .select-price { font-family: 'JetBrains Mono', monospace; font-size: 1rem; font-weight: 900; flex-shrink: 0; }
-
-    /* Produtos dentro do select card */
-    .select-products { border-top: 1px solid var(--border); padding-top: 10px; display: flex; flex-direction: column; gap: 6px; }
-    .select-prod-row { display: flex; flex-direction: column; gap: 2px; padding: 8px 10px; background: var(--surface2); border-radius: 9px; border: 1px solid var(--border); }
-    .select-prod-name { font-size: .78rem; font-weight: 700; color: var(--text); }
-    .select-prod-meta { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 3px; }
-    .select-prod-detail { font-size: .62rem; font-weight: 600; color: var(--text-mid); }
-    .select-prod-detail span { color: var(--text); }
-    .select-prod-price { font-family: 'JetBrains Mono', monospace; font-size: .72rem; font-weight: 700; margin-top: 4px; }
-
-    /* ── APPROVED BANNER ── */
-    .approved-card { background: var(--primary-dim); border: 1px solid var(--primary); border-radius: 18px; padding: 22px; text-align: center; margin-bottom: 28px; }
-    .approved-title { font-size: .95rem; font-weight: 900; color: var(--primary); margin-bottom: 5px; }
-    .approved-sub   { font-size: .75rem; color: var(--text-mid); }
-    .approved-ts    { font-family: 'JetBrains Mono', monospace; font-size: .68rem; color: var(--primary); margin-top: 8px; }
+    /* ── APPROVED ── */
+    .approved-card{background:var(--primary-dim);border:1px solid var(--primary);border-radius:18px;padding:22px;text-align:center;margin-bottom:28px}
+    .approved-title{font-size:.95rem;font-weight:900;color:var(--primary);margin-bottom:5px}
+    .approved-sub{font-size:.75rem;color:var(--text-mid)}
+    .approved-ts{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--primary);margin-top:8px}
 
     /* ── STICKY FOOTER ── */
-    .sticky-footer {
-      position: fixed; bottom: 0; left: 0; right: 0; z-index: 200;
-      padding: 14px 16px calc(14px + env(safe-area-inset-bottom));
-      background: linear-gradient(to top, var(--bg) 70%, transparent);
-    }
-    .footer-inner { max-width: 640px; margin: 0 auto; }
-    .footer-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; padding: 0 2px; }
-    .footer-label { font-size: .62rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--text-mid); }
-    .footer-selected { font-size: .8rem; font-weight: 700; color: var(--text); }
-    .btn-confirm {
-      width: 100%; background: var(--primary); color: #000; border: none;
-      padding: 16px; border-radius: 15px; font-family: 'Inter', sans-serif; font-size: .75rem; font-weight: 900;
-      letter-spacing: .1em; text-transform: uppercase; cursor: pointer;
-      transition: opacity .18s, transform .12s; box-shadow: 0 0 40px rgba(34,197,94,.12);
-    }
-    .btn-confirm:active { transform: scale(.97); }
-    .btn-confirm:disabled { opacity: .3; cursor: not-allowed; box-shadow: none; }
+    .sticky-footer{position:fixed;bottom:0;left:0;right:0;z-index:200;padding:14px 16px calc(14px + env(safe-area-inset-bottom));background:linear-gradient(to top,var(--bg) 70%,transparent)}
+    .footer-inner{max-width:640px;margin:0 auto}
+    .footer-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px;padding:0 2px}
+    .footer-label{font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-mid)}
+    .footer-selected{font-size:.8rem;font-weight:700;color:var(--text)}
+    .footer-total{font-family:'JetBrains Mono',monospace;font-size:1.15rem;font-weight:700;color:var(--text)}
+    .btn-confirm{width:100%;background:var(--primary);color:#000;border:none;padding:16px;border-radius:15px;font-family:'Inter',sans-serif;font-size:.75rem;font-weight:900;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:opacity .18s,transform .12s;box-shadow:0 0 40px rgba(34,197,94,.12)}
+    .btn-confirm:active{transform:scale(.97)}
+    .btn-confirm:disabled{opacity:.3;cursor:not-allowed;box-shadow:none}
 
     /* ── MODAL ── */
-    .modal-backdrop {
-      position: fixed; inset: 0; z-index: 500;
-      background: rgba(0,0,0,.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-      display: flex; align-items: flex-end; justify-content: center; padding: 16px;
-      opacity: 0; pointer-events: none; transition: opacity .25s;
-    }
-    .modal-backdrop.open { opacity: 1; pointer-events: all; }
-    .modal {
-      background: var(--surface2); border: 1px solid var(--border2);
-      border-radius: 24px; padding: 26px 22px; width: 100%; max-width: 620px;
-      transform: translateY(24px); transition: transform .3s cubic-bezier(.4,0,.2,1);
-      max-height: 88svh; display: flex; flex-direction: column;
-    }
-    .modal-backdrop.open .modal { transform: translateY(0); }
-    .modal-title { font-size: .95rem; font-weight: 900; margin-bottom: 5px; flex-shrink: 0; }
-    .modal-sub   { font-size: .75rem; color: var(--text-mid); margin-bottom: 16px; flex-shrink: 0; }
-    .modal-scroll { overflow-y: auto; flex: 1; }
-    .modal-prod {
-      padding: 12px 0;
-      border-bottom: 1px solid var(--border);
-    }
-    .modal-prod:last-child { border-bottom: none; }
-    .modal-prod-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 5px; }
-    .modal-prod-name { font-size: .82rem; font-weight: 700; color: var(--text); flex: 1; }
-    .modal-prod-price { font-family: 'JetBrains Mono', monospace; font-size: .8rem; font-weight: 700; color: var(--primary); flex-shrink: 0; }
-    .modal-prod-details { display: flex; flex-wrap: wrap; gap: 6px; }
-    .modal-detail-chip {
-      font-size: .6rem; font-weight: 600;
-      padding: 2px 7px; border-radius: 5px;
-      background: var(--surface); border: 1px solid var(--border);
-      color: var(--text-mid);
-    }
-    .modal-detail-chip b { color: var(--text); font-weight: 700; }
-    .modal-total { display: flex; justify-content: space-between; align-items: center; padding-top: 14px; margin-top: 12px; border-top: 1px solid var(--border2); flex-shrink: 0; }
-    .modal-total-label { font-size: .62rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--text-mid); }
-    .modal-total-val   { font-family: 'JetBrains Mono', monospace; font-size: 1.05rem; font-weight: 900; }
-    .modal-actions { display: flex; gap: 10px; margin-top: 16px; flex-shrink: 0; }
-    .btn-cancel { flex: 1; background: transparent; border: 1px solid var(--border2); color: var(--text-mid); padding: 14px; border-radius: 12px; font-family: 'Inter', sans-serif; font-size: .72rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; cursor: pointer; }
-    .btn-ok { flex: 2; background: var(--primary); color: #000; border: none; padding: 14px; border-radius: 12px; font-family: 'Inter', sans-serif; font-size: .72rem; font-weight: 900; letter-spacing: .1em; text-transform: uppercase; cursor: pointer; }
-    .btn-ok:disabled { opacity: .5; cursor: not-allowed; }
+    .modal-backdrop{position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.8);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);display:flex;align-items:flex-end;justify-content:center;padding:16px;opacity:0;pointer-events:none;transition:opacity .25s}
+    .modal-backdrop.open{opacity:1;pointer-events:all}
+    .modal{background:var(--surface2);border:1px solid var(--border2);border-radius:24px;padding:26px 22px;width:100%;max-width:620px;transform:translateY(24px);transition:transform .3s cubic-bezier(.4,0,.2,1);max-height:88svh;display:flex;flex-direction:column}
+    .modal-backdrop.open .modal{transform:translateY(0)}
+    .modal-title{font-size:.95rem;font-weight:900;margin-bottom:5px;flex-shrink:0}
+    .modal-sub{font-size:.75rem;color:var(--text-mid);margin-bottom:16px;flex-shrink:0}
+    .modal-scroll{overflow-y:auto;flex:1}
+    .modal-row{padding:10px 0;border-bottom:1px solid var(--border)}
+    .modal-row:last-child{border-bottom:none}
+    .modal-row-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:4px}
+    .modal-row-name{font-size:.78rem;font-weight:700;color:var(--text);flex:1}
+    .modal-row-price{font-family:'JetBrains Mono',monospace;font-size:.76rem;font-weight:700;color:var(--primary);flex-shrink:0}
+    .modal-row-chips{display:flex;flex-wrap:wrap;gap:4px}
+    .modal-row-chip{font-size:.6rem;font-weight:600;padding:2px 7px;border-radius:5px;background:var(--surface);border:1px solid var(--border);color:var(--text-mid)}
+    .modal-row-chip b{color:var(--text);font-weight:700}
+    .modal-total-row{display:flex;justify-content:space-between;align-items:center;padding-top:14px;margin-top:4px;border-top:1px solid var(--border2);flex-shrink:0}
+    .modal-total-label{font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-mid)}
+    .modal-total-val{font-family:'JetBrains Mono',monospace;font-size:1.05rem;font-weight:900}
+    .modal-actions{display:flex;gap:10px;margin-top:16px;flex-shrink:0}
+    .btn-cancel{flex:1;background:transparent;border:1px solid var(--border2);color:var(--text-mid);padding:14px;border-radius:12px;font-family:'Inter',sans-serif;font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;cursor:pointer}
+    .btn-ok{flex:2;background:var(--primary);color:#000;border:none;padding:14px;border-radius:12px;font-family:'Inter',sans-serif;font-size:.72rem;font-weight:900;letter-spacing:.1em;text-transform:uppercase;cursor:pointer}
+    .btn-ok:disabled{opacity:.5;cursor:not-allowed}
 
-    .page-footer { text-align: center; padding: 12px 16px; font-size: .6rem; color: var(--text-low); letter-spacing: .06em; text-transform: uppercase; }
+    .page-footer{text-align:center;padding:12px 16px;font-size:.6rem;color:var(--text-low);letter-spacing:.06em;text-transform:uppercase}
 
-    /* ── PDF PRINT ── */
-    @media print {
-      body { background: #fff !important; color: #111 !important; font-size: 11pt; }
-      .top-bar, .sticky-footer, .modal-backdrop, .btn-pdf { display: none !important; }
-      .page { padding: 0 !important; max-width: 100% !important; }
-      .chart-card, .select-card, .prod-header, .select-prod-row, .meta-cell {
-        background: #f8f8f8 !important; border-color: #ddd !important; color: #111 !important;
-      }
-      .approved-card { background: #e8f5e9 !important; border-color: #4caf50 !important; }
-      canvas { max-width: 160px !important; }
-      .section-hd { margin-top: 24px !important; }
-      .select-card { break-inside: avoid; }
-      .prod-block { break-inside: avoid; }
+    /* ── PRINT / PDF ── */
+    @media print{
+      body{background:#fff !important;color:#111 !important}
+      .top-bar,.sticky-footer,.modal-backdrop,.btn-pdf{display:none !important}
+      .page{padding:0 !important;max-width:100% !important}
+      .chart-card,.meta-cell,.select-card,.bar-prod-chip,.select-prod-chip,.modal-row-chip{background:#f8f8f8 !important;border-color:#ddd !important;color:#111 !important}
+      .approved-card{background:#e8f5e9 !important;border-color:#4caf50 !important}
+      canvas{max-width:160px !important}
+      .select-card{break-inside:avoid}
     }
   </style>
 </head>
@@ -271,21 +192,17 @@
   </div>
 
   <main class="page">
-
-    <!-- META -->
     <div class="meta-block">
       <h1 class="meta-title" id="meta-titulo">Comparativo de Cotação</h1>
       <div class="meta-grid" id="meta-grid"></div>
     </div>
 
-    <!-- BANNER APROVADO -->
     <div class="approved-card" id="approved-banner" style="display:none">
       <div class="approved-title">Aceite Registrado</div>
       <div class="approved-sub">Seu consultor foi notificado. Obrigado pela confirmação.</div>
       <div class="approved-ts" id="approved-ts"></div>
     </div>
 
-    <!-- GRÁFICO 1: DONUT -->
     <div class="section-hd">
       <h2>Comparativo de Investimento</h2>
       <div class="section-line"></div>
@@ -307,22 +224,21 @@
       </div>
     </div>
 
-    <!-- GRÁFICO 2: BARRAS POR PRODUTO -->
+    <!-- Barras: produto × cotação, com chips de P.A. e fontes -->
     <div class="section-hd" style="margin-top:36px">
       <h2>Comparativo por Produto</h2>
       <div class="section-line"></div>
     </div>
     <div class="chart-card">
-      <div id="bar-list"></div>
+      <div class="bar-list" id="bar-list"></div>
     </div>
 
-    <!-- SELEÇÃO DE PROPOSTA -->
+    <!-- Seleção: cada cotação como card com lista de produtos e detalhes -->
     <div class="section-hd" style="margin-top:36px">
       <h2>Selecione a Proposta</h2>
       <div class="section-line"></div>
     </div>
     <div class="select-list" id="select-list"></div>
-
   </main>
 
   <div class="sticky-footer" id="sticky-footer">
@@ -336,13 +252,13 @@
   </div>
 </div>
 
-<!-- MODAL -->
+<!-- MODAL ACEITE -->
 <div class="modal-backdrop" id="modal-backdrop" onclick="fecharModalFora(event)">
   <div class="modal">
     <div class="modal-title">Confirmar Aceite</div>
-    <div class="modal-sub">Revise os produtos antes de confirmar. Esta ação será registrada.</div>
+    <div class="modal-sub">Revise os produtos da proposta selecionada antes de confirmar. Esta ação será registrada.</div>
     <div class="modal-scroll" id="modal-rows"></div>
-    <div class="modal-total">
+    <div class="modal-total-row">
       <span class="modal-total-label">Total</span>
       <span class="modal-total-val" id="modal-total">—</span>
     </div>
@@ -353,384 +269,270 @@
   </div>
 </div>
 
-<footer class="page-footer">Agrocota 2025 — Plataforma de Decisão Agrícola</footer>
+<footer class="page-footer">Agrocota 2025 &mdash; Plataforma de Decisão Agrícola</footer>
 
 <script>
   const SUPABASE_URL  = 'https://fafjknchnibdflpqyssf.supabase.co';
   const SUPABASE_ANON = 'sb_publishable_3HDU_nViFfOubXqNplV5ow_8FV0Ix0r';
-
-  const COT_PALETTE = ['#22c55e','#3B82F6','#F59E0B','#8B5CF6','#EF4444','#06B6D4','#EC4899','#84CC16'];
+  const COT_PALETTE   = ['#22c55e','#3B82F6','#F59E0B','#8B5CF6','#EF4444','#06B6D4','#EC4899','#84CC16'];
 
   const fmtBRL      = n => Number(n||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
-  const fmtDate     = s => !s ? '—' : new Date(s).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'});
-  const fmtDateTime = s => !s ? '—' : new Date(s).toLocaleString('pt-BR');
+  const fmtDate     = s => !s?'—':new Date(s).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'});
+  const fmtDateTime = s => !s?'—':new Date(s).toLocaleString('pt-BR');
   const esc         = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 
-  async function rpc(fn, body) {
-    const r = await fetch(SUPABASE_URL + '/rest/v1/rpc/' + fn, {
-      method: 'POST',
-      headers: { apikey: SUPABASE_ANON, Authorization: 'Bearer ' + SUPABASE_ANON, 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-    });
-    if (!r.ok) throw new Error('RPC error: ' + fn);
+  async function rpc(fn,body){
+    const r=await fetch(SUPABASE_URL+'/rest/v1/rpc/'+fn,{method:'POST',headers:{apikey:SUPABASE_ANON,Authorization:'Bearer '+SUPABASE_ANON,'Content-Type':'application/json'},body:JSON.stringify(body)});
+    if(!r.ok) throw new Error('RPC error: '+fn);
     return r.json();
   }
-
-  function showError(msg, sub) {
-    document.getElementById('state-loading').style.display = 'none';
-    document.getElementById('state-error').style.display   = 'flex';
-    if (msg) document.getElementById('err-title').textContent = msg;
-    if (sub) document.getElementById('err-body').textContent  = sub;
+  function showError(msg,sub){
+    document.getElementById('state-loading').style.display='none';
+    document.getElementById('state-error').style.display='flex';
+    if(msg) document.getElementById('err-title').textContent=msg;
+    if(sub) document.getElementById('err-body').textContent=sub;
   }
-
-  function addMeta(key, val, full) {
-    const g = document.getElementById('meta-grid');
-    const c = document.createElement('div');
-    c.className = 'meta-cell' + (full ? ' full' : '');
-    c.innerHTML = '<div class="meta-key">' + key + '</div><div class="meta-val">' + esc(String(val||'—')) + '</div>';
+  function addMeta(key,val,full){
+    const g=document.getElementById('meta-grid');
+    const c=document.createElement('div');
+    c.className='meta-cell'+(full?' full':'');
+    c.innerHTML='<div class="meta-key">'+key+'</div><div class="meta-val">'+esc(String(val||'—'))+'</div>';
     g.appendChild(c);
   }
 
-  let cotacao     = null;
-  let payload     = null;
-  let selecionado = null;
-  let approved    = false;
-  let donutChart  = null;
+  let cotacao=null,payload=null,selecionado=null,approved=false,donutChart=null;
 
-  function cotacoesOrdenadas() {
-    return [...payload.cotacoes].sort((a,b) => a.total - b.total);
-  }
+  function cotacoesOrdenadas(){ return [...payload.cotacoes].sort((a,b)=>a.total-b.total); }
 
-  /* helper: retorna detalhes do produto (empresa, principio_ativo, fontes) */
-  function prodDetails(prod) {
-    return {
-      empresa:         prod.empresa || prod.fabricante || prod.marca || '',
-      principioAtivo:  prod.principio_ativo || prod.principioAtivo || prod.ativo || '',
-      fontes:          prod.fontes || prod.fonte || prod.sources || '',
-    };
+  /* ── helper: chips de principio_ativo e fonte de um produto do payload ── */
+  function prodChipsHtml(p, chipClass) {
+    const d=[];
+    if(p.principio_ativo) d.push({k:'P. Ativo', v:p.principio_ativo});
+    if(p.fonte)           d.push({k:'Fontes',   v:p.fonte});
+    return d.map(x=>'<span class="'+chipClass+'"><span style="opacity:.55;font-size:.55rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em">'+esc(x.k)+'</span> <b>'+esc(x.v)+'</b></span>').join('');
   }
 
   /* ── DONUT ── */
-  function buildDonut() {
-    const sorted = cotacoesOrdenadas();
-    const labels = sorted.map(c => c.titulo);
-    const values = sorted.map(c => c.total);
-    const colors = sorted.map((_, i) => COT_PALETTE[i % COT_PALETTE.length]);
-    const total  = values.reduce((a,b) => a+b, 0);
-    const min    = values[0] || 0;
-    const max    = values[values.length-1] || 0;
-    const diff   = max - min;
+  function buildDonut(){
+    const sorted=cotacoesOrdenadas();
+    const labels=sorted.map(c=>c.titulo);
+    const values=sorted.map(c=>c.total);
+    const colors=sorted.map((_,i)=>COT_PALETTE[i%COT_PALETTE.length]);
+    const total=values.reduce((a,b)=>a+b,0);
+    const min=values[0]||0,max=values[values.length-1]||0,diff=max-min;
 
-    const diffEl = document.getElementById('donut-diff');
-    diffEl.textContent = diff > 0 ? 'R$ ' + fmtBRL(diff) : '—';
-    diffEl.style.color = diff > 0 ? '#22c55e' : 'var(--text-mid)';
+    const diffEl=document.getElementById('donut-diff');
+    diffEl.textContent=diff>0?'R$ '+fmtBRL(diff):'—';
+    diffEl.style.color=diff>0?'#22c55e':'var(--text-mid)';
+    if(diff>0){document.getElementById('diff-badge').style.display='flex';document.getElementById('diff-value').textContent='R$ '+fmtBRL(diff);}
 
-    if (diff > 0) {
-      document.getElementById('diff-badge').style.display = 'flex';
-      document.getElementById('diff-value').textContent   = 'R$ ' + fmtBRL(diff);
-    }
+    const ctx=document.getElementById('donut').getContext('2d');
+    if(donutChart) donutChart.destroy();
+    donutChart=new Chart(ctx,{type:'doughnut',data:{labels,datasets:[{data:values,backgroundColor:colors,borderColor:'#040404',borderWidth:3,hoverOffset:6}]},options:{cutout:'78%',plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+c.label+': R$ '+fmtBRL(c.parsed)}}},animation:{duration:700,easing:'easeInOutQuart'}}});
 
-    const ctx = document.getElementById('donut').getContext('2d');
-    if (donutChart) donutChart.destroy();
-    donutChart = new Chart(ctx, {
-      type: 'doughnut',
-      data: {
-        labels,
-        datasets: [{ data: values, backgroundColor: colors, borderColor: '#040404', borderWidth: 3, hoverOffset: 6 }]
-      },
-      options: {
-        cutout: '78%',
-        plugins: {
-          legend: { display: false },
-          tooltip: { callbacks: { label: c => ' ' + c.label + ': R$ ' + fmtBRL(c.parsed) } }
-        },
-        animation: { duration: 700, easing: 'easeInOutQuart' },
-      }
-    });
-
-    const el = document.getElementById('donut-legend');
-    el.innerHTML = '';
-    sorted.forEach((c, i) => {
-      const pct = total > 0 ? (c.total / total * 100).toFixed(1) : '0.0';
-      const chip = document.createElement('div');
-      chip.className = 'donut-chip';
-      chip.innerHTML =
-        '<div class="donut-chip-dot" style="background:' + colors[i] + '"></div>'
-        + '<span class="donut-chip-name">' + esc(c.titulo) + '</span>'
-        + '<span class="donut-chip-pct" style="color:' + colors[i] + '">' + pct + '%</span>';
+    const el=document.getElementById('donut-legend');
+    el.innerHTML='';
+    sorted.forEach((c,i)=>{
+      const pct=total>0?(c.total/total*100).toFixed(1):'0.0';
+      const chip=document.createElement('div');
+      chip.className='donut-chip';
+      chip.innerHTML='<div class="donut-chip-dot" style="background:'+colors[i]+'"></div>'
+        +'<span class="donut-chip-name">'+esc(c.titulo)+'</span>'
+        +'<span class="donut-chip-pct" style="color:'+colors[i]+'">'+pct+'%</span>';
       el.appendChild(chip);
     });
   }
 
-  /* ── BARRAS POR PRODUTO — com empresa, princípio ativo e fontes ── */
-  function buildBars() {
-    const container = document.getElementById('bar-list');
-    container.innerHTML = '';
-    const produtos  = payload.produtos || [];
-    const sorted    = cotacoesOrdenadas();
+  /* ── BARRAS — produto com chips de P.A./fontes antes das barras ── */
+  function buildBars(){
+    const container=document.getElementById('bar-list');
+    container.innerHTML='';
+    const produtos=payload.produtos||[];
+    const sorted=cotacoesOrdenadas();
 
-    produtos.forEach((prod, pi) => {
-      const entries = sorted.map((c, i) => {
-        const origIdx = payload.cotacoes.indexOf(c);
-        const val = prod.precos && prod.precos[origIdx] != null
-          ? Number(prod.precos[origIdx])
-          : 0;
-        return { titulo: c.titulo, valor: val, color: COT_PALETTE[i % COT_PALETTE.length] };
-      }).filter(e => e.valor > 0);
+    produtos.forEach(prod=>{
+      const entries=sorted.map((c,i)=>{
+        const val=prod.precos&&prod.precos[payload.cotacoes.indexOf(c)]!=null?Number(prod.precos[payload.cotacoes.indexOf(c)]):0;
+        return{titulo:c.titulo,valor:val,color:COT_PALETTE[i%COT_PALETTE.length]};
+      }).filter(e=>e.valor>0);
+      if(!entries.length) return;
 
-      if (!entries.length) return;
-      const maxVal = Math.max(...entries.map(e => e.valor));
+      const maxVal=Math.max(...entries.map(e=>e.valor));
 
-      const details = prodDetails(prod);
+      /* cabeçalho do produto com chips */
+      const hdr=document.createElement('div');
+      hdr.className='bar-prod-header';
+      const chipsHtml=prodChipsHtml(prod,'bar-prod-chip');
+      hdr.innerHTML='<div class="bar-prod-name">'+esc(prod.nome)+'</div>'
+        +(chipsHtml?'<div class="bar-prod-chips">'+chipsHtml+'</div>':'');
+      container.appendChild(hdr);
 
-      /* bloco do produto */
-      const block = document.createElement('div');
-      block.className = 'prod-block';
-
-      /* cabeçalho com nome + detalhes */
-      let tagsHtml = '';
-      if (details.empresa)        tagsHtml += buildTag('Empresa', details.empresa);
-      if (details.principioAtivo) tagsHtml += buildTag('Princípio ativo', details.principioAtivo);
-      if (details.fontes)         tagsHtml += buildTag('Fontes', details.fontes);
-
-      block.innerHTML =
-        '<div class="prod-header">'
-          + '<div class="prod-name">' + esc(prod.nome) + '</div>'
-          + (tagsHtml ? '<div class="prod-tags">' + tagsHtml + '</div>' : '')
-        + '</div>'
-        + '<div class="bar-list" id="bars-prod-' + pi + '"></div>';
-
-      container.appendChild(block);
-
-      const barContainer = document.getElementById('bars-prod-' + pi);
-      entries.forEach(e => {
-        const pct = maxVal > 0 ? (e.valor / maxVal * 100) : 0;
-        const row = document.createElement('div');
-        row.className = 'bar-row';
-        row.innerHTML =
-          '<div class="bar-label">' + esc(e.titulo) + '</div>'
-          + '<div class="bar-track"><div class="bar-fill" style="width:' + Math.max(pct,3).toFixed(1) + '%;background:' + e.color + '"></div></div>'
-          + '<div class="bar-right">'
-            + '<span class="bar-pct" style="color:' + e.color + '">' + pct.toFixed(0) + '%</span>'
-            + '<span class="bar-val" style="color:' + e.color + '">R$ ' + fmtBRL(e.valor) + '</span>'
-          + '</div>';
-        barContainer.appendChild(row);
+      entries.forEach(e=>{
+        const pct=maxVal>0?(e.valor/maxVal*100):0;
+        const row=document.createElement('div');
+        row.className='bar-row';
+        row.innerHTML='<div class="bar-label">'+esc(e.titulo)+'</div>'
+          +'<div class="bar-track"><div class="bar-fill" style="width:'+Math.max(pct,3).toFixed(1)+'%;background:'+e.color+'"></div></div>'
+          +'<div class="bar-right">'
+            +'<span class="bar-pct" style="color:'+e.color+'">'+pct.toFixed(0)+'%</span>'
+            +'<span class="bar-val" style="color:'+e.color+'">R$ '+fmtBRL(e.valor)+'</span>'
+          +'</div>';
+        container.appendChild(row);
       });
     });
   }
 
-  function buildTag(key, val) {
-    return '<div class="prod-tag">'
-      + '<span class="prod-tag-key">' + esc(key) + '</span>'
-      + '<span class="prod-tag-sep">·</span>'
-      + '<span class="prod-tag-val">' + esc(val) + '</span>'
-    + '</div>';
-  }
+  /* ── SELEÇÃO — cada cotação mostra lista de produtos com chips ── */
+  function renderSelecao(){
+    const container=document.getElementById('select-list');
+    container.innerHTML='';
+    const sorted=cotacoesOrdenadas();
+    const minTot=sorted[0]?.total||0;
 
-  /* ── SELEÇÃO — cards com lista de produtos detalhada ── */
-  function renderSelecao() {
-    const container = document.getElementById('select-list');
-    container.innerHTML = '';
-    const sorted  = cotacoesOrdenadas();
-    const minTot  = sorted[0]?.total || 0;
+    sorted.forEach((c,i)=>{
+      const color=COT_PALETTE[i%COT_PALETTE.length];
+      const isMenor=c.total===minTot;
+      const origIdx=payload.cotacoes.indexOf(c);
 
-    sorted.forEach((c, i) => {
-      const color   = COT_PALETTE[i % COT_PALETTE.length];
-      const isMenor = c.total === minTot;
-      const origIdx = payload.cotacoes.indexOf(c);
+      const card=document.createElement('div');
+      card.className='select-card';
 
-      const card = document.createElement('div');
-      card.className = 'select-card';
+      /* linha superior */
+      let html='<div class="select-top">'
+        +'<div class="select-radio"></div>'
+        +'<div class="select-info">'
+          +'<span class="select-title">'+esc(c.titulo)+'</span>'
+          +(isMenor?'<span class="select-badge">Menor</span>':'')
+        +'</div>'
+        +'<div class="select-price" style="color:'+color+'">R$ '+fmtBRL(c.total)+'</div>'
+      +'</div>';
 
-      /* topo do card */
-      let topHtml =
-        '<div class="select-card-top">'
-          + '<div class="select-radio"></div>'
-          + '<div class="select-info">'
-            + '<span class="select-title">' + esc(c.titulo) + '</span>'
-            + (isMenor ? '<span class="select-badge">Menor</span>' : '')
-          + '</div>'
-          + '<div class="select-price" style="color:' + color + '">R$ ' + fmtBRL(c.total) + '</div>'
-        + '</div>';
+      /* produtos do card com chips */
+      const produtos=payload.produtos||[];
+      const prodsComPreco=produtos.filter(p=>p.precos&&p.precos[origIdx]!=null&&Number(p.precos[origIdx])>0);
+      if(prodsComPreco.length){
+        html+='<div class="select-prods">';
+        prodsComPreco.forEach(p=>{
+          const val=Number(p.precos[origIdx]||0);
+          const chipsHtml=prodChipsHtml(p,'select-prod-chip');
+          html+='<div>'
+            +'<div class="select-prod-row">'
+              +'<span class="select-prod-name">'+esc(p.nome)+'</span>'
+              +'<span class="select-prod-price">R$ '+fmtBRL(val)+'</span>'
+            +'</div>'
+            +(chipsHtml?'<div class="select-prod-chips">'+chipsHtml+'</div>':'')
+          +'</div>';
+        });
+        html+='</div>';
+      }
 
-      /* produtos desta cotação */
-      const produtos = payload.produtos || [];
-      let prodsHtml = '<div class="select-products">';
-      produtos.forEach(prod => {
-        const val = prod.precos && prod.precos[origIdx] != null ? Number(prod.precos[origIdx]) : 0;
-        if (!val) return;
-        const d = prodDetails(prod);
-        let detailsHtml = '';
-        if (d.empresa)        detailsHtml += '<span class="select-prod-detail">Empresa: <span>' + esc(d.empresa) + '</span></span>';
-        if (d.principioAtivo) detailsHtml += '<span class="select-prod-detail">P. Ativo: <span>' + esc(d.principioAtivo) + '</span></span>';
-        if (d.fontes)         detailsHtml += '<span class="select-prod-detail">Fontes: <span>' + esc(d.fontes) + '</span></span>';
-
-        prodsHtml +=
-          '<div class="select-prod-row">'
-            + '<div class="select-prod-name">' + esc(prod.nome) + '</div>'
-            + (detailsHtml ? '<div class="select-prod-meta">' + detailsHtml + '</div>' : '')
-            + '<div class="select-prod-price" style="color:' + color + '">R$ ' + fmtBRL(val) + '</div>'
-          + '</div>';
-      });
-      prodsHtml += '</div>';
-
-      card.innerHTML = topHtml + prodsHtml;
-
-      card.onclick = () => {
-        if (approved) return;
-        document.querySelectorAll('.select-card').forEach(el => el.classList.remove('active'));
+      card.innerHTML=html;
+      card.onclick=()=>{
+        if(approved) return;
+        document.querySelectorAll('.select-card').forEach(el=>el.classList.remove('active'));
         card.classList.add('active');
-        selecionado = { cotacao: c, idx: origIdx };
-        document.getElementById('footer-selected').textContent = c.titulo;
-        document.getElementById('btn-aceite').disabled = false;
+        selecionado={cotacao:c,idx:origIdx};
+        document.getElementById('footer-selected').textContent=c.titulo;
+        document.getElementById('btn-aceite').disabled=false;
       };
-
       container.appendChild(card);
     });
   }
 
-  /* ── MODAL — com detalhes dos produtos ── */
-  function abrirModal() {
-    if (!selecionado) return;
-    const c   = selecionado.cotacao;
-    const ci  = selecionado.idx;
-    const el  = document.getElementById('modal-rows');
-    el.innerHTML = '';
-
-    (payload.produtos || []).forEach(prod => {
-      const val = prod.precos && prod.precos[ci] != null ? Number(prod.precos[ci]) : 0;
-      if (!val) return;
-      const d = prodDetails(prod);
-
-      let chipsHtml = '';
-      if (d.empresa)        chipsHtml += '<span class="modal-detail-chip">Empresa: <b>' + esc(d.empresa) + '</b></span>';
-      if (d.principioAtivo) chipsHtml += '<span class="modal-detail-chip">P. Ativo: <b>' + esc(d.principioAtivo) + '</b></span>';
-      if (d.fontes)         chipsHtml += '<span class="modal-detail-chip">Fontes: <b>' + esc(d.fontes) + '</b></span>';
-
-      const row = document.createElement('div');
-      row.className = 'modal-prod';
-      row.innerHTML =
-        '<div class="modal-prod-top">'
-          + '<span class="modal-prod-name">' + esc(prod.nome) + '</span>'
-          + '<span class="modal-prod-price">R$ ' + fmtBRL(val) + '</span>'
-        + '</div>'
-        + (chipsHtml ? '<div class="modal-prod-details">' + chipsHtml + '</div>' : '');
+  /* ── MODAL ACEITE — produtos com chips de P.A./fontes ── */
+  function abrirModal(){
+    if(!selecionado) return;
+    const c=selecionado.cotacao,ci=selecionado.idx;
+    const el=document.getElementById('modal-rows');
+    el.innerHTML='';
+    (payload.produtos||[]).forEach(p=>{
+      const val=p.precos&&p.precos[ci]!=null?Number(p.precos[ci]):0;
+      const chipsHtml=prodChipsHtml(p,'modal-row-chip');
+      const row=document.createElement('div');
+      row.className='modal-row';
+      row.innerHTML='<div class="modal-row-top">'
+        +'<span class="modal-row-name">'+esc(p.nome)+'</span>'
+        +'<span class="modal-row-price">R$ '+fmtBRL(val)+'</span>'
+        +'</div>'
+        +(chipsHtml?'<div class="modal-row-chips">'+chipsHtml+'</div>':'');
       el.appendChild(row);
     });
-
-    document.getElementById('modal-total').textContent = 'R$ ' + fmtBRL(c.total);
+    document.getElementById('modal-total').textContent='R$ '+fmtBRL(c.total);
     document.getElementById('modal-backdrop').classList.add('open');
   }
+  function fecharModal(){document.getElementById('modal-backdrop').classList.remove('open');}
+  function fecharModalFora(e){if(e.target===document.getElementById('modal-backdrop')) fecharModal();}
 
-  function fecharModal() { document.getElementById('modal-backdrop').classList.remove('open'); }
-  function fecharModalFora(e) { if (e.target === document.getElementById('modal-backdrop')) fecharModal(); }
-
-  async function confirmarAceite() {
-    if (!selecionado) return;
-    const btn = document.getElementById('btn-ok');
-    btn.disabled = true; btn.textContent = 'Registrando...';
-    try {
-      await rpc('registrar_aceite_cotacao', {
-        p_cotacao_id: cotacao.id,
-        p_itens:      [],
-        p_total_ha:   selecionado.cotacao.total,
-        p_user_agent: navigator.userAgent,
-      });
+  async function confirmarAceite(){
+    if(!selecionado) return;
+    const btn=document.getElementById('btn-ok');
+    btn.disabled=true;btn.textContent='Registrando...';
+    try{
+      await rpc('registrar_aceite_cotacao',{p_cotacao_id:cotacao.id,p_itens:[],p_total_ha:selecionado.cotacao.total,p_user_agent:navigator.userAgent});
       fecharModal();
-      approved = true;
-      document.getElementById('status-pill').textContent = 'Aceite registrado';
-      document.getElementById('status-pill').className   = 'status-pill aprovado';
-      document.querySelector('#approved-banner .approved-title').textContent = 'Aceite Registrado';
-      document.getElementById('approved-banner').style.display = 'block';
-      document.getElementById('approved-ts').textContent = 'Registrado em ' + fmtDateTime(new Date().toISOString());
-      document.getElementById('sticky-footer').style.display = 'none';
-    } catch(e) {
-      alert('Erro ao registrar o aceite. Tente novamente.');
-    } finally {
-      btn.disabled = false; btn.textContent = 'Confirmar Aceite';
-    }
+      approved=true;
+      document.getElementById('status-pill').textContent='Aceite registrado';
+      document.getElementById('status-pill').className='status-pill aprovado';
+      document.querySelector('#approved-banner .approved-title').textContent='Aceite Registrado';
+      document.getElementById('approved-banner').style.display='block';
+      document.getElementById('approved-ts').textContent='Registrado em '+fmtDateTime(new Date().toISOString());
+      document.getElementById('sticky-footer').style.display='none';
+    }catch(e){alert('Erro ao registrar o aceite. Tente novamente.');}
+    finally{btn.disabled=false;btn.textContent='Confirmar Aceite';}
   }
 
-  /* ── MAIN ── */
-  async function main() {
-    const params      = new URLSearchParams(window.location.search);
-    const cotacaoId   = params.get('id');
-    const dataEncoded = params.get('data');
+  async function main(){
+    const params=new URLSearchParams(window.location.search);
+    const cotacaoId=params.get('id'),dataEncoded=params.get('data');
+    if(!cotacaoId){showError('Link inválido','Parâmetro "id" não encontrado na URL.');return;}
+    if(!dataEncoded){showError('Dados não encontrados','Parâmetro "data" não encontrado na URL.');return;}
 
-    if (!cotacaoId)   { showError('Link inválido', 'Parâmetro "id" não encontrado na URL.'); return; }
-    if (!dataEncoded) { showError('Dados não encontrados', 'Parâmetro "data" não encontrado na URL.'); return; }
+    try{payload=JSON.parse(decodeURIComponent(escape(atob(dataEncoded))));}
+    catch(e){showError('Erro ao decodificar','Link corrompido. Solicite um novo ao consultor.');return;}
 
-    try {
-      payload = JSON.parse(decodeURIComponent(escape(atob(dataEncoded))));
-    } catch(e) {
-      showError('Erro ao decodificar', 'Link corrompido. Solicite um novo ao consultor.'); return;
-    }
+    if(!payload.cotacoes||payload.cotacoes.length<2){showError('Comparativo inválido','São necessárias pelo menos 2 cotações.');return;}
 
-    if (!payload.cotacoes || payload.cotacoes.length < 2) {
-      showError('Comparativo inválido', 'São necessárias pelo menos 2 cotações.'); return;
-    }
+    try{
+      const rows=await fetch(SUPABASE_URL+'/rest/v1/cotacoes?id=eq.'+cotacaoId+'&select=*&limit=1',{headers:{apikey:SUPABASE_ANON,Authorization:'Bearer '+SUPABASE_ANON}}).then(r=>r.json());
+      if(!rows||!rows[0]){showError('Cotação não encontrada','Verifique o link ou solicite um novo ao consultor.');return;}
+      cotacao=rows[0];
 
-    try {
-      const rows = await fetch(
-        SUPABASE_URL + '/rest/v1/cotacoes?id=eq.' + cotacaoId + '&select=*&limit=1',
-        { headers: { apikey: SUPABASE_ANON, Authorization: 'Bearer ' + SUPABASE_ANON } }
-      ).then(r => r.json());
-
-      if (!rows || !rows[0]) { showError('Cotação não encontrada', 'Verifique o link ou solicite um novo ao consultor.'); return; }
-      cotacao = rows[0];
-
-      /* consultor */
-      let consultorNome = '—';
-      try {
-        const p = await rpc('get_profile_name', { p_id: cotacao.consultor_id });
-        if (p && p[0]) consultorNome = p[0].full_name || '—';
-      } catch(_) {}
-
-      /* fazenda */
-      let fazendaNome = '—';
-      if (cotacao.fazenda_id) {
-        try {
-          const f = await rpc('get_fazenda_by_id', { p_id: cotacao.fazenda_id });
-          if (f && f[0]) fazendaNome = f[0].nome || '—';
-        } catch(_) {}
+      let consultorNome='—',fazendaNome='—';
+      try{const p=await rpc('get_profile_name',{p_id:cotacao.consultor_id});if(p&&p[0])consultorNome=p[0].full_name||'—';}catch(_){}
+      if(cotacao.fazenda_id){
+        try{const f=await rpc('get_fazenda_by_id',{p_id:cotacao.fazenda_id});if(f&&f[0])fazendaNome=f[0].nome||'—';}catch(_){}
       }
 
-      /* área */
-      const areaManual = Number(cotacao?.area_ha || 0);
-      const areaTalhao = Number(cotacao?.talhao_area_ha || 0);
-      const areaFinal  = areaManual > 0 ? areaManual : (areaTalhao > 0 ? areaTalhao : 0);
+      const areaManual=Number(cotacao?.area_ha||0),areaTalhao=Number(cotacao?.talhao_area_ha||0);
+      const areaFinal=areaManual>0?areaManual:(areaTalhao>0?areaTalhao:0);
 
-      /* preenche meta */
-      document.title = (cotacao.titulo || 'Comparativo') + ' — Agrocota';
-      document.getElementById('meta-titulo').textContent = cotacao.titulo || 'Comparativo de Cotação';
-      addMeta('Fazenda',   fazendaNome, true);   /* linha inteira */
-      addMeta('Área',      areaFinal > 0 ? fmtBRL(areaFinal) + ' ha' : '—');
-      addMeta('Data',      fmtDate(cotacao.created_at));
-      addMeta('Consultor', consultorNome);
+      document.title=(cotacao.titulo||'Comparativo')+' — Agrocota';
+      document.getElementById('meta-titulo').textContent=cotacao.titulo||'Comparativo de Cotação';
 
-      /* status */
-      const aceiteEm = cotacao.aceite_em || cotacao.approved_at;
-      if (cotacao.status === 'aprovada' || cotacao.status === 'aprovado' || aceiteEm) {
-        approved = true;
-        document.getElementById('status-pill').textContent = 'Aceite registrado';
-        document.getElementById('status-pill').className   = 'status-pill aprovado';
-        document.getElementById('approved-banner').style.display = 'block';
-        document.getElementById('approved-ts').textContent = 'Registrado em ' + fmtDateTime(aceiteEm);
-        document.getElementById('sticky-footer').style.display = 'none';
+      /* Fazenda em linha inteira */
+      addMeta('Fazenda',fazendaNome,true);
+      addMeta('Área',areaFinal>0?fmtBRL(areaFinal)+' ha':'—');
+      addMeta('Data',fmtDate(cotacao.created_at));
+      addMeta('Consultor',consultorNome);
+
+      const aceiteEm=cotacao.aceite_em||cotacao.approved_at;
+      if(cotacao.status==='aprovada'||cotacao.status==='aprovado'||aceiteEm){
+        approved=true;
+        document.getElementById('status-pill').textContent='Aceite registrado';
+        document.getElementById('status-pill').className='status-pill aprovado';
+        document.getElementById('approved-banner').style.display='block';
+        document.getElementById('approved-ts').textContent='Registrado em '+fmtDateTime(aceiteEm);
+        document.getElementById('sticky-footer').style.display='none';
       }
 
       buildDonut();
       buildBars();
       renderSelecao();
 
-      document.getElementById('state-loading').style.display = 'none';
-      document.getElementById('app').style.display           = 'block';
-
-    } catch(e) {
-      showError('Erro ao carregar', 'Tente novamente ou solicite um novo link ao consultor.');
-    }
+      document.getElementById('state-loading').style.display='none';
+      document.getElementById('app').style.display='block';
+    }catch(e){showError('Erro ao carregar','Tente novamente ou solicite um novo link ao consultor.');}
   }
-
   main();
 </script>
 </body>
