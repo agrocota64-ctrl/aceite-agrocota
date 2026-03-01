@@ -76,20 +76,23 @@
     .donut-wrap { display: flex; flex-direction: column; align-items: center; gap: 24px; }
     .donut-canvas-wrap { position: relative; width: 190px; height: 190px; flex-shrink: 0; }
     canvas#donut { width: 190px !important; height: 190px !important; }
-    .donut-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); text-align: center; pointer-events: none; }
-    .donut-center-label { font-size: .52rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--text-mid); }
-    .donut-center-value { font-family: 'JetBrains Mono', monospace; font-size: .82rem; font-weight: 700; color: var(--text); display: block; line-height: 1.4; margin-top: 1px; }
+    .donut-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); text-align: center; pointer-events: none; width: 120px; }
+    .donut-center-label { font-size: .5rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: #4D7A5A; }
+    .donut-center-value { font-family: 'JetBrains Mono', monospace; font-size: .78rem; font-weight: 800; color: #22c55e; display: block; line-height: 1.4; margin-top: 2px; }
 
-    /* DONUT LEGEND — discreta, horizontal em chips */
-    .donut-legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; width: 100%; }
+    /* DONUT LEGEND */
+    .donut-legend { display: flex; flex-direction: column; gap: 8px; width: 100%; }
     .donut-chip {
-      display: flex; align-items: center; gap: 6px;
+      display: flex; align-items: center; gap: 10px;
       background: var(--surface2); border: 1px solid var(--border2);
-      border-radius: 100px; padding: 5px 10px;
+      border-radius: 12px; padding: 10px 14px;
     }
-    .donut-chip-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
-    .donut-chip-name { font-size: .68rem; font-weight: 700; color: var(--text-mid); }
-    .donut-chip-pct  { font-family: 'JetBrains Mono', monospace; font-size: .68rem; font-weight: 700; }
+    .donut-chip-menor { border-color: #22c55e44; background: #021a09; }
+    .donut-chip-dot   { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+    .donut-chip-info  { flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+    .donut-chip-name  { font-size: .78rem; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .donut-chip-val   { font-family: 'JetBrains Mono', monospace; font-size: .72rem; font-weight: 700; }
+    .donut-chip-menor-tag { font-size: .55rem; font-weight: 900; color: #000; background: #22c55e; border-radius: 5px; padding: 2px 7px; letter-spacing: .06em; flex-shrink: 0; }
 
     /* DIFERENÇA entre cotações */
     .diff-badge {
@@ -100,15 +103,17 @@
     .diff-label { font-size: .62rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--text-mid); }
     .diff-value { font-family: 'JetBrains Mono', monospace; font-size: .9rem; font-weight: 900; color: var(--primary); }
 
-    /* BAR CHART — produto com nome + barra + % + valor */
+    /* BAR CHART */
     .bar-list { display: flex; flex-direction: column; gap: 10px; }
-    .bar-row { display: flex; align-items: center; gap: 10px; }
-    .bar-label { font-size: .75rem; font-weight: 700; color: var(--text); width: 110px; flex-shrink: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .bar-row       { display: flex; align-items: center; gap: 10px; border-radius: 8px; padding: 2px 4px; }
+    .bar-row-menor { background: rgba(34,197,94,.07); }
+    .bar-label-wrap{ width: 110px; flex-shrink: 0; }
+    .bar-label     { font-size: .75rem; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .bar-menor-tag { font-size: .55rem; font-weight: 800; color: #22c55e; letter-spacing: .04em; margin-top: 1px; }
     .bar-track { flex: 1; height: 8px; background: var(--border2); border-radius: 99px; overflow: hidden; }
     .bar-fill  { height: 100%; border-radius: 99px; transition: width .6s cubic-bezier(.4,0,.2,1); }
-    .bar-right { display: flex; align-items: center; gap: 6px; flex-shrink: 0; min-width: 110px; justify-content: flex-end; }
-    .bar-pct   { font-size: .62rem; font-weight: 700; color: var(--text-mid); min-width: 32px; text-align: right; }
-    .bar-val   { font-family: 'JetBrains Mono', monospace; font-size: .72rem; font-weight: 700; min-width: 72px; text-align: right; }
+    .bar-right { display: flex; align-items: center; gap: 6px; flex-shrink: 0; min-width: 90px; justify-content: flex-end; }
+    .bar-val   { font-family: 'JetBrains Mono', monospace; font-size: .76rem; font-weight: 700; min-width: 80px; text-align: right; }
 
     /* SELEÇÃO — cards compactos */
     .select-list { display: flex; flex-direction: column; gap: 8px; }
@@ -390,17 +395,20 @@
       }
     });
 
-    /* legenda discreta em chips */
+    /* legenda com valor absoluto e badge MENOR */
     const el = document.getElementById('donut-legend');
     el.innerHTML = '';
     sorted.forEach((c, i) => {
-      const pct = total > 0 ? (c.total / total * 100).toFixed(1) : '0.0';
+      const isMenor = i === 0; // sorted do menor ao maior
       const chip = document.createElement('div');
-      chip.className = 'donut-chip';
+      chip.className = 'donut-chip' + (isMenor ? ' donut-chip-menor' : '');
       chip.innerHTML =
         '<div class="donut-chip-dot" style="background:' + colors[i] + '"></div>'
-        + '<span class="donut-chip-name">' + esc(c.titulo) + '</span>'
-        + '<span class="donut-chip-pct" style="color:' + colors[i] + '">' + pct + '%</span>';
+        + '<div class="donut-chip-info">'
+          + '<span class="donut-chip-name">' + esc(c.titulo) + '</span>'
+          + '<span class="donut-chip-val" style="color:' + colors[i] + '">R$ ' + fmtBRL(c.total) + '</span>'
+        + '</div>'
+        + (isMenor ? '<span class="donut-chip-menor-tag">MENOR</span>' : '');
       el.appendChild(chip);
     });
   }
@@ -474,16 +482,21 @@
           prodWrap.style.marginBottom = '4px';
         }
 
-        entries.forEach(e => {
-          const pct = maxVal > 0 ? (e.valor / maxVal * 100) : 0;
-          const row = document.createElement('div');
-          row.className = 'bar-row';
-          row.innerHTML =
-            '<div class="bar-label">' + esc(e.titulo) + '</div>'
-            + '<div class="bar-track"><div class="bar-fill" style="width:' + Math.max(pct,3).toFixed(1) + '%;background:' + e.color + '"></div></div>'
+        const minEntryVal = Math.min(...entries.map(e => e.valor));
+        entries.forEach((e, eIdx) => {
+          const pct      = maxVal > 0 ? (e.valor / maxVal * 100) : 0;
+          const isMenor  = entries.length > 1 && eIdx === 0; // entries sorted by sorted cotacoes (menor first)
+          const barColor = isMenor ? '#22c55e' : e.color;
+          const row      = document.createElement('div');
+          row.className  = 'bar-row' + (isMenor ? ' bar-row-menor' : '');
+          row.innerHTML  =
+            '<div class="bar-label-wrap">'
+              + '<div class="bar-label" style="color:' + (isMenor ? '#22c55e' : 'var(--text)') + '">' + esc(e.titulo) + '</div>'
+              + (isMenor ? '<div class="bar-menor-tag">menor preço</div>' : '')
+            + '</div>'
+            + '<div class="bar-track"><div class="bar-fill" style="width:' + Math.max(pct,3).toFixed(1) + '%;background:' + barColor + '"></div></div>'
             + '<div class="bar-right">'
-              + '<span class="bar-pct" style="color:' + e.color + '">' + pct.toFixed(0) + '%</span>'
-              + '<span class="bar-val" style="color:' + e.color + '">R$ ' + fmtBRL(e.valor) + '</span>'
+              + '<span class="bar-val" style="color:' + barColor + ';font-weight:' + (isMenor?900:700) + '">R$ ' + fmtBRL(e.valor) + '</span>'
             + '</div>';
           prodWrap.appendChild(row);
         });
@@ -588,9 +601,17 @@
     if (!dataEncoded) { showError('Dados não encontrados', 'Parâmetro "data" não encontrado na URL.'); return; }
 
     try {
-      payload = JSON.parse(decodeURIComponent(escape(atob(dataEncoded))));
+      // Suporte a UTF-8: tenta TextDecoder (moderno) e fallback para escape/unescape
+      let jsonStr;
+      try {
+        const bytes = Uint8Array.from(atob(dataEncoded), c => c.charCodeAt(0));
+        jsonStr = new TextDecoder('utf-8').decode(bytes);
+      } catch(_) {
+        jsonStr = decodeURIComponent(escape(atob(dataEncoded)));
+      }
+      payload = JSON.parse(jsonStr);
     } catch(e) {
-      showError('Erro ao decodificar', 'Link corrompido. Solicite um novo ao consultor.'); return;
+      showError('Erro ao decodificar', 'Link corrompido ou muito longo. Solicite um novo ao consultor.'); return;
     }
 
     if (!payload.cotacoes || payload.cotacoes.length < 2) {
