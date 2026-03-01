@@ -462,14 +462,6 @@ async function rpc(fn, params) {
   return r.json();
 }
 
-async function sbFrom(table, query) {
-  const r = await fetch(SUPABASE_URL + '/rest/v1/' + table + '?' + query, {
-    headers: { apikey: SUPABASE_ANON, Authorization: 'Bearer ' + SUPABASE_ANON },
-  });
-  if (!r.ok) return [];
-  return r.json();
-}
-
 function showError(msg) {
   document.getElementById('state-loading').style.display = 'none';
   document.getElementById('state-error').style.display = 'flex';
@@ -820,6 +812,24 @@ function setRecusado(ts) {
 }
 
 /* ═══════════════════════════════════════════════════════
+   REST HELPER — query direta nas tabelas do Supabase
+═══════════════════════════════════════════════════════ */
+async function sbGet(table, params) {
+  const qs = Object.entries(params)
+    .map(([k, v]) => encodeURIComponent(k) + '=' + encodeURIComponent(v))
+    .join('&');
+  const r = await fetch(SUPABASE_URL + '/rest/v1/' + table + '?' + qs, {
+    headers: {
+      apikey: SUPABASE_ANON,
+      Authorization: 'Bearer ' + SUPABASE_ANON,
+      Accept: 'application/json',
+    },
+  });
+  if (!r.ok) return [];
+  return r.json();
+}
+
+/* ═══════════════════════════════════════════════════════
    MAIN
 ═══════════════════════════════════════════════════════ */
 async function main() {
@@ -828,105 +838,159 @@ async function main() {
   if (!token) { showError('Token não encontrado na URL.'); return; }
 
   try {
-    /* 1. Dados da cotação */
-    const cotRows = await rpc('get_cotacao_by_token', { p_token: token });
-    if (!cotRows || cotRows.length === 0) { showError('Cotação não encontrada.'); return; }
-    cotacao = cotRows[0];
+    /* ── 1. Busca a cotação pelo approval_token (campo do banco) ── */
+    const cotacoes = await sbGet('cotacoes', {
+      select: 'id,titulo,status,created_at,consultor_id,fazenda_id,talhao_id,area_ha,aceite_em,approved_at,excel_itens_json',
+      approval_token: 'eq.' + token,
+      limit: 1,
+    });
 
-    /* 2. Consultor / Empresa */
-    let consultorNome = '—', companyName = '', phone = '', logoUrl = '';
-    try {
-      const p = await rpc('get_profile_name', { p_id: cotacao.consultor_id });
-      if (p && p[0]) {
-        consultorNome = p[0].full_name    || '—';
-        companyName   = p[0].company_name || '';
-        phone         = p[0].phone        || '';
-        logoUrl       = p[0].company_logo_url || '';
-      }
-    } catch (_) {}
-
-    /* 3. Fazenda */
-    let fazendaNome = '—', produtorNome = '', municipio = '', estado = '';
-    if (cotacao.fazenda_id) {
+    /* Fallback: tenta o token como share_token também */
+    let cotRow = cotacoes[0];
+    if (!cotRow) {
+      const alt = await sbGet('cotacoes', {
+        select: 'id,titulo,status,created_at,consultor_id,fazenda_id,talhao_id,area_ha,aceite_em,approved_at,excel_itens_json',
+        share_token: 'eq.' + token,
+        limit: 1,
+      });
+      cotRow = alt[0];
+    }
+    /* Fallback 2: tenta via RPC antigo */
+    if (!cotRow) {
       try {
-        const f = await rpc('get_fazenda_by_id', { p_id: cotacao.fazenda_id });
-        if (f && f[0]) {
-          fazendaNome  = f[0].nome          || '—';
-          produtorNome = f[0].produtor_nome  || '';
-          municipio    = f[0].municipio      || '';
-          estado       = f[0].estado         || '';
+        const rpcRows = await rpc('get_cotacao_by_token', { p_token: token });
+        cotRow = rpcRows && rpcRows[0];
+      } catch (_) {}
+    }
+
+    if (!cotRow) { showError('Cotação não encontrada. Verifique o link.'); return; }
+    cotacao = cotRow;
+
+    console.log('[Agrocota] cotação carregada:', cotacao.id, '| status:', cotacao.status);
+
+    /* ── 2. Consultor / Empresa — direto na tabela profiles ── */
+    let consultorNome = '—', companyName = '', phone = '', logoUrl = '';
+    if (cotacao.consultor_id) {
+      try {
+        const profiles = await sbGet('profiles', {
+          select: 'full_name,company_name,phone,company_logo_url',
+          id: 'eq.' + cotacao.consultor_id,
+          limit: 1,
+        });
+        if (profiles[0]) {
+          consultorNome = profiles[0].full_name         || '—';
+          companyName   = profiles[0].company_name      || '';
+          phone         = profiles[0].phone             || '';
+          logoUrl       = profiles[0].company_logo_url  || '';
         }
       } catch (_) {}
     }
 
+    /* ── 3. Fazenda — direto na tabela fazendas ── */
+    let fazendaNome = '—', produtorNome = '', municipio = '', estado = '';
+    if (cotacao.fazenda_id) {
+      try {
+        const fazendas = await sbGet('fazendas', {
+          select: 'nome,produtor_nome,municipio,estado',
+          id: 'eq.' + cotacao.fazenda_id,
+          limit: 1,
+        });
+        if (fazendas[0]) {
+          fazendaNome  = fazendas[0].nome          || '—';
+          produtorNome = fazendas[0].produtor_nome || '';
+          municipio    = fazendas[0].municipio     || '';
+          estado       = fazendas[0].estado        || '';
+        }
+      } catch (_) {}
+    }
     const localizacao = [municipio, estado].filter(Boolean).join(' - ');
 
-    /* 4. Área */
-    const areaManual  = Number(cotacao.area_ha || 0);
-    const areaTalhao  = Number(cotacao.talhao_area_ha || 0);
-    const areaFinal   = areaManual > 0 ? areaManual : (areaTalhao > 0 ? areaTalhao : 0);
+    /* ── 4. Talhão — para pegar area_ha quando não estiver na cotação ── */
+    let talhaoAreaHa = 0;
+    if (cotacao.talhao_id) {
+      try {
+        const talhoes = await sbGet('talhoes', {
+          select: 'area_ha',
+          id: 'eq.' + cotacao.talhao_id,
+          limit: 1,
+        });
+        if (talhoes[0]) talhaoAreaHa = Number(talhoes[0].area_ha || 0);
+      } catch (_) {}
+    }
+
+    /* ── 5. Área final (mesma lógica do CotacaoGraficosScreen) ── */
+    const areaManual = Number(cotacao.area_ha || 0);
+    const areaFinal  = areaManual > 0 ? areaManual : (talhaoAreaHa > 0 ? talhaoAreaHa : 0);
     areaFactor = areaFinal > 0 ? areaFinal : 1;
 
-    /* 5. Itens — busca direta na tabela para garantir TODOS os campos */
+    /* ── 6. Itens — busca REST direta com TODOS os campos ── */
     const COLS = [
       'id','produto_nome','fornecedor','categoria',
       'valor_ha','dose_ha','unidade',
       'principio_ativo','fonte',
       'estagio','n_aplicacoes','obs',
-      'alvo','tecnologia','grupo_alvo','campo_adicional',
     ].join(',');
 
-    const itensRes = await fetch(
-      SUPABASE_URL + '/rest/v1/itens_cotacao'
-        + '?select=' + COLS
-        + '&cotacao_id=eq.' + encodeURIComponent(cotacao.id)
-        + '&order=categoria.asc,produto_nome.asc',
-      { headers: { apikey: SUPABASE_ANON, Authorization: 'Bearer ' + SUPABASE_ANON } }
-    );
-    const rawItens = itensRes.ok ? await itensRes.json() : [];
+    const rawItens = await sbGet('itens_cotacao', {
+      select: COLS,
+      cotacao_id: 'eq.' + cotacao.id,
+      order: 'categoria.asc,produto_nome.asc',
+    });
 
-    /* Tenta complementar com excel_itens_json (fallback caso PA/Fonte venham de lá) */
+    /* Tenta buscar colunas extras (podem não existir no schema) */
+    let extrasMap = {};
+    try {
+      const extras = await sbGet('itens_cotacao', {
+        select: 'id,alvo,tecnologia,grupo_alvo,campo_adicional',
+        cotacao_id: 'eq.' + cotacao.id,
+      });
+      extras.forEach(r => { extrasMap[r.id] = r; });
+    } catch (_) {}
+
+    /* Fallback PA/Fonte do excel_itens_json salvo na cotação */
     const excelJson = Array.isArray(cotacao.excel_itens_json) ? cotacao.excel_itens_json : [];
     const excelByNome = {};
-    excelJson.forEach(x => { if (x.nome || x.produto) excelByNome[(x.nome || x.produto).trim()] = x; });
+    excelJson.forEach(x => {
+      const nome = (x.nome || x.produto || '').trim();
+      if (nome) excelByNome[nome] = x;
+    });
 
     allItens = (rawItens || []).map(it => {
-      const ex = excelByNome[String(it.produto_nome || '').trim()] || {};
+      const ex  = excelByNome[String(it.produto_nome || '').trim()] || {};
+      const ext = extrasMap[it.id] || {};
       return {
         ...it,
-        /* Garante PA e Fonte: coluna do banco tem prioridade, senão fallback do excel_json */
-        principio_ativo: it.principio_ativo || ex.ia || ex.principio_ativo || null,
-        fonte:           it.fonte           || ex.fonte || null,
-        valor_ha:        Number(it.valor_ha || 0) * areaFactor,
+        principio_ativo:  it.principio_ativo || ex.ia || ex.principio_ativo || null,
+        fonte:            it.fonte           || ex.fonte || null,
+        alvo:             ext.alvo            || ex.alvo || null,
+        tecnologia:       ext.tecnologia      || ex.tecnologia || null,
+        grupo_alvo:       ext.grupo_alvo      || null,
+        campo_adicional:  ext.campo_adicional || null,
+        valor_ha:         Number(it.valor_ha  || 0) * areaFactor,
       };
     });
 
-    /* DEBUG — abre o console do navegador para verificar se PA/Fonte chegaram */
-    if (allItens.length > 0) {
-      console.log('[Agrocota] Amostra do 1º item:', JSON.stringify({
-        produto_nome:    allItens[0].produto_nome,
-        principio_ativo: allItens[0].principio_ativo,
-        fonte:           allItens[0].fonte,
-        categoria:       allItens[0].categoria,
-        valor_ha:        allItens[0].valor_ha,
-      }, null, 2));
-    }
+    console.log('[Agrocota]', allItens.length, 'itens carregados. Amostra:', {
+      produto_nome:    allItens[0]?.produto_nome,
+      principio_ativo: allItens[0]?.principio_ativo,
+      fonte:           allItens[0]?.fonte,
+      valor_ha:        allItens[0]?.valor_ha,
+    });
 
-    /* 6. Pré-inicializa cores na ordem alfabética (igual ao PDF) */
+    /* ── 7. Inicializa cores alfabéticas (igual ao PDF) ── */
     const cats = [...new Set(allItens.map(it => it.categoria || 'Insumo'))];
     initCatColors(cats);
 
-    /* 7. Logo */
-    const logoBox = document.getElementById('logo-box');
+    /* ── 8. Logo ── */
     if (logoUrl) {
-      logoBox.innerHTML = `<img src="${esc(logoUrl)}" alt="Logo" />`;
+      document.getElementById('logo-box').innerHTML = `<img src="${esc(logoUrl)}" alt="Logo" />`;
     }
 
-    /* 8. Título */
+    /* ── 9. Título ── */
     document.title = cotacao.titulo || 'Cotação Agrocota';
     document.getElementById('meta-titulo').textContent = cotacao.titulo || 'Cotação';
 
-    /* 9. Metadados (como no header do PDF) */
+    /* ── 10. Grid de metadados ── */
     addMeta('Fazenda', fazendaNome, true);
     if (produtorNome) addMeta('Produtor', produtorNome, true);
     if (areaFinal > 0) addMeta('Área', fmtBRL(areaFinal) + ' ha');
@@ -935,17 +999,15 @@ async function main() {
     if (companyName) addMeta('Empresa', companyName);
     if (localizacao) addMeta('Localização', localizacao, true);
 
-    /* 10. WhatsApp */
+    /* ── 11. WhatsApp ── */
     if (phone) {
       const wa = document.getElementById('whatsapp-btn');
-      const phoneFmt = formatBrPhone(phone);
-      const waBr = normBrPhone(phone);
-      wa.href = 'https://wa.me/' + waBr;
-      document.getElementById('whatsapp-phone').textContent = phoneFmt;
+      wa.href = 'https://wa.me/' + normBrPhone(phone);
+      document.getElementById('whatsapp-phone').textContent = formatBrPhone(phone);
       wa.style.display = 'inline-flex';
     }
 
-    /* 11. Status atual */
+    /* ── 12. Status (aceite/recusa já registrado) ── */
     const aceiteEm = cotacao.aceite_em || cotacao.approved_at;
     if (cotacao.status === 'recusada') {
       setRecusado(aceiteEm || new Date().toISOString());
@@ -953,16 +1015,16 @@ async function main() {
       setAprovado(aceiteEm || new Date().toISOString());
     }
 
-    /* 12. Renderiza */
+    /* ── 13. Renderiza conteúdo ── */
     renderProdutos(allItens);
     sync(allItens);
 
-    /* 13. Mostra app */
+    /* ── 14. Exibe app ── */
     document.getElementById('state-loading').style.display = 'none';
     document.getElementById('app').style.display = 'block';
 
   } catch (e) {
-    console.error(e);
+    console.error('[Agrocota] Erro fatal:', e);
     showError('Erro ao carregar os dados.');
   }
 }
