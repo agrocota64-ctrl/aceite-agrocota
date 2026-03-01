@@ -609,10 +609,10 @@ function renderProdutos(itens) {
 
       /* Referência para chips de produto (PA, Fonte) — usa o primeiro item */
       const ref = sorted[0];
-      const pa    = ref.principio_ativo || '';
-      const fonte = ref.fonte || '';
-      const paChip    = pa    ? `<span class="chip-pa">P.A.: ${esc(pa)}</span>`       : '';
-      const fonteChip = fonte ? `<span class="chip-fonte">Fonte: ${esc(fonte)}</span>` : '';
+      const pa    = String(ref.principio_ativo || '').trim();
+      const fonte = String(ref.fonte           || '').trim();
+      const paChip    = pa.length    ? `<span class="chip-pa">P.A.: ${esc(pa)}</span>`       : '';
+      const fonteChip = fonte.length ? `<span class="chip-fonte">Fonte: ${esc(fonte)}</span>` : '';
 
       /* Badges extras do produto (estadio, aplicações, alvo, tecnologia, obs, campo_adicional) */
       const extraBadges = [
@@ -867,12 +867,50 @@ async function main() {
     const areaFinal   = areaManual > 0 ? areaManual : (areaTalhao > 0 ? areaTalhao : 0);
     areaFactor = areaFinal > 0 ? areaFinal : 1;
 
-    /* 5. Itens */
-    const rawItens = await rpc('get_itens_by_cotacao', { p_cotacao_id: cotacao.id });
-    allItens = (rawItens || []).map(it => ({
-      ...it,
-      valor_ha: Number(it.valor_ha || 0) * areaFactor,
-    }));
+    /* 5. Itens — busca direta na tabela para garantir TODOS os campos */
+    const COLS = [
+      'id','produto_nome','fornecedor','categoria',
+      'valor_ha','dose_ha','unidade',
+      'principio_ativo','fonte',
+      'estagio','n_aplicacoes','obs',
+      'alvo','tecnologia','grupo_alvo','campo_adicional',
+    ].join(',');
+
+    const itensRes = await fetch(
+      SUPABASE_URL + '/rest/v1/itens_cotacao'
+        + '?select=' + COLS
+        + '&cotacao_id=eq.' + encodeURIComponent(cotacao.id)
+        + '&order=categoria.asc,produto_nome.asc',
+      { headers: { apikey: SUPABASE_ANON, Authorization: 'Bearer ' + SUPABASE_ANON } }
+    );
+    const rawItens = itensRes.ok ? await itensRes.json() : [];
+
+    /* Tenta complementar com excel_itens_json (fallback caso PA/Fonte venham de lá) */
+    const excelJson = Array.isArray(cotacao.excel_itens_json) ? cotacao.excel_itens_json : [];
+    const excelByNome = {};
+    excelJson.forEach(x => { if (x.nome || x.produto) excelByNome[(x.nome || x.produto).trim()] = x; });
+
+    allItens = (rawItens || []).map(it => {
+      const ex = excelByNome[String(it.produto_nome || '').trim()] || {};
+      return {
+        ...it,
+        /* Garante PA e Fonte: coluna do banco tem prioridade, senão fallback do excel_json */
+        principio_ativo: it.principio_ativo || ex.ia || ex.principio_ativo || null,
+        fonte:           it.fonte           || ex.fonte || null,
+        valor_ha:        Number(it.valor_ha || 0) * areaFactor,
+      };
+    });
+
+    /* DEBUG — abre o console do navegador para verificar se PA/Fonte chegaram */
+    if (allItens.length > 0) {
+      console.log('[Agrocota] Amostra do 1º item:', JSON.stringify({
+        produto_nome:    allItens[0].produto_nome,
+        principio_ativo: allItens[0].principio_ativo,
+        fonte:           allItens[0].fonte,
+        categoria:       allItens[0].categoria,
+        valor_ha:        allItens[0].valor_ha,
+      }, null, 2));
+    }
 
     /* 6. Pré-inicializa cores na ordem alfabética (igual ao PDF) */
     const cats = [...new Set(allItens.map(it => it.categoria || 'Insumo'))];
