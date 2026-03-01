@@ -150,28 +150,28 @@
     .cat-detail-table tr.highlight-min td { background: rgba(34,197,94,.04); }
     .cat-detail-table tr.highlight-max td { background: rgba(239,68,68,.03); }
     .prod-name-cell { font-weight: 800; font-size: .85rem; color: var(--text); margin-bottom: 5px; }
-    /* Chips P.A. e Fonte dentro da célula do produto */
+    /* ── Linha de chips horizontais ── */
+    .chips-row { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 5px; align-items: center; }
     .chip-pa {
-      display: inline-flex; align-items: center; gap: 4px;
-      background: #022710; border: 1px solid rgba(34,197,94,.25);
-      color: #4ade80; padding: 2px 8px; border-radius: 5px;
-      font-size: .6rem; font-weight: 800; margin-right: 4px; margin-top: 4px;
+      display: inline-flex; align-items: center;
+      background: #022710; border: 1px solid rgba(34,197,94,.3);
+      color: #4ade80; padding: 2px 7px; border-radius: 4px;
+      font-size: .57rem; font-weight: 800; white-space: nowrap;
     }
     .chip-fonte {
-      display: inline-flex; align-items: center; gap: 4px;
-      background: #0f172a; border: 1px solid rgba(96,165,250,.25);
-      color: #60a5fa; padding: 2px 8px; border-radius: 5px;
-      font-size: .6rem; font-weight: 800; margin-right: 4px; margin-top: 4px;
+      display: inline-flex; align-items: center;
+      background: #0f172a; border: 1px solid rgba(96,165,250,.3);
+      color: #60a5fa; padding: 2px 7px; border-radius: 4px;
+      font-size: .57rem; font-weight: 800; white-space: nowrap;
     }
-    /* Badges extras (estadio, aplicações, alvo, obs, tecnologia, campo_adicional) */
     .badge {
       display: inline-flex; align-items: center; gap: 3px;
       background: var(--surface2); border: 1px solid var(--border2);
-      color: var(--text-mid); padding: 2px 7px; border-radius: 5px;
-      font-size: .58rem; font-weight: 700; margin-right: 4px; margin-top: 4px;
+      color: var(--text-mid); padding: 2px 7px; border-radius: 4px;
+      font-size: .57rem; font-weight: 600; white-space: nowrap;
     }
     .badge b { color: var(--text); font-weight: 700; }
-    .badge-key { opacity: .7; font-size: .52rem; text-transform: uppercase; letter-spacing: .06em; }
+    .badge-key { opacity: .6; font-size: .52rem; text-transform: uppercase; letter-spacing: .05em; }
     /* Fornecedor + badges por linha */
     .forn-cell { font-size: .82rem; font-weight: 700; color: var(--text); }
     .badge-menor { display: inline-block; font-size: .52rem; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; padding: 2px 7px; border-radius: 5px; background: var(--primary); color: #000; margin-left: 6px; }
@@ -617,10 +617,10 @@ function renderProdutos(itens) {
         ref.obs           ? buildBadge('Obs',      ref.obs)                              : '',
       ].filter(Boolean).join('');
 
+      const todosChips = [paChip, fonteChip, extraBadges].filter(Boolean).join('');
       const prodCellHtml = `
         <div class="prod-name-cell">${esc(nome)}</div>
-        ${(paChip || fonteChip) ? '<div style="margin-top:4px">' + paChip + fonteChip + '</div>' : ''}
-        ${extraBadges ? '<div style="margin-top:4px">' + extraBadges + '</div>' : ''}
+        ${todosChips ? '<div class="chips-row">' + todosChips + '</div>' : ''}
       `;
 
       sorted.forEach((it, opIdx) => {
