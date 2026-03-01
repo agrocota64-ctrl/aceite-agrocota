@@ -150,26 +150,20 @@
     .cat-detail-table tr.highlight-min td { background: rgba(34,197,94,.04); }
     .cat-detail-table tr.highlight-max td { background: rgba(239,68,68,.03); }
     .prod-name-cell { font-weight: 800; font-size: .85rem; color: var(--text); margin-bottom: 5px; }
-    /* ── Linha de chips horizontais ── */
-    .chips-row { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 5px; align-items: center; }
-    .chip-pa {
-      display: inline-flex; align-items: center;
-      background: #022710; border: 1px solid rgba(34,197,94,.3);
-      color: #4ade80; padding: 2px 7px; border-radius: 4px;
-      font-size: .57rem; font-weight: 800; white-space: nowrap;
+    /* ── Chips inline ── */
+    .chips-row {
+      display: flex !important; flex-direction: row !important;
+      flex-wrap: wrap; gap: 4px; margin-top: 6px; align-items: center;
     }
-    .chip-fonte {
-      display: inline-flex; align-items: center;
-      background: #0f172a; border: 1px solid rgba(96,165,250,.3);
-      color: #60a5fa; padding: 2px 7px; border-radius: 4px;
-      font-size: .57rem; font-weight: 800; white-space: nowrap;
+    .chip-pa, .chip-fonte, .badge {
+      display: inline-flex !important; align-items: center; gap: 3px;
+      padding: 2px 7px; border-radius: 4px;
+      font-size: .57rem; font-weight: 700; white-space: nowrap; line-height: 1.4;
     }
-    .badge {
-      display: inline-flex; align-items: center; gap: 3px;
-      background: var(--surface2); border: 1px solid var(--border2);
-      color: var(--text-mid); padding: 2px 7px; border-radius: 4px;
-      font-size: .57rem; font-weight: 600; white-space: nowrap;
-    }
+    .chip-pa   { background: #022710; border: 1px solid rgba(34,197,94,.35); color: #4ade80; }
+    .chip-fonte { background: #0f172a; border: 1px solid rgba(96,165,250,.35); color: #60a5fa; }
+    .badge     { background: var(--surface2); border: 1px solid var(--border2); color: var(--text); }
+    .ck { opacity: .55; font-size: .5rem; text-transform: uppercase; letter-spacing: .06em; margin-right: 2px; }
     .badge b { color: var(--text); font-weight: 700; }
     .badge-key { opacity: .6; font-size: .52rem; text-transform: uppercase; letter-spacing: .05em; }
     /* Fornecedor + badges por linha */
@@ -528,11 +522,6 @@ function calcTotais(itens) {
 /* ═══════════════════════════════════════════════════════
    RENDER PRODUTOS — estrutura de tabela igual ao PDF
 ═══════════════════════════════════════════════════════ */
-function buildBadge(label, value) {
-  if (!value && value !== 0) return '';
-  return '<span class="badge"><span class="badge-key">' + esc(label) + '</span> <b>' + esc(String(value)) + '</b></span>';
-}
-
 function renderProdutos(itens) {
   /* 1. Agrupa por categoria → produto */
   const byCat = {};
@@ -601,27 +590,22 @@ function renderProdutos(itens) {
 
       /* Referência para chips de produto (PA, Fonte) — usa o primeiro item */
       const ref = sorted[0];
+      /* Monta array de chips — todos inline num único flex row */
+      const chipsArr = [];
       const pa    = String(ref.principio_ativo || '').trim();
       const fonte = String(ref.fonte           || '').trim();
-      const paChip    = pa.length    ? `<span class="chip-pa">P.A.: ${esc(pa)}</span>`       : '';
-      const fonteChip = fonte.length ? `<span class="chip-fonte">Fonte: ${esc(fonte)}</span>` : '';
+      if (pa)                chipsArr.push('<span class="chip-pa"><span class="ck">P.A.</span> ' + esc(pa) + '</span>');
+      if (fonte)             chipsArr.push('<span class="chip-fonte"><span class="ck">Fonte</span> ' + esc(fonte) + '</span>');
+      if (ref.estagio)       chipsArr.push('<span class="badge"><span class="ck">Estádio</span> ' + esc(ref.estagio) + '</span>');
+      if (ref.n_aplicacoes)  chipsArr.push('<span class="badge"><span class="ck">Aplic.</span> ' + esc(ref.n_aplicacoes) + 'x</span>');
+      if (ref.alvo)          chipsArr.push('<span class="badge"><span class="ck">Alvo</span> ' + esc(ref.alvo) + '</span>');
+      if (ref.tecnologia)    chipsArr.push('<span class="badge"><span class="ck">Tecnol.</span> ' + esc(ref.tecnologia) + '</span>');
+      if (ref.grupo_alvo)    chipsArr.push('<span class="badge"><span class="ck">Grupo</span> ' + esc(ref.grupo_alvo) + '</span>');
+      if (ref.campo_adicional) chipsArr.push('<span class="badge"><span class="ck">Campo</span> ' + esc(ref.campo_adicional) + '</span>');
+      if (ref.obs)           chipsArr.push('<span class="badge"><span class="ck">Obs</span> ' + esc(ref.obs) + '</span>');
+      const chipsHtml = chipsArr.length ? '<div class="chips-row">' + chipsArr.join('') + '</div>' : '';
 
-      /* Badges extras do produto (estadio, aplicações, alvo, tecnologia, obs, campo_adicional) */
-      const extraBadges = [
-        ref.estagio       ? buildBadge('Estádio',  ref.estagio)                         : '',
-        ref.n_aplicacoes  ? buildBadge('Aplic.',   ref.n_aplicacoes + 'x')               : '',
-        ref.alvo          ? buildBadge('Alvo',     ref.alvo)                             : '',
-        ref.tecnologia    ? buildBadge('Tecnologia', ref.tecnologia)                     : '',
-        ref.grupo_alvo    ? buildBadge('Grupo Alvo', ref.grupo_alvo)                     : '',
-        ref.campo_adicional ? buildBadge('Campo',  ref.campo_adicional)                  : '',
-        ref.obs           ? buildBadge('Obs',      ref.obs)                              : '',
-      ].filter(Boolean).join('');
-
-      const todosChips = [paChip, fonteChip, extraBadges].filter(Boolean).join('');
-      const prodCellHtml = `
-        <div class="prod-name-cell">${esc(nome)}</div>
-        ${todosChips ? '<div class="chips-row">' + todosChips + '</div>' : ''}
-      `;
+      const prodCellHtml = '<div class="prod-name-cell">' + esc(nome) + '</div>' + chipsHtml;
 
       sorted.forEach((it, opIdx) => {
         const isMin = nOps > 1 && Number(it.valor_ha || 0) === minVal;
