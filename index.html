@@ -134,47 +134,64 @@
     .legend-bar { height: 100%; border-radius: 99px; }
     .legend-val { font-family: 'JetBrains Mono', monospace; font-size: .72rem; font-weight: 700; min-width: 88px; text-align: right; }
 
-    /* ── CATEGORIA TABLE BLOCK (like PDF) ── */
-    .cat-detail-wrapper { margin-bottom: 8px; border-radius: 14px; overflow: hidden; border: 1px solid var(--border); }
-    .cat-detail-header { padding: 10px 16px; color: #fff; font-size: .78rem; font-weight: 900; text-transform: uppercase; letter-spacing: .08em; display: flex; align-items: center; justify-content: space-between; }
-    .cat-detail-header-right { font-size: .7rem; font-weight: 700; opacity: .85; }
-    .cat-detail-table { width: 100%; border-collapse: collapse; }
-    .cat-detail-table th {
-      background: #111; font-size: .58rem; color: var(--text-mid);
-      padding: 7px 14px; text-transform: uppercase; letter-spacing: .06em;
-      border-bottom: 1px solid var(--border); text-align: left; white-space: nowrap;
+    /* ── CATEGORIA CARDS ── */
+    .cat-block { margin-bottom: 16px; border-radius: 16px; overflow: hidden; border: 1px solid var(--border); }
+    .cat-block-header {
+      padding: 11px 16px; color: #fff;
+      display: flex; align-items: center; justify-content: space-between; gap: 8px;
     }
-    .cat-detail-table th.num { text-align: right; }
-    .cat-detail-table td { padding: 9px 14px; border-bottom: 1px solid var(--border); font-size: .8rem; color: var(--text); vertical-align: top; }
-    .cat-detail-table tr:last-child td { border-bottom: none; }
-    .cat-detail-table tr.highlight-min td { background: rgba(34,197,94,.04); }
-    .cat-detail-table tr.highlight-max td { background: rgba(239,68,68,.03); }
-    .prod-name-cell { font-weight: 800; font-size: .85rem; color: var(--text); margin-bottom: 5px; }
-    /* ── Chips inline ── */
-    .chips-row {
-      display: flex !important; flex-direction: row !important;
-      flex-wrap: wrap; gap: 4px; margin-top: 6px; align-items: center;
-    }
-    .chip-pa, .chip-fonte, .badge {
-      display: inline-flex !important; align-items: center; gap: 3px;
-      padding: 2px 7px; border-radius: 4px;
-      font-size: .57rem; font-weight: 700; white-space: nowrap; line-height: 1.4;
-    }
-    .chip-pa   { background: #022710; border: 1px solid rgba(34,197,94,.35); color: #4ade80; }
-    .chip-fonte { background: #0f172a; border: 1px solid rgba(96,165,250,.35); color: #60a5fa; }
-    .badge     { background: var(--surface2); border: 1px solid var(--border2); color: var(--text); }
-    .ck { opacity: .55; font-size: .5rem; text-transform: uppercase; letter-spacing: .06em; margin-right: 2px; }
-    .badge b { color: var(--text); font-weight: 700; }
-    .badge-key { opacity: .6; font-size: .52rem; text-transform: uppercase; letter-spacing: .05em; }
-    /* Fornecedor + badges por linha */
-    .forn-cell { font-size: .82rem; font-weight: 700; color: var(--text); }
-    .badge-menor { display: inline-block; font-size: .52rem; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; padding: 2px 7px; border-radius: 5px; background: var(--primary); color: #000; margin-left: 6px; }
-    .badge-maior { display: inline-block; font-size: .52rem; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; padding: 2px 7px; border-radius: 5px; background: rgba(239,68,68,.15); color: var(--red); border: 1px solid rgba(239,68,68,.3); margin-left: 6px; }
-    .num { text-align: right; font-variant-numeric: tabular-nums; font-family: 'JetBrains Mono', monospace; }
-    .val-strong { font-size: .88rem; font-weight: 800; }
+    .cat-block-title { font-size: .78rem; font-weight: 900; text-transform: uppercase; letter-spacing: .08em; }
+    .cat-block-meta  { font-size: .68rem; font-weight: 700; opacity: .85; white-space: nowrap; }
 
-    /* Rowspan-style product name grouping */
-    td.prod-group-cell { border-right: 1px solid var(--border); min-width: 160px; }
+    /* Produto: card com nome + chips + lista de opções */
+    .prod-card { background: var(--surface); border-bottom: 1px solid var(--border); padding: 12px 14px; }
+    .prod-card:last-child { border-bottom: none; }
+    .prod-card-name { font-size: .88rem; font-weight: 800; color: var(--text); margin-bottom: 6px; }
+
+    /* Chips inline — P.A., Fonte, Estádio, Aplic., etc */
+    .chips-row { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px; }
+    .chip-pa {
+      display: inline-flex; align-items: center; gap: 3px;
+      background: #022710; border: 1px solid rgba(34,197,94,.4);
+      color: #4ade80; padding: 3px 8px; border-radius: 5px;
+      font-size: .6rem; font-weight: 700;
+    }
+    .chip-fonte {
+      display: inline-flex; align-items: center; gap: 3px;
+      background: #0f172a; border: 1px solid rgba(96,165,250,.4);
+      color: #60a5fa; padding: 3px 8px; border-radius: 5px;
+      font-size: .6rem; font-weight: 700;
+    }
+    .chip-badge {
+      display: inline-flex; align-items: center; gap: 3px;
+      background: var(--surface2); border: 1px solid var(--border2);
+      color: var(--text-mid); padding: 3px 8px; border-radius: 5px;
+      font-size: .6rem; font-weight: 600;
+    }
+    .chip-badge b { color: var(--text); font-weight: 700; }
+    .ck { opacity: .55; font-size: .52rem; text-transform: uppercase; letter-spacing: .06em; }
+
+    /* Cada opção de fornecedor dentro do card */
+    .op-row {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 8px; padding: 7px 0;
+      border-top: 1px solid var(--border);
+    }
+    .op-row:first-of-type { margin-top: 2px; }
+    .op-left  { flex: 1; min-width: 0; }
+    .op-forn  { font-size: .78rem; font-weight: 700; color: var(--text); }
+    .op-dose  { font-size: .65rem; color: var(--text-mid); margin-top: 2px; }
+    .op-right { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; flex-shrink: 0; }
+    .op-val   { font-family: 'JetBrains Mono', monospace; font-size: .92rem; font-weight: 800; }
+    .badge-menor {
+      font-size: .5rem; font-weight: 900; letter-spacing: .08em; text-transform: uppercase;
+      padding: 2px 6px; border-radius: 4px; background: var(--primary); color: #000;
+    }
+    .badge-maior {
+      font-size: .5rem; font-weight: 900; letter-spacing: .08em; text-transform: uppercase;
+      padding: 2px 6px; border-radius: 4px;
+      background: rgba(239,68,68,.12); color: var(--red); border: 1px solid rgba(239,68,68,.3);
+    }
 
     /* ── STICKY FOOTER ── */
     .sticky-footer {
@@ -253,7 +270,7 @@
       .chart-wrap, .meta-cell, .cat-detail-wrapper, .badge, .chip-pa, .chip-fonte { background: #f8f8f8 !important; border-color: #ddd !important; color: #111 !important; }
       .approved-card { background: #e8f5e9 !important; border-color: #4caf50 !important; }
       canvas { max-width: 160px !important; }
-      .cat-detail-wrapper, .cat-detail-table tr { break-inside: avoid; }
+      .cat-block, .prod-card { break-inside: avoid; }
     }
   </style>
 </head>
@@ -523,7 +540,7 @@ function calcTotais(itens) {
    RENDER PRODUTOS — estrutura de tabela igual ao PDF
 ═══════════════════════════════════════════════════════ */
 function renderProdutos(itens) {
-  /* 1. Agrupa por categoria → produto */
+  /* Agrupa por categoria → produto */
   const byCat = {};
   itens.forEach(it => {
     if (!it.produto_nome) return;
@@ -533,10 +550,10 @@ function renderProdutos(itens) {
     byCat[cat][it.produto_nome].push(it);
   });
 
-  /* 2. Ordena categorias pela soma mínima (maior primeiro — igual ao PDF) */
+  /* Ordena categorias pela soma mínima (maior primeiro) */
   const catEntries = Object.entries(byCat).map(([cat, prods]) => {
     const somaMin = Object.values(prods).reduce((s, opts) => {
-      const sv = [...opts].sort((a, b) => (a.valor_ha || 0) - (b.valor_ha || 0));
+      const sv = [...opts].sort((a, b) => (a.valor_ha||0) - (b.valor_ha||0));
       return s + Number(sv[0]?.valor_ha || 0);
     }, 0);
     return { cat, prods, somaMin };
@@ -550,106 +567,82 @@ function renderProdutos(itens) {
     const color = getCatColor(cat);
     const numProdutos = Object.keys(prods).length;
 
-    const wrapper = document.createElement('div');
-    wrapper.className = 'cat-detail-wrapper';
-    wrapper.style.marginBottom = '12px';
+    /* Bloco da categoria */
+    const block = document.createElement('div');
+    block.className = 'cat-block';
 
-    /* ── Cabeçalho da categoria (colorido) ── */
-    wrapper.innerHTML = `
-      <div class="cat-detail-header" style="background:${color}">
-        <span>${esc(cat)}</span>
-        <span class="cat-detail-header-right">${numProdutos} produto${numProdutos !== 1 ? 's' : ''} &nbsp;|&nbsp; R$ ${fmtBRL(somaMin)}</span>
-      </div>
-    `;
+    /* Cabeçalho colorido */
+    const hdr = document.createElement('div');
+    hdr.className = 'cat-block-header';
+    hdr.style.background = color;
+    hdr.innerHTML =
+      '<span class="cat-block-title">' + esc(cat) + '</span>' +
+      '<span class="cat-block-meta">' + numProdutos + ' produto' + (numProdutos !== 1 ? 's' : '') +
+      ' &nbsp;·&nbsp; R$ ' + fmtBRL(somaMin) + '</span>';
+    block.appendChild(hdr);
 
-    /* ── Tabela (Produto / Fornecedor / Dose / Valor/ha) ── */
-    const table = document.createElement('table');
-    table.className = 'cat-detail-table';
-    table.innerHTML = `
-      <thead>
-        <tr>
-          <th style="width:38%">Produto / P.A. / Detalhes</th>
-          <th style="width:28%">Fornecedor</th>
-          <th class="num" style="width:15%">Dose</th>
-          <th class="num" style="width:19%">Valor/ha</th>
-        </tr>
-      </thead>
-      <tbody id="tbody-${esc(cat.replace(/\s/g,'_'))}"></tbody>
-    `;
-
-    const tbody = table.querySelector('tbody');
-
-    /* Ordena produtos alfabeticamente */
+    /* Cards de produto */
     const prodEntries = Object.entries(prods).sort((a, b) => a[0].localeCompare(b[0]));
-
     prodEntries.forEach(([nome, opts]) => {
-      const sorted = [...opts].sort((a, b) => (a.valor_ha || 0) - (b.valor_ha || 0));
+      const sorted = [...opts].sort((a, b) => (a.valor_ha||0) - (b.valor_ha||0));
       const minVal = Number(sorted[0]?.valor_ha || 0);
-      const maxVal = Number(sorted[sorted.length - 1]?.valor_ha || 0);
-      const nOps   = sorted.length;
+      const maxVal = Number(sorted[sorted.length-1]?.valor_ha || 0);
+      const ref    = sorted[0];
 
-      /* Referência para chips de produto (PA, Fonte) — usa o primeiro item */
-      const ref = sorted[0];
-      /* Monta array de chips — todos inline num único flex row */
-      const chipsArr = [];
+      /* ── Chips do produto ── */
+      const chips = [];
       const pa    = String(ref.principio_ativo || '').trim();
-      const fonte = String(ref.fonte           || '').trim();
-      if (pa)                chipsArr.push('<span class="chip-pa"><span class="ck">P.A.</span> ' + esc(pa) + '</span>');
-      if (fonte)             chipsArr.push('<span class="chip-fonte"><span class="ck">Fonte</span> ' + esc(fonte) + '</span>');
-      if (ref.estagio)       chipsArr.push('<span class="badge"><span class="ck">Estádio</span> ' + esc(ref.estagio) + '</span>');
-      if (ref.n_aplicacoes)  chipsArr.push('<span class="badge"><span class="ck">Aplic.</span> ' + esc(ref.n_aplicacoes) + 'x</span>');
-      if (ref.alvo)          chipsArr.push('<span class="badge"><span class="ck">Alvo</span> ' + esc(ref.alvo) + '</span>');
-      if (ref.tecnologia)    chipsArr.push('<span class="badge"><span class="ck">Tecnol.</span> ' + esc(ref.tecnologia) + '</span>');
-      if (ref.grupo_alvo)    chipsArr.push('<span class="badge"><span class="ck">Grupo</span> ' + esc(ref.grupo_alvo) + '</span>');
-      if (ref.campo_adicional) chipsArr.push('<span class="badge"><span class="ck">Campo</span> ' + esc(ref.campo_adicional) + '</span>');
-      if (ref.obs)           chipsArr.push('<span class="badge"><span class="ck">Obs</span> ' + esc(ref.obs) + '</span>');
-      const chipsHtml = chipsArr.length ? '<div class="chips-row">' + chipsArr.join('') + '</div>' : '';
+      const fonte = String(ref.fonte || '').trim();
+      if (pa)                 chips.push('<span class="chip-pa"><span class="ck">P.A. </span>' + esc(pa) + '</span>');
+      if (fonte)              chips.push('<span class="chip-fonte"><span class="ck">Fonte </span>' + esc(fonte) + '</span>');
+      if (ref.estagio)        chips.push('<span class="chip-badge"><span class="ck">Estádio </span><b>' + esc(ref.estagio) + '</b></span>');
+      if (ref.n_aplicacoes)   chips.push('<span class="chip-badge"><span class="ck">Aplic. </span><b>' + esc(ref.n_aplicacoes) + 'x</b></span>');
+      if (ref.alvo)           chips.push('<span class="chip-badge"><span class="ck">Alvo </span><b>' + esc(ref.alvo) + '</b></span>');
+      if (ref.tecnologia)     chips.push('<span class="chip-badge"><span class="ck">Tecnol. </span><b>' + esc(ref.tecnologia) + '</b></span>');
+      if (ref.grupo_alvo)     chips.push('<span class="chip-badge"><span class="ck">Grupo </span><b>' + esc(ref.grupo_alvo) + '</b></span>');
+      if (ref.campo_adicional)chips.push('<span class="chip-badge"><span class="ck">Campo </span><b>' + esc(ref.campo_adicional) + '</b></span>');
+      if (ref.obs)            chips.push('<span class="chip-badge"><span class="ck">Obs </span><b>' + esc(ref.obs) + '</b></span>');
 
-      const prodCellHtml = '<div class="prod-name-cell">' + esc(nome) + '</div>' + chipsHtml;
+      /* ── Card do produto ── */
+      const card = document.createElement('div');
+      card.className = 'prod-card';
 
-      sorted.forEach((it, opIdx) => {
-        const isMin = nOps > 1 && Number(it.valor_ha || 0) === minVal;
-        const isMax = nOps > 1 && Number(it.valor_ha || 0) === maxVal && minVal !== maxVal;
+      let html = '<div class="prod-card-name">' + esc(nome) + '</div>';
+      if (chips.length) html += '<div class="chips-row">' + chips.join('') + '</div>';
 
-        const tr = document.createElement('tr');
-        if (isMin) tr.className = 'highlight-min';
-        if (isMax) tr.className = 'highlight-max';
-
-        const minBadge = isMin ? '<span class="badge-menor">Menor</span>' : '';
-        const maxBadge = isMax ? '<span class="badge-maior">Maior</span>' : '';
-
-        const doseStr = (it.dose_ha != null && it.dose_ha !== '' && it.dose_ha !== 0)
+      /* ── Opções de fornecedor ── */
+      sorted.forEach(it => {
+        const isMin = sorted.length > 1 && Number(it.valor_ha||0) === minVal;
+        const isMax = sorted.length > 1 && Number(it.valor_ha||0) === maxVal && minVal !== maxVal;
+        const forn  = (it.fornecedor === 'N/I' || !it.fornecedor) ? 'Fornecedor Direto' : it.fornecedor;
+        const dose  = (it.dose_ha != null && it.dose_ha !== 0)
           ? fmtBRL(Number(it.dose_ha)) + (it.unidade ? ' ' + it.unidade : '')
-          : '—';
+          : '';
 
-        const fornecedor = it.fornecedor === 'N/I' ? 'Fornecedor Direto' : (it.fornecedor || 'Fornecedor Direto');
-
-        if (opIdx === 0) {
-          tr.innerHTML = `
-            <td class="prod-group-cell" rowspan="${nOps}">${prodCellHtml}</td>
-            <td class="forn-cell">${esc(fornecedor)}${minBadge}${maxBadge}</td>
-            <td class="num" style="font-size:.8rem">${esc(doseStr)}</td>
-            <td class="num val-strong" style="color:${isMin ? 'var(--primary)' : (isMax ? 'var(--red)' : 'var(--text)')}">
-              R$ ${fmtBRL(it.valor_ha || 0)}
-            </td>
-          `;
-        } else {
-          tr.innerHTML = `
-            <td class="forn-cell">${esc(fornecedor)}${minBadge}${maxBadge}</td>
-            <td class="num" style="font-size:.8rem">${esc(doseStr)}</td>
-            <td class="num val-strong" style="color:${isMin ? 'var(--primary)' : (isMax ? 'var(--red)' : 'var(--text)')}">
-              R$ ${fmtBRL(it.valor_ha || 0)}
-            </td>
-          `;
-        }
-        tbody.appendChild(tr);
+        html += '<div class="op-row">' +
+          '<div class="op-left">' +
+            '<div class="op-forn">' + esc(forn) + '</div>' +
+            (dose ? '<div class="op-dose">Dose: ' + esc(dose) + '</div>' : '') +
+          '</div>' +
+          '<div class="op-right">' +
+            '<div class="op-val" style="color:' +
+              (isMin ? 'var(--primary)' : isMax ? 'var(--red)' : 'var(--text)') + '">' +
+              'R$ ' + fmtBRL(it.valor_ha || 0) +
+            '</div>' +
+            (isMin ? '<span class="badge-menor">Menor</span>' : '') +
+            (isMax ? '<span class="badge-maior">Maior</span>' : '') +
+          '</div>' +
+        '</div>';
       });
+
+      card.innerHTML = html;
+      block.appendChild(card);
     });
 
-    wrapper.appendChild(table);
-    container.appendChild(wrapper);
+    container.appendChild(block);
   });
 }
+
 
 /* ═══════════════════════════════════════════════════════
    SYNC — atualiza totais, legenda, gráfico
