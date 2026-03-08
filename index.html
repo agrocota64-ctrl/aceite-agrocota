@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>Agrocota – Painel de Decisão</title>
+  <title>OAgroCota – Painel de Decisão</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet" />
@@ -287,7 +287,7 @@
 
 <div id="app" style="display:none">
   <div class="top-bar">
-    <span class="brand">Agrocota</span>
+    <span class="brand">OAgroCota</span>
     <div class="top-bar-right">
       <button class="btn-pdf" onclick="window.print()">Baixar PDF</button>
       <span class="status-pill pendente" id="status-pill">Aguardando aceite</span>
@@ -400,7 +400,7 @@
   </div>
 </div>
 
-<footer class="page-footer">Agrocota 2025 — Plataforma de Decisão Agrícola</footer>
+<footer class="page-footer">OAgroCota 2025 — Plataforma de Decisão Agrícola</footer>
 
 <script>
 /* ═══════════════════════════════════════════════════════
@@ -843,7 +843,7 @@ async function main() {
     if (!cotRow) { showError('Cotação não encontrada. Verifique o link.'); return; }
     cotacao = cotRow;
 
-    console.log('[Agrocota] cotação carregada:', cotacao.id, '| status:', cotacao.status);
+    console.log('[OAgroCota] cotação carregada:', cotacao.id, '| status:', cotacao.status);
 
     /* ── 2. Consultor / Empresa — direto na tabela profiles ── */
     let consultorNome = '—', companyName = '', phone = '', logoUrl = '';
@@ -947,7 +947,7 @@ async function main() {
       };
     });
 
-    console.log('[Agrocota]', allItens.length, 'itens carregados. Amostra:', {
+    console.log('[OAgroCota]', allItens.length, 'itens carregados. Amostra:', {
       produto_nome:    allItens[0]?.produto_nome,
       principio_ativo: allItens[0]?.principio_ativo,
       fonte:           allItens[0]?.fonte,
@@ -964,7 +964,7 @@ async function main() {
     }
 
     /* ── 9. Título ── */
-    document.title = cotacao.titulo || 'Cotação Agrocota';
+    document.title = cotacao.titulo || 'Cotação OAgroCota';
     document.getElementById('meta-titulo').textContent = cotacao.titulo || 'Cotação';
 
     /* ── 10. Grid de metadados ── */
@@ -1001,7 +1001,7 @@ async function main() {
     document.getElementById('app').style.display = 'block';
 
   } catch (e) {
-    console.error('[Agrocota] Erro fatal:', e);
+    console.error('[OAgroCota] Erro fatal:', e);
     showError('Erro ao carregar os dados.');
   }
 }
