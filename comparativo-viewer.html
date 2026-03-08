@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>Agrocota - Comparativo</title>
+  <title>OAgroCota - Comparativo</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet" />
@@ -215,7 +215,7 @@
 
 <div id="app" style="display:none">
   <div class="top-bar">
-    <span class="brand">Agrocota</span>
+    <span class="brand">OAgroCota</span>
     <span class="status-pill" id="status-pill">Aguardando aceite</span>
   </div>
 
@@ -302,7 +302,7 @@
   </div>
 </div>
 
-<footer class="page-footer">Agrocota 2025 &mdash; Plataforma de Decisão Agrícola</footer>
+<footer class="page-footer">OAgroCota 2025 &mdash; Plataforma de Decisão Agrícola</footer>
 
 <script>
   const SUPABASE_URL  = 'https://fafjknchnibdflpqyssf.supabase.co';
@@ -650,7 +650,7 @@
       const areaFinal  = areaManual > 0 ? areaManual : (areaTalhao > 0 ? areaTalhao : 0);
 
       /* preenche meta */
-      document.title = (cotacao.titulo || 'Comparativo') + ' — Agrocota';
+      document.title = (cotacao.titulo || 'Comparativo') + ' — OAgroCota';
       document.getElementById('meta-titulo').textContent = cotacao.titulo || 'Comparativo de Cotação';
       addMeta('Fazenda',   fazendaNome);
       addMeta('Área',      areaFinal > 0 ? fmtBRL(areaFinal) + ' ha' : '—');
