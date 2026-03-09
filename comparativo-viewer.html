@@ -156,6 +156,16 @@
     .approved-title { font-size: .95rem; font-weight: 900; color: var(--primary); margin-bottom: 5px; }
     .approved-sub   { font-size: .75rem; color: var(--text-mid); }
     .approved-ts    { font-family: 'JetBrains Mono', monospace; font-size: .68rem; color: var(--primary); margin-top: 8px; }
+    .btn-undo {
+      display: inline-block; margin-top: 16px;
+      background: transparent; border: 1px solid var(--border2);
+      color: var(--text-mid); padding: 10px 20px; border-radius: 10px;
+      font-family: 'Inter', sans-serif; font-size: .68rem; font-weight: 700;
+      letter-spacing: .06em; text-transform: uppercase; cursor: pointer;
+      transition: border-color .18s, color .18s;
+    }
+    .btn-undo:hover { border-color: var(--red); color: var(--red); }
+    .btn-undo:disabled { opacity: .3; cursor: not-allowed; }
 
     /* STICKY FOOTER */
     .sticky-footer {
@@ -243,6 +253,7 @@
       <div class="approved-title">Aceite Registrado</div>
       <div class="approved-sub">Seu consultor foi notificado. Obrigado pela confirmação.</div>
       <div class="approved-ts" id="approved-ts"></div>
+      <button class="btn-undo" id="btn-undo" onclick="desfazerAceite()">Mudei de ideia — escolher outra opção</button>
     </div>
 
     <!-- GRÁFICO 1: DONUT -->
@@ -662,6 +673,35 @@
       alert('Erro ao registrar o aceite. Tente novamente.');
     } finally {
       btn.disabled = false; btn.textContent = 'Confirmar Aceite';
+    }
+  }
+
+  async function desfazerAceite() {
+    const btn = document.getElementById('btn-undo');
+    btn.disabled = true; btn.textContent = 'Desfazendo...';
+    try {
+      const cotId = (payload && payload.cotacao_id) || (cotacao && cotacao.id);
+      if (!cotId) throw new Error('ID da cotação não encontrado');
+      await rpc('desfazer_aceite', { p_cotacao_id: cotId });
+
+      // Restaura estado global
+      approved    = false;
+      selecionado = null;
+
+      // Atualiza UI
+      document.getElementById('approved-banner').style.display   = 'none';
+      document.getElementById('status-pill').textContent         = 'Aguardando aceite';
+      document.getElementById('status-pill').className           = 'status-pill';
+      document.getElementById('sticky-footer').style.display     = 'block';
+      document.getElementById('footer-selected').textContent     = 'Nenhuma selecionada';
+      document.getElementById('btn-aceite').disabled             = true;
+
+      // Re-renderiza cards de seleção (limpa marcação e reabilita cliques)
+      renderSelecao();
+    } catch(e) {
+      alert('Não foi possível desfazer o aceite. Tente novamente.');
+      btn.disabled = false;
+      btn.textContent = 'Mudei de ideia — escolher outra opção';
     }
   }
 
