@@ -112,14 +112,14 @@
 
     /* BAR CHART */
     .bar-list { display: flex; flex-direction: column; gap: 10px; }
-    .bar-row       { display: flex; align-items: center; gap: 10px; border-radius: 8px; padding: 2px 4px; }
+    .bar-row       { display: flex; align-items: flex-start; gap: 10px; border-radius: 8px; padding: 4px 4px; }
     .bar-row-menor { background: rgba(34,197,94,.07); }
-    .bar-label-wrap{ width: 110px; flex-shrink: 0; }
+    .bar-label-wrap{ width: 130px; flex-shrink: 0; }
     .bar-label     { font-size: .75rem; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .bar-menor-tag { font-size: .55rem; font-weight: 800; color: #22c55e; letter-spacing: .04em; margin-top: 1px; }
-    .bar-track { flex: 1; height: 8px; background: var(--border2); border-radius: 99px; overflow: hidden; }
+    .bar-track { flex: 1; height: 8px; background: var(--border2); border-radius: 99px; overflow: hidden; align-self: center; }
     .bar-fill  { height: 100%; border-radius: 99px; transition: width .6s cubic-bezier(.4,0,.2,1); }
-    .bar-right { display: flex; align-items: center; gap: 6px; flex-shrink: 0; min-width: 90px; justify-content: flex-end; }
+    .bar-right { display: flex; align-items: center; gap: 6px; flex-shrink: 0; min-width: 90px; justify-content: flex-end; align-self: center; }
     .bar-val   { font-family: 'JetBrains Mono', monospace; font-size: .76rem; font-weight: 700; min-width: 80px; text-align: right; }
 
     /* SELEÇÃO — cards compactos */
@@ -245,9 +245,9 @@
       <div class="approved-ts" id="approved-ts"></div>
     </div>
 
-    <!-- GRÁFICO 1: DONUT — cotações entre si -->
+    <!-- GRÁFICO 1: DONUT -->
     <div class="section-hd">
-      <h2>Comparativo de Investimento</h2>
+      <h2 id="lbl-secao-investimento">Comparativo de Investimento</h2>
       <div class="section-line"></div>
     </div>
     <div class="chart-card">
@@ -261,7 +261,7 @@
         </div>
         <div class="donut-legend" id="donut-legend"></div>
         <div class="diff-badge" id="diff-badge" style="display:none">
-          <span class="diff-label">Economia potencial</span>
+          <span class="diff-label" id="lbl-economia">Economia potencial</span>
           <span class="diff-value" id="diff-value">—</span>
         </div>
       </div>
@@ -278,7 +278,7 @@
 
     <!-- SELEÇÃO -->
     <div class="section-hd" style="margin-top:36px">
-      <h2>Selecione a Proposta</h2>
+      <h2 id="lbl-secao-selecao">Selecione a Proposta</h2>
       <div class="section-line"></div>
     </div>
     <div class="select-list" id="select-list"></div>
@@ -471,11 +471,18 @@
       container.appendChild(catHd);
 
       catGroups[catNome].forEach((prod, pIdx) => {
-        /* entries: [{titulo, valor, color}] — usa índice direto de payload.cotacoes */
+        /* entries: [{titulo, valor, dose, produtoAlternativo, doseAlternativa, pctDiferencaDose, color}] */
         const entries = payload.cotacoes.map((cot, i) => {
-          const val = (prod.precos && prod.precos[i] != null) ? Number(prod.precos[i]) : 0;
+          const pr  = prod.precos && prod.precos[i];
+          const val = pr ? Number(pr.valor ?? pr) : 0;
           const si  = titToSortedIdx[cot.titulo] ?? i;
-          return { titulo: cot.titulo, valor: val, color: COT_COLORS[si % COT_COLORS.length] };
+          return {
+            titulo: cot.titulo, valor: val, color: COT_COLORS[si % COT_COLORS.length],
+            dose: pr && typeof pr === 'object' ? (pr.dose || null) : null,
+            produtoAlternativo: pr && typeof pr === 'object' ? (pr.produtoAlternativo || null) : null,
+            doseAlternativa: pr && typeof pr === 'object' ? (pr.doseAlternativa || null) : null,
+            pctDiferencaDose: pr && typeof pr === 'object' ? (pr.pctDiferencaDose || null) : null,
+          };
         }).filter(e => e.valor > 0);
 
         if (!entries.length) return;
@@ -511,19 +518,43 @@
 
         const minEntryVal = Math.min(...entries.map(e => e.valor));
         entries.forEach((e, eIdx) => {
-          const pct      = maxVal > 0 ? (e.valor / maxVal * 100) : 0;
-          const isMenor  = entries.length > 1 && eIdx === 0; // entries sorted by sorted cotacoes (menor first)
-          const barColor = isMenor ? '#22c55e' : e.color;
-          const row      = document.createElement('div');
-          row.className  = 'bar-row' + (isMenor ? ' bar-row-menor' : '');
-          row.innerHTML  =
+          const pct        = maxVal > 0 ? (e.valor / maxVal * 100) : 0;
+          const isMenor    = entries.length > 1 && eIdx === 0;
+          const barColor   = isMenor ? '#22c55e' : e.color;
+          const pctVsMenor = (entries.length > 1 && !isMenor && minEntryVal > 0)
+            ? Math.round(((e.valor - minEntryVal) / minEntryVal) * 100) : 0;
+
+          /* Sub-linha com dose/alternativa */
+          let doseHtml = '';
+          if (e.produtoAlternativo) {
+            doseHtml += '<div style="font-size:.62rem;font-weight:800;color:#4ade80;margin-top:2px">'
+              + '<span style="font-size:.55rem;background:rgba(34,197,94,.15);border:1px solid #22c55e;color:#22c55e;padding:1px 5px;border-radius:4px;margin-right:4px">Alt</span>'
+              + esc(e.produtoAlternativo) + '</div>';
+          }
+          if (e.doseAlternativa || e.dose) {
+            const doseLabel = e.produtoAlternativo
+              ? (e.dose ? '<span style="color:var(--text-mid)">Orig: ' + esc(e.dose) + '</span> → <span style="color:#4ade80;font-weight:700">Alt: ' + esc(e.doseAlternativa || '') + '</span>' : '<span style="color:#4ade80;font-weight:700">Dose: ' + esc(e.doseAlternativa || e.dose || '') + '</span>')
+              : '<span style="color:var(--text-mid)">Dose: ' + esc(e.dose || '') + '</span>';
+            doseHtml += '<div style="font-size:.6rem;margin-top:1px">' + doseLabel + '</div>';
+          }
+          if (e.pctDiferencaDose) {
+            const pctColor = e.pctDiferencaDose > 0 ? '#f59e0b' : '#22c55e';
+            doseHtml += '<div style="font-size:.58rem;font-weight:900;color:' + pctColor + ';margin-top:1px">'
+              + (e.pctDiferencaDose > 0 ? '+' : '') + e.pctDiferencaDose + '% dose</div>';
+          }
+
+          const row = document.createElement('div');
+          row.className = 'bar-row' + (isMenor ? ' bar-row-menor' : '');
+          row.innerHTML =
             '<div class="bar-label-wrap">'
               + '<div class="bar-label" style="color:' + (isMenor ? '#22c55e' : 'var(--text)') + '">' + esc(e.titulo) + '</div>'
               + (isMenor ? '<div class="bar-menor-tag">menor preço</div>' : '')
+              + doseHtml
             + '</div>'
             + '<div class="bar-track"><div class="bar-fill" style="width:' + Math.max(pct,3).toFixed(1) + '%;background:' + barColor + '"></div></div>'
             + '<div class="bar-right">'
               + '<span class="bar-val" style="color:' + barColor + ';font-weight:' + (isMenor?900:700) + '">R$ ' + fmtBRL(e.valor) + '</span>'
+              + (pctVsMenor > 0 ? '<span style="font-size:.6rem;font-weight:800;color:var(--red);margin-left:4px">+' + pctVsMenor + '%</span>' : '')
             + '</div>';
           prodWrap.appendChild(row);
         });
@@ -597,12 +628,22 @@
     const btn = document.getElementById('btn-ok');
     btn.disabled = true; btn.textContent = 'Registrando...';
     try {
-      await rpc('registrar_aceite_cotacao', {
-        p_cotacao_id: cotacao.id,
-        p_itens:      [],
-        p_total_ha:   selecionado.cotacao.total,
-        p_user_agent: navigator.userAgent,
-      });
+      if (payload.mode === 'propostas') {
+        const propostaId = payload.proposta_ids?.[selecionado.idx];
+        if (!propostaId) throw new Error('Proposta inválida');
+        await rpc('registrar_aceite_proposta', {
+          p_cotacao_id:  payload.cotacao_id,
+          p_proposta_id: propostaId,
+          p_user_agent:  navigator.userAgent,
+        });
+      } else {
+        await rpc('registrar_aceite_cotacao', {
+          p_cotacao_id: cotacao.id,
+          p_itens:      [],
+          p_total_ha:   selecionado.cotacao.total,
+          p_user_agent: navigator.userAgent,
+        });
+      }
       fecharModal();
       approved = true;
       document.getElementById('status-pill').textContent = 'Aceite registrado';
@@ -642,18 +683,38 @@
     }
 
     if (!payload.cotacoes || payload.cotacoes.length < 2) {
-      showError('Comparativo inválido', 'São necessárias pelo menos 2 cotações.'); return;
+      showError('Comparativo inválido', 'São necessárias pelo menos 2 propostas.'); return;
+    }
+
+    /* Ajusta labels conforme o modo */
+    const modoPropostas = payload.mode === 'propostas';
+    if (modoPropostas) {
+      document.getElementById('lbl-secao-investimento').textContent = 'Comparativo de Propostas';
+      document.getElementById('lbl-secao-selecao').textContent      = 'Selecione a Melhor Proposta';
+      document.getElementById('lbl-economia').textContent           = 'Economia ao escolher a menor';
     }
 
     try {
       /* busca meta da cotação via REST */
-      const rows = await fetch(
-        SUPABASE_URL + '/rest/v1/cotacoes?id=eq.' + cotacaoId + '&select=*&limit=1',
-        { headers: { apikey: SUPABASE_ANON, Authorization: 'Bearer ' + SUPABASE_ANON } }
-      ).then(r => r.json());
+      let rows = null;
+      try {
+        const r = await fetch(
+          SUPABASE_URL + '/rest/v1/cotacoes?id=eq.' + cotacaoId + '&select=*&limit=1',
+          { headers: { apikey: SUPABASE_ANON, Authorization: 'Bearer ' + SUPABASE_ANON } }
+        ).then(r => r.json());
+        if (r && r[0]) rows = r;
+      } catch(_) {}
 
-      if (!rows || !rows[0]) { showError('Cotação não encontrada', 'Verifique o link ou solicite um novo ao consultor.'); return; }
-      cotacao = rows[0];
+      /* Se não conseguiu (RLS), monta objeto sintético com dados do payload */
+      if (!rows || !rows[0]) {
+        if (modoPropostas && payload.cotacao_id) {
+          cotacao = { id: payload.cotacao_id, titulo: payload.titulo || 'Comparativo de Propostas' };
+        } else {
+          showError('Cotação não encontrada', 'Verifique o link ou solicite um novo ao consultor.'); return;
+        }
+      } else {
+        cotacao = rows[0];
+      }
 
       /* consultor */
       let consultorNome = '—';
@@ -690,12 +751,20 @@
       const areaFinal  = areaManual > 0 ? areaManual : (areaTalhao > 0 ? areaTalhao : 0);
 
       /* preenche meta */
-      document.title = (cotacao.titulo || 'Comparativo') + ' — OAgroCota';
-      document.getElementById('meta-titulo').textContent = cotacao.titulo || 'Comparativo de Cotação';
-      addMeta('Fazenda',   fazendaNome);
-      addMeta('Área',      areaFinal > 0 ? fmtBRL(areaFinal) + ' ha' : '—');
-      addMeta('Data',      fmtDate(cotacao.created_at));
-      addMeta('Consultor', consultorNome);
+      const tituloExibir = payload.titulo || cotacao.titulo || (modoPropostas ? 'Comparativo de Propostas' : 'Comparativo de Cotação');
+      document.title = tituloExibir + ' — OAgroCota';
+      document.getElementById('meta-titulo').textContent = tituloExibir;
+      if (modoPropostas) {
+        addMeta('Cotação',   tituloExibir);
+        addMeta('Propostas', payload.cotacoes.length + ' fornecedor' + (payload.cotacoes.length !== 1 ? 'es' : ''));
+        addMeta('Produtos',  (payload.produtos || []).length + ' produto' + ((payload.produtos || []).length !== 1 ? 's' : ''));
+        addMeta('Fazenda',   fazendaNome);
+      } else {
+        addMeta('Fazenda',   fazendaNome);
+        addMeta('Área',      areaFinal > 0 ? fmtBRL(areaFinal) + ' ha' : '—');
+        addMeta('Data',      fmtDate(cotacao.created_at));
+        addMeta('Consultor', consultorNome);
+      }
 
       /* Dados do Talhão */
       const temTalhao = talhaoNome || talhaoCoordenadas || talhaoAreaHa > 0;
