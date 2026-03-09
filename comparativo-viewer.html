@@ -308,8 +308,24 @@
   const SUPABASE_URL  = 'https://fafjknchnibdflpqyssf.supabase.co';
   const SUPABASE_ANON = 'sb_publishable_3HDU_nViFfOubXqNplV5ow_8FV0Ix0r';
 
-  /* paleta de cotações — verde primeiro (menor), depois azul, laranja... */
-  const COT_PALETTE = ['#22c55e','#3B82F6','#F59E0B','#8B5CF6','#EF4444','#06B6D4','#EC4899','#84CC16'];
+  /* Cores distintas por cotação (igual ao app) — cada cotação com cor única */
+  const COT_COLORS = ['#DC2626','#F57C00','#1565C0','#6A1B9A','#00838F','#16a34a','#eab308','#C62828'];
+
+  /* Cores agrícolas por categoria (headers de seção) */
+  const CAT_AGRICOLA = {
+    Fungicida: '#DC2626', Herbicida: '#DC2626', Inseticida: '#DC2626', Nematicida: '#DC2626', Defensivo: '#DC2626',
+    Fertilizantes: '#16a34a', 'Nutricao / Fertilizante Foliar': '#16a34a', 'Fertilizante de Base': '#16a34a',
+    Sementes: '#92400e', 'Sementes / Hibridos': '#92400e',
+    Adjuvante: '#eab308', Biologico: '#0d9488', 'Corretivo de Solo': '#78716c',
+  };
+  const CAT_FALLBACK = ['#1A6B30','#2E7D32','#43A047','#f97316','#78716c','#5a7060'];
+  const CAT_COLORS_MAP = {};
+  function getCatColor(cat) {
+    const c = String(cat || '').trim();
+    if (CAT_AGRICOLA[c]) return CAT_AGRICOLA[c];
+    if (!CAT_COLORS_MAP[c]) CAT_COLORS_MAP[c] = CAT_FALLBACK[Object.keys(CAT_COLORS_MAP).length % CAT_FALLBACK.length];
+    return CAT_COLORS_MAP[c];
+  }
 
   const fmtBRL      = n => Number(n||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
   const fmtDate     = s => !s ? '—' : new Date(s).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'});
@@ -357,7 +373,7 @@
     const sorted = cotacoesOrdenadas();
     const labels = sorted.map(c => c.titulo);
     const values = sorted.map(c => c.total);
-    const colors = sorted.map((_, i) => COT_PALETTE[i % COT_PALETTE.length]);
+    const colors = sorted.map((_, i) => COT_COLORS[i % COT_COLORS.length]);
     const total  = values.reduce((a,b) => a+b, 0);
     const min    = values[0] || 0;
     const max    = values[values.length-1] || 0;
@@ -435,12 +451,12 @@
 
     const catNames = Object.keys(catGroups).sort();
     catNames.forEach((catNome, catIdx) => {
-      /* Cabeçalho da categoria */
+      const catColor = getCatColor(catNome);
       const catHd = document.createElement('div');
       catHd.style.cssText = (catIdx > 0 ? 'margin-top:28px;' : '') +
-        'font-size:.6rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;' +
-        'color:var(--text-mid);padding-bottom:8px;border-bottom:1px solid var(--border);margin-bottom:12px;';
-      catHd.textContent = catNome;
+        'display:flex;align-items:center;gap:8px;font-size:.6rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;' +
+        'color:' + catColor + ';padding-bottom:8px;border-bottom:1px solid var(--border);margin-bottom:12px;';
+      catHd.innerHTML = '<div style="width:4px;height:18px;background:' + catColor + ';border-radius:99px;flex-shrink:0"></div><span>' + esc(catNome) + '</span>';
       container.appendChild(catHd);
 
       catGroups[catNome].forEach((prod, pIdx) => {
@@ -448,7 +464,7 @@
         const entries = payload.cotacoes.map((cot, i) => {
           const val = (prod.precos && prod.precos[i] != null) ? Number(prod.precos[i]) : 0;
           const si  = titToSortedIdx[cot.titulo] ?? i;
-          return { titulo: cot.titulo, valor: val, color: COT_PALETTE[si % COT_PALETTE.length] };
+          return { titulo: cot.titulo, valor: val, color: COT_COLORS[si % COT_COLORS.length] };
         }).filter(e => e.valor > 0);
 
         if (!entries.length) return;
@@ -517,7 +533,7 @@
     const minTot  = sorted[0]?.total || 0;
 
     sorted.forEach((c, i) => {
-      const color   = COT_PALETTE[i % COT_PALETTE.length];
+      const color   = COT_COLORS[i % COT_COLORS.length];
       const isMenor = c.total === minTot;
       const origIdx = payload.cotacoes.indexOf(c);
 
