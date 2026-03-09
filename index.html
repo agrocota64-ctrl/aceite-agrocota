@@ -95,6 +95,17 @@
     }
     .whatsapp-btn:hover { background: #033a18; }
 
+    /* ── DADOS DO TALHÃO ── */
+    .talhao-block {
+      margin-top: 16px; padding: 14px 16px;
+      background: var(--surface2); border: 1px solid var(--border2);
+      border-radius: 14px;
+    }
+    .talhao-block-hd { font-size: .55rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--text-mid); margin-bottom: 10px; }
+    .talhao-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 16px; font-size: .78rem; }
+    .talhao-cell .key { font-size: .6rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--text-mid); margin-bottom: 2px; }
+    .talhao-cell .val { font-weight: 600; color: var(--text); }
+
     /* ── ACEITE BANNER ── */
     .approved-card { background: var(--primary-dim); border: 1px solid var(--primary); border-radius: 18px; padding: 22px; text-align: center; margin-bottom: 28px; }
     .approved-card.recusado { background: rgba(239,68,68,.08); border-color: var(--red); }
@@ -304,6 +315,10 @@
       <div class="header-info">
         <h1 class="doc-title" id="meta-titulo">Cotação</h1>
         <div class="meta-grid" id="meta-grid"></div>
+        <div class="talhao-block" id="talhao-block" style="display:none">
+          <div class="talhao-block-hd">Dados do Talhão</div>
+          <div class="talhao-grid" id="talhao-grid"></div>
+        </div>
         <a class="whatsapp-btn" id="whatsapp-btn" style="display:none" target="_blank" rel="noopener">
           💬 Falar no WhatsApp: <span id="whatsapp-phone"></span>
         </a>
@@ -409,21 +424,20 @@
 const SUPABASE_URL  = 'https://fafjknchnibdflpqyssf.supabase.co';
 const SUPABASE_ANON = 'sb_publishable_3HDU_nViFfOubXqNplV5ow_8FV0Ix0r';
 
-/* Cores agrícolas por categoria (igual ao app e PDF) */
+/* Cores agrícolas por categoria — idêntico ao theme/colors (app, PDFs, viewers) */
 const CAT_AGRICOLA = {
-  Fungicida: '#DC2626', Herbicida: '#DC2626', Inseticida: '#DC2626', Nematicida: '#DC2626', Defensivo: '#DC2626',
-  Fertilizantes: '#16a34a', 'Nutricao / Fertilizante Foliar': '#16a34a', 'Fertilizante de Base': '#16a34a',
-  Sementes: '#92400e', 'Sementes / Hibridos': '#92400e',
-  Adjuvante: '#eab308', Biologico: '#0d9488', 'Corretivo de Solo': '#78716c',
+  Fungicida: '#7C3AED', Herbicida: '#EA580C', Inseticida: '#2563EB', Nematicida: '#0891B2', Defensivo: '#DC2626',
+  Fertilizantes: '#16A34A', 'Nutricao / Fertilizante Foliar': '#16A34A', 'Fertilizante de Base': '#16A34A',
+  Sementes: '#92400E', 'Sementes / Hibridos': '#92400E',
+  Adjuvante: '#CA8A04', Biologico: '#0D9488', 'Corretivo de Solo': '#78716C',
 };
-const CAT_FALLBACK = ['#1A6B30','#2E7D32','#43A047','#f97316','#eab308','#78716c','#5a7060'];
-const CAT_COLORS_MAP = {};
-
+const CAT_FALLBACK = ['#6366F1', '#DB2777', '#059669', '#F59E0B', '#64748B'];
+const _catColorMap = {};
 function getCatColor(cat) {
   const c = String(cat || '').trim();
   if (CAT_AGRICOLA[c]) return CAT_AGRICOLA[c];
-  if (!CAT_COLORS_MAP[c]) CAT_COLORS_MAP[c] = CAT_FALLBACK[Object.keys(CAT_COLORS_MAP).length % CAT_FALLBACK.length];
-  return CAT_COLORS_MAP[c];
+  if (!_catColorMap[c]) _catColorMap[c] = CAT_FALLBACK[Object.keys(_catColorMap).length % CAT_FALLBACK.length];
+  return _catColorMap[c];
 }
 
 function initCatColors(categorias) {
@@ -877,16 +891,20 @@ async function main() {
     }
     const localizacao = [municipio, estado].filter(Boolean).join(' - ');
 
-    /* ── 4. Talhão — para pegar area_ha quando não estiver na cotação ── */
-    let talhaoAreaHa = 0;
+    /* ── 4. Talhão — dados reais para área, nome, coordenadas ── */
+    let talhaoAreaHa = 0, talhaoNome = '', talhaoCoordenadas = null;
     if (cotacao.talhao_id) {
       try {
         const talhoes = await sbGet('talhoes', {
-          select: 'area_ha',
+          select: 'nome,area_ha,coordenadas',
           id: 'eq.' + cotacao.talhao_id,
           limit: 1,
         });
-        if (talhoes[0]) talhaoAreaHa = Number(talhoes[0].area_ha || 0);
+        if (talhoes[0]) {
+          talhaoAreaHa = Number(talhoes[0].area_ha || 0);
+          talhaoNome = String(talhoes[0].nome || '').trim();
+          talhaoCoordenadas = talhoes[0].coordenadas;
+        }
       } catch (_) {}
     }
 
@@ -970,6 +988,36 @@ async function main() {
     addMeta('Consultor', consultorNome);
     if (companyName) addMeta('Empresa', companyName);
     if (localizacao) addMeta('Localização', localizacao, true);
+
+    /* ── 10b. Dados do Talhão (nome, área, coordenadas, altitude) ── */
+    const temTalhao = talhaoNome || talhaoCoordenadas || talhaoAreaHa > 0;
+    if (temTalhao) {
+      const tb = document.getElementById('talhao-block');
+      const tg = document.getElementById('talhao-grid');
+      let coordStr = '', altStr = '—';
+      if (talhaoCoordenadas) {
+        const ring = talhaoCoordenadas?.type === 'Polygon' && Array.isArray(talhaoCoordenadas?.coordinates?.[0])
+          ? talhaoCoordenadas.coordinates[0] : [];
+        if (ring.length > 0) {
+          const sum = ring.reduce((a, c) => ({ lat: a.lat + (Array.isArray(c) ? c[1] : 0), lng: a.lng + (Array.isArray(c) ? c[0] : 0) }), { lat: 0, lng: 0 });
+          const lat = sum.lat / ring.length, lng = sum.lng / ring.length;
+          coordStr = lat.toFixed(6) + ', ' + lng.toFixed(6);
+          try {
+            const r = await fetch('https://api.open-elevation.com/api/v1/lookup?locations=' + lat + ',' + lng);
+            const j = await r.json();
+            const e = j?.results?.[0]?.elevation;
+            if (typeof e === 'number') altStr = Math.round(e) + ' m';
+          } catch (_) {}
+        }
+      }
+      const cells = [];
+      if (talhaoNome) cells.push('<div class="talhao-cell"><div class="key">Nome</div><div class="val">' + esc(talhaoNome) + '</div></div>');
+      if (talhaoAreaHa > 0) cells.push('<div class="talhao-cell"><div class="key">Área</div><div class="val">' + fmtBRL(talhaoAreaHa) + ' ha</div></div>');
+      if (coordStr) cells.push('<div class="talhao-cell" style="grid-column:1/-1"><div class="key">Coordenadas (centro)</div><div class="val">' + esc(coordStr) + '</div></div>');
+      cells.push('<div class="talhao-cell"><div class="key">Altitude</div><div class="val">' + esc(altStr) + '</div></div>');
+      tg.innerHTML = cells.join('');
+      tb.style.display = 'block';
+    }
 
     /* ── 11. WhatsApp ── */
     if (phone) {
