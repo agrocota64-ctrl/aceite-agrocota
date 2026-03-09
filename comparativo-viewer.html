@@ -349,8 +349,14 @@
       headers: { apikey: SUPABASE_ANON, Authorization: 'Bearer ' + SUPABASE_ANON, 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
     });
-    if (!r.ok) throw new Error('RPC error: ' + fn);
-    return r.json();
+    if (!r.ok) {
+      let errMsg = 'RPC error: ' + fn;
+      try { const j = await r.json(); errMsg = j?.message || j?.error || errMsg; } catch(_) {}
+      throw new Error(errMsg);
+    }
+    // Funções RETURNS void retornam body vazio (HTTP 200 sem conteúdo)
+    const text = await r.text();
+    return text ? JSON.parse(text) : null;
   }
 
   function showError(msg, sub) {
