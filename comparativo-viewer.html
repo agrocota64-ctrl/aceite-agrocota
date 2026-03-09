@@ -61,6 +61,13 @@
     .meta-key { font-size: .6rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--text-mid); margin-bottom: 3px; }
     .meta-val { font-size: .88rem; font-weight: 600; color: var(--text); }
 
+    /* DADOS DO TALHÃO */
+    .talhao-block { margin-top: 16px; padding: 14px 16px; background: var(--surface2); border: 1px solid var(--border2); border-radius: 14px; }
+    .talhao-block-hd { font-size: .55rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--text-mid); margin-bottom: 10px; }
+    .talhao-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 16px; font-size: .78rem; }
+    .talhao-cell .key { font-size: .6rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--text-mid); margin-bottom: 2px; }
+    .talhao-cell .val { font-weight: 600; color: var(--text); }
+
     /* SECTION HEADER */
     .section-hd { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; margin-top: 36px; }
     .section-hd h2 { font-size: .62rem; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: var(--text-mid); white-space: nowrap; }
@@ -225,6 +232,10 @@
     <div class="meta-block">
       <h1 class="meta-title" id="meta-titulo">Comparativo de Cotação</h1>
       <div class="meta-grid" id="meta-grid"></div>
+      <div class="talhao-block" id="talhao-block" style="display:none">
+        <div class="talhao-block-hd">Dados do Talhão</div>
+        <div class="talhao-grid" id="talhao-grid"></div>
+      </div>
     </div>
 
     <!-- BANNER APROVADO -->
@@ -311,20 +322,20 @@
   /* Cores distintas por cotação (igual ao app) — cada cotação com cor única */
   const COT_COLORS = ['#DC2626','#F57C00','#1565C0','#6A1B9A','#00838F','#16a34a','#eab308','#C62828'];
 
-  /* Cores agrícolas por categoria (headers de seção) */
+  /* Cores agrícolas por categoria — idêntico ao theme/colors (app, PDFs, viewers) */
   const CAT_AGRICOLA = {
-    Fungicida: '#DC2626', Herbicida: '#DC2626', Inseticida: '#DC2626', Nematicida: '#DC2626', Defensivo: '#DC2626',
-    Fertilizantes: '#16a34a', 'Nutricao / Fertilizante Foliar': '#16a34a', 'Fertilizante de Base': '#16a34a',
-    Sementes: '#92400e', 'Sementes / Hibridos': '#92400e',
-    Adjuvante: '#eab308', Biologico: '#0d9488', 'Corretivo de Solo': '#78716c',
+    Fungicida: '#7C3AED', Herbicida: '#EA580C', Inseticida: '#2563EB', Nematicida: '#0891B2', Defensivo: '#DC2626',
+    Fertilizantes: '#16A34A', 'Nutricao / Fertilizante Foliar': '#16A34A', 'Fertilizante de Base': '#16A34A',
+    Sementes: '#92400E', 'Sementes / Hibridos': '#92400E',
+    Adjuvante: '#CA8A04', Biologico: '#0D9488', 'Corretivo de Solo': '#78716C',
   };
-  const CAT_FALLBACK = ['#1A6B30','#2E7D32','#43A047','#f97316','#78716c','#5a7060'];
-  const CAT_COLORS_MAP = {};
+  const CAT_FALLBACK = ['#6366F1', '#DB2777', '#059669', '#F59E0B', '#64748B'];
+  const _catColorMap = {};
   function getCatColor(cat) {
     const c = String(cat || '').trim();
     if (CAT_AGRICOLA[c]) return CAT_AGRICOLA[c];
-    if (!CAT_COLORS_MAP[c]) CAT_COLORS_MAP[c] = CAT_FALLBACK[Object.keys(CAT_COLORS_MAP).length % CAT_FALLBACK.length];
-    return CAT_COLORS_MAP[c];
+    if (!_catColorMap[c]) _catColorMap[c] = CAT_FALLBACK[Object.keys(_catColorMap).length % CAT_FALLBACK.length];
+    return _catColorMap[c];
   }
 
   const fmtBRL      = n => Number(n||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -660,9 +671,22 @@
         } catch(_) {}
       }
 
-      /* área */
+      /* talhão — dados reais para área, nome, coordenadas */
+      let talhaoAreaHa = 0, talhaoNome = '', talhaoCoordenadas = null;
+      if (cotacao.talhao_id) {
+        try {
+          const t = await fetch(SUPABASE_URL + '/rest/v1/talhoes?id=eq.' + cotacao.talhao_id + '&select=nome,area_ha,coordenadas&limit=1', {
+            headers: { apikey: SUPABASE_ANON, Authorization: 'Bearer ' + SUPABASE_ANON }
+          }).then(r => r.json());
+          if (t && t[0]) {
+            talhaoAreaHa = Number(t[0].area_ha || 0);
+            talhaoNome = String(t[0].nome || '').trim();
+            talhaoCoordenadas = t[0].coordenadas;
+          }
+        } catch(_) {}
+      }
       const areaManual = Number(cotacao?.area_ha || 0);
-      const areaTalhao = Number(cotacao?.talhao_area_ha || 0);
+      const areaTalhao = talhaoAreaHa || Number(cotacao?.talhao_area_ha || 0);
       const areaFinal  = areaManual > 0 ? areaManual : (areaTalhao > 0 ? areaTalhao : 0);
 
       /* preenche meta */
@@ -672,6 +696,36 @@
       addMeta('Área',      areaFinal > 0 ? fmtBRL(areaFinal) + ' ha' : '—');
       addMeta('Data',      fmtDate(cotacao.created_at));
       addMeta('Consultor', consultorNome);
+
+      /* Dados do Talhão */
+      const temTalhao = talhaoNome || talhaoCoordenadas || talhaoAreaHa > 0;
+      if (temTalhao) {
+        const tb = document.getElementById('talhao-block');
+        const tg = document.getElementById('talhao-grid');
+        let coordStr = '', altStr = '—';
+        if (talhaoCoordenadas) {
+          const ring = talhaoCoordenadas?.type === 'Polygon' && Array.isArray(talhaoCoordenadas?.coordinates?.[0])
+            ? talhaoCoordenadas.coordinates[0] : [];
+          if (ring.length > 0) {
+            const sum = ring.reduce((a, c) => ({ lat: a.lat + (Array.isArray(c) ? c[1] : 0), lng: a.lng + (Array.isArray(c) ? c[0] : 0) }), { lat: 0, lng: 0 });
+            const lat = sum.lat / ring.length, lng = sum.lng / ring.length;
+            coordStr = lat.toFixed(6) + ', ' + lng.toFixed(6);
+            try {
+              const r = await fetch('https://api.open-elevation.com/api/v1/lookup?locations=' + lat + ',' + lng);
+              const j = await r.json();
+              const e = j?.results?.[0]?.elevation;
+              if (typeof e === 'number') altStr = Math.round(e) + ' m';
+            } catch (_) {}
+          }
+        }
+        const cells = [];
+        if (talhaoNome) cells.push('<div class="talhao-cell"><div class="key">Nome</div><div class="val">' + esc(talhaoNome) + '</div></div>');
+        if (talhaoAreaHa > 0) cells.push('<div class="talhao-cell"><div class="key">Área</div><div class="val">' + fmtBRL(talhaoAreaHa) + ' ha</div></div>');
+        if (coordStr) cells.push('<div class="talhao-cell" style="grid-column:1/-1"><div class="key">Coordenadas (centro)</div><div class="val">' + esc(coordStr) + '</div></div>');
+        cells.push('<div class="talhao-cell"><div class="key">Altitude</div><div class="val">' + esc(altStr) + '</div></div>');
+        tg.innerHTML = cells.join('');
+        tb.style.display = 'block';
+      }
 
       /* status */
       const aceiteEm = cotacao.aceite_em || cotacao.approved_at;
