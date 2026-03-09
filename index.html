@@ -824,15 +824,22 @@ async function main() {
   if (!token) { showError('Token não encontrado na URL.'); return; }
 
   try {
-    /* ── 1. Busca a cotação pelo approval_token (campo do banco) ── */
-    const cotacoes = await sbGet('cotacoes', {
-      select: 'id,titulo,status,created_at,consultor_id,fazenda_id,talhao_id,area_ha,aceite_em,approved_at,excel_itens_json',
-      approval_token: 'eq.' + token,
-      limit: 1,
-    });
+    /* ── 1. Busca a cotação — RPC primeiro (bypassa RLS, evita recursion) ── */
+    let cotRow = null;
+    try {
+      const rpcRows = await rpc('get_cotacao_by_token', { p_token: token });
+      cotRow = rpcRows && rpcRows[0];
+    } catch (_) {}
 
-    /* Fallback: tenta o token como share_token também */
-    let cotRow = cotacoes[0];
+    /* Fallback: REST direto (requer policies RLS corretas) */
+    if (!cotRow) {
+      const cotacoes = await sbGet('cotacoes', {
+        select: 'id,titulo,status,created_at,consultor_id,fazenda_id,talhao_id,area_ha,aceite_em,approved_at,excel_itens_json',
+        approval_token: 'eq.' + token,
+        limit: 1,
+      });
+      cotRow = cotacoes[0];
+    }
     if (!cotRow) {
       const alt = await sbGet('cotacoes', {
         select: 'id,titulo,status,created_at,consultor_id,fazenda_id,talhao_id,area_ha,aceite_em,approved_at,excel_itens_json',
@@ -840,13 +847,6 @@ async function main() {
         limit: 1,
       });
       cotRow = alt[0];
-    }
-    /* Fallback 2: tenta via RPC antigo */
-    if (!cotRow) {
-      try {
-        const rpcRows = await rpc('get_cotacao_by_token', { p_token: token });
-        cotRow = rpcRows && rpcRows[0];
-      } catch (_) {}
     }
 
     if (!cotRow) { showError('Cotação não encontrada. Verifique o link.'); return; }
