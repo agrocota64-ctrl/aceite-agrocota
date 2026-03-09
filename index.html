@@ -409,30 +409,25 @@
 const SUPABASE_URL  = 'https://fafjknchnibdflpqyssf.supabase.co';
 const SUPABASE_ANON = 'sb_publishable_3HDU_nViFfOubXqNplV5ow_8FV0Ix0r';
 
-/* Paleta igual ao CotacaoPdfExportService (PRODUTOR_PALETTE) */
-const PALETTE = [
-  '#1B5E20','#F57C00','#C62828','#1565C0','#00838F',
-  '#6A1B9A','#4E342E','#0277BD','#EF6C00','#558B2F',
-  '#00695C','#880E4F','#1A237E','#BF360C','#006064',
-  '#F9A825','#4A148C','#37474F','#E65100','#283593',
-];
-
-/* CAT_COLORS mapeado alfabeticamente (mesma lógica do PDF service) */
+/* Cores agrícolas por categoria (igual ao app e PDF) */
+const CAT_AGRICOLA = {
+  Fungicida: '#DC2626', Herbicida: '#DC2626', Inseticida: '#DC2626', Nematicida: '#DC2626', Defensivo: '#DC2626',
+  Fertilizantes: '#16a34a', 'Nutricao / Fertilizante Foliar': '#16a34a', 'Fertilizante de Base': '#16a34a',
+  Sementes: '#92400e', 'Sementes / Hibridos': '#92400e',
+  Adjuvante: '#eab308', Biologico: '#0d9488', 'Corretivo de Solo': '#78716c',
+};
+const CAT_FALLBACK = ['#1A6B30','#2E7D32','#43A047','#f97316','#eab308','#78716c','#5a7060'];
 const CAT_COLORS_MAP = {};
-let _catPaletteIdx = 0;
 
 function getCatColor(cat) {
-  if (!CAT_COLORS_MAP[cat]) {
-    CAT_COLORS_MAP[cat] = PALETTE[_catPaletteIdx % PALETTE.length];
-    _catPaletteIdx++;
-  }
-  return CAT_COLORS_MAP[cat];
+  const c = String(cat || '').trim();
+  if (CAT_AGRICOLA[c]) return CAT_AGRICOLA[c];
+  if (!CAT_COLORS_MAP[c]) CAT_COLORS_MAP[c] = CAT_FALLBACK[Object.keys(CAT_COLORS_MAP).length % CAT_FALLBACK.length];
+  return CAT_COLORS_MAP[c];
 }
 
-/* Pré-inicializa cores na ordem alfabética (como o PDF service faz) */
 function initCatColors(categorias) {
-  const sorted = [...new Set(categorias)].sort((a, b) => a.localeCompare(b));
-  sorted.forEach(cat => getCatColor(cat));
+  [...new Set(categorias)].sort((a, b) => a.localeCompare(b)).forEach(cat => getCatColor(cat));
 }
 
 let chart = null;
