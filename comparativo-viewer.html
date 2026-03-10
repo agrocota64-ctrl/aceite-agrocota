@@ -110,6 +110,10 @@
     .diff-label { font-size: .62rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--text-mid); }
     .diff-value { font-family: 'JetBrains Mono', monospace; font-size: .9rem; font-weight: 900; color: var(--primary); }
 
+    /* VERTICAL BAR CHART */
+    .vbar-canvas-wrap { width: 100%; max-width: 520px; margin: 0 auto; }
+    canvas#vbar { width: 100% !important; }
+
     /* BAR CHART */
     .bar-list { display: flex; flex-direction: column; gap: 10px; }
     .bar-row       { display: flex; align-items: flex-start; gap: 10px; border-radius: 8px; padding: 4px 4px; }
@@ -278,7 +282,18 @@
       </div>
     </div>
 
-    <!-- GRÁFICO 2: BARRAS — produtos -->
+    <!-- GRÁFICO 2: BARRAS VERTICAIS — total por cotação -->
+    <div class="section-hd" style="margin-top:36px">
+      <h2>Total por Proposta</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="chart-card">
+      <div class="vbar-canvas-wrap">
+        <canvas id="vbar" height="200"></canvas>
+      </div>
+    </div>
+
+    <!-- GRÁFICO 3: BARRAS — produtos -->
     <div class="section-hd" style="margin-top:36px">
       <h2>Comparativo por Produto</h2>
       <div class="section-line"></div>
@@ -391,6 +406,7 @@
   let approved    = false;
   let _pollTimer  = null;
   let donutChart  = null;
+  let vbarChart   = null;
 
   /* ordena cotações do menor para o maior — verde = mais barata */
   function cotacoesOrdenadas() {
@@ -455,6 +471,77 @@
         + '</div>'
         + (isMenor ? '<span class="donut-chip-menor-tag">MENOR</span>' : '');
       el.appendChild(chip);
+    });
+  }
+
+  /* ── BARRAS VERTICAIS: total por cotação usando Chart.js ── */
+  function buildVBar() {
+    const sorted = cotacoesOrdenadas();
+    const labels = sorted.map(c => c.titulo);
+    const values = sorted.map(c => c.total);
+    const colors = sorted.map((_, i) => COT_COLORS[i % COT_COLORS.length]);
+    const minVal = values[0] || 0;
+    const bgColors = colors.map((c, i) => values[i] === minVal ? c : c + 'cc');
+
+    const el = document.getElementById('vbar');
+    if (!el) return;
+    const ctx = el.getContext('2d');
+    if (vbarChart) vbarChart.destroy();
+    vbarChart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [{
+          data: values,
+          backgroundColor: bgColors,
+          borderColor: colors,
+          borderWidth: 2,
+          borderRadius: 6,
+          borderSkipped: false,
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: ctx => 'R$ ' + fmtBRL(ctx.parsed.y),
+              afterLabel: (ctx) => {
+                const v = ctx.parsed.y;
+                if (v === minVal) return '✓ Menor valor';
+                const diff = ((v - minVal) / minVal * 100).toFixed(1);
+                return '+' + diff + '% vs menor';
+              }
+            },
+            backgroundColor: '#0e0e0e',
+            titleColor: '#f0f0f0',
+            bodyColor: '#22c55e',
+            borderColor: '#2a2a2a',
+            borderWidth: 1,
+          },
+        },
+        scales: {
+          x: {
+            ticks: { color: '#888', font: { size: 11, weight: '700' } },
+            grid: { color: '#1e1e1e' },
+          },
+          y: {
+            ticks: {
+              color: '#666',
+              font: { size: 10 },
+              callback: v => {
+                const n = Number(v);
+                if (n >= 1_000_000) return 'R$' + (n / 1_000_000).toFixed(1) + 'M';
+                if (n >= 1_000)     return 'R$' + Math.round(n / 1_000) + 'k';
+                return 'R$' + n;
+              }
+            },
+            grid: { color: '#1e1e1e' },
+          }
+        },
+        animation: { duration: 600, easing: 'easeInOutQuart' },
+      }
     });
   }
 
@@ -856,6 +943,7 @@
 
       /* renderiza */
       buildDonut();
+      buildVBar();
       buildBars();
       renderSelecao();
 
