@@ -357,6 +357,15 @@
       <div class="chart-legend" id="chart-legend"></div>
     </div>
 
+    <!-- BARRAS VERTICAIS: composição por categoria -->
+    <div class="section-hd" style="margin-top:36px">
+      <h2>Custo por Categoria</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="chart-wrap" style="padding:20px 16px;">
+      <canvas id="vbar-idx" style="width:100%;max-height:220px;"></canvas>
+    </div>
+
     <!-- DETALHAMENTO (igual ao PDF: tabelas por categoria) -->
     <div class="section-hd" style="margin-top:44px">
       <h2>Detalhamento Completo dos Insumos</h2>
@@ -445,6 +454,7 @@ function initCatColors(categorias) {
 }
 
 let chart = null;
+let vbarIdxChart = null;
 let cotacao = null;
 let allItens = [];
 let approved = false;
@@ -510,6 +520,67 @@ function buildChart(labels, values, colors) {
       plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => ' R$ ' + fmtBRL(c.parsed) } } },
       animation: { duration: 700, easing: 'easeInOutQuart' },
     },
+  });
+}
+
+function buildVBarCat(entries, colors) {
+  const el = document.getElementById('vbar-idx');
+  if (!el || !entries.length) return;
+  const ctx = el.getContext('2d');
+  if (vbarIdxChart) vbarIdxChart.destroy();
+  const labels = entries.map(([c]) => c.length > 14 ? c.slice(0, 12) + '…' : c);
+  const values = entries.map(([, v]) => v);
+  const maxVal = Math.max(...values, 1);
+  vbarIdxChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        data: values,
+        backgroundColor: colors.map((c, i) => {
+          const v = values[i];
+          return v === maxVal ? c + '99' : c;
+        }),
+        borderColor: colors,
+        borderWidth: 2,
+        borderRadius: 5,
+        borderSkipped: false,
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: { label: ctx => 'R$ ' + fmtBRL(ctx.parsed.y) },
+          backgroundColor: '#0e0e0e',
+          titleColor: '#f0f0f0',
+          bodyColor: '#22c55e',
+          borderColor: '#2a2a2a',
+          borderWidth: 1,
+        },
+      },
+      scales: {
+        x: {
+          ticks: { color: '#888', font: { size: 10, weight: '700' } },
+          grid: { color: '#1e1e1e' },
+        },
+        y: {
+          ticks: {
+            color: '#666',
+            font: { size: 10 },
+            callback: v => {
+              const n = Number(v);
+              if (n >= 1_000_000) return 'R$' + (n / 1_000_000).toFixed(1) + 'M';
+              if (n >= 1_000)     return 'R$' + Math.round(n / 1_000) + 'k';
+              return 'R$' + n;
+            }
+          },
+          grid: { color: '#1e1e1e' },
+        }
+      },
+      animation: { duration: 600, easing: 'easeInOutQuart' },
+    }
   });
 }
 
@@ -691,6 +762,7 @@ function sync(itens) {
   } else {
     buildChart(entries.map(e => e[0]), entries.map(e => e[1]), colors);
     buildLegend(entries, colors, totalChart);
+    buildVBarCat(entries, colors);
   }
 }
 
